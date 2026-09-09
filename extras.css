@@ -1,0 +1,63 @@
+/* ============================================================================
+   DinkFlix Theme — extras.css
+   Glass badges/chips for quality, rating, genre & language tags (Jellyfin
+   Enhanced plugin), plus panel accents. Safe to drop if you don't run it.
+   ============================================================================ */
+
+/* Enhanced panel */
+#jellyfin-enhanced-panel {
+    background: var(--dk-card-glass) !important;
+    backdrop-filter: blur(var(--dk-blur)) saturate(140%) !important;
+    border: 1px solid var(--dk-hairline) !important;
+    border-radius: var(--dk-radius-lg) !important;
+}
+#jellyfin-enhanced-panel .tab-button.active {
+    border-bottom-color: var(--primary-accent-color) !important;
+}
+#jellyfin-enhanced-panel h3,
+#jellyfin-enhanced-panel details summary {
+    font-family: var(--dk-serif) !important;
+    color: var(--primary-accent-color) !important;
+}
+#jellyfin-enhanced-panel input[type="checkbox"] {
+    accent-color: var(--primary-accent-color) !important;
+}
+
+/* Quality / genre / language / rating tag chips — glass pill with a hairline
+   border instead of a flat solid block */
+.quality-overlay-label,
+.genre-tag,
+.language-flag,
+[class*="rating-tag-"] {
+    background: var(--dk-card-glass) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--dk-hairline) !important;
+    border-radius: var(--dk-radius-pill) !important;
+}
+
+/* *arr tag links, styled as small glass pills matching the rest of the theme */
+.itemExternalLinks a.arr-tag-link {
+    background: var(--dk-card-glass) !important;
+    border: 1px solid var(--dk-hairline) !important;
+    border-radius: var(--dk-radius-pill) !important;
+    transition: box-shadow var(--dk-transition), transform var(--dk-transition);
+}
+.itemExternalLinks a.arr-tag-link:hover {
+    box-shadow: var(--dk-glow-soft) !important;
+    transform: translateY(-1px);
+}
+
+/* IntroSkipper button matched to the DinkFlix accent */
+.skip-button, #skipIntro .btnSkipIntro:hover {
+    background: var(--dk-gradient) !important;
+    color: var(--text-color) !important;
+    box-shadow: var(--dk-glow) !important;
+}
+
+/* Star ratings pick up the champagne highlight rather than plain accent —
+   this is the one place a warm tone is allowed to stand out */
+.starRatingContainer .starIcon,
+.mediaInfoCriticRating {
+    color: var(--dk-champagne) !important;
+}
+
