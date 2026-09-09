@@ -29,9 +29,27 @@
     --primary-alt4: rgba(calc(var(--primary-r) - 30), calc(var(--primary-g) - 30), calc(var(--primary-b) - 30), 0.55);
     --primary-alt5: rgba(calc(var(--primary-r) - 30), calc(var(--primary-g) - 30), calc(var(--primary-b) - 30), 0.4);
 
-    /* DinkFlix-specific tuning knobs, used by theme.css/login.css/extras.css */
+    /* DinkFlix tuning knobs — used across theme.css / login.css / extras.css */
     --dk-rounded: 16px;
-    --dk-blur: 20px;
-    --dk-transition: 0.2s ease;
-    --dk-glow: 0 0 18px rgba(var(--primary-r), var(--primary-g), var(--primary-b), 0.45);
+    --dk-radius-lg: 24px;
+    --dk-radius-pill: 999px;
+    --dk-blur: 22px;
+    --dk-transition: 0.25s cubic-bezier(.2,.8,.2,1);
+
+    /* Deeper mint + a warm champagne accent for restrained "luxury" highlights (dividers, stars, badges only — never large areas) */
+    --dk-accent-2: #00d1a3;
+    --dk-champagne: #e8d9ab;
+    --dk-gradient: linear-gradient(135deg, #00ffc6 0%, #00d1a3 55%, #0a8f77 100%);
+    --dk-gradient-text: linear-gradient(120deg, #00ffc6, #e8d9ab 65%, #00ffc6);
+
+    --dk-glow: 0 0 22px rgba(var(--primary-r), var(--primary-g), var(--primary-b), 0.45);
+    --dk-glow-soft: 0 0 14px rgba(var(--primary-r), var(--primary-g), var(--primary-b), 0.25);
+    --dk-shadow-lg: 0 24px 60px -12px rgba(0, 0, 0, 0.65);
+    --dk-card-glass: rgba(18, 23, 41, 0.6);
+    --dk-hairline: rgba(var(--primary-r), var(--primary-g), var(--primary-b), 0.14);
+
+    --dk-serif: 'Fraunces', 'Georgia', serif;
+    --dk-sans: 'Manrope', sans-serif;
+    --dk-noise-opacity: 0.035;
 }
+
