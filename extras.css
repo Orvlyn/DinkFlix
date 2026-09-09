@@ -1,34 +1,28 @@
-/* DinkFlix Theme — Extra polish (load after theme.css + colors/dinkflix.css) */
+/* ============================================================================
+   DinkFlix Theme — extras.css
+   Optional: Jellyfin Enhanced plugin panel accents + small finishing touches.
+   Safe to drop if you don't run Jellyfin Enhanced.
+   ============================================================================ */
 
-body { background-color: #050810 !important; }
-
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: #050810; }
-::-webkit-scrollbar-thumb { background: #0f2a24; border-radius: 8px; }
-::-webkit-scrollbar-thumb:hover { background: #00ffc6; }
-
-::selection { background: #00ffc6; color: #050810; }
-
-.emby-button.raised.button-submit,
-.emby-button.button-submit {
-    box-shadow: 0 0 0 rgba(0, 255, 198, 0);
-    transition: box-shadow 0.2s ease, transform 0.15s ease;
-}
-
-.emby-button.raised.button-submit:hover,
-.emby-button.button-submit:hover {
-    box-shadow: 0 0 16px rgba(0, 255, 198, 0.55);
-    transform: translateY(-1px);
-}
-
-/* Jellyfin Enhanced panel: match DinkFlix accent */
 #jellyfin-enhanced-panel .tab-button.active {
-    border-bottom-color: #00ffc6 !important;
+    border-bottom-color: var(--primary-accent-color) !important;
 }
 #jellyfin-enhanced-panel h3,
 #jellyfin-enhanced-panel details summary {
-    color: #00ffc6 !important;
+    color: var(--primary-accent-color) !important;
 }
 #jellyfin-enhanced-panel input[type="checkbox"] {
-    accent-color: #00ffc6 !important;
+    accent-color: var(--primary-accent-color) !important;
+}
+#jellyfin-enhanced-panel {
+    background: rgba(11, 15, 28, 0.92) !important;
+    backdrop-filter: blur(var(--dk-blur)) !important;
+    border: 1px solid var(--primary-background-transparent) !important;
+}
+
+/* IntroSkipper button matched to the DinkFlix accent */
+.skip-button, #skipIntro .btnSkipIntro:hover {
+    background: var(--primary-accent-color) !important;
+    color: var(--text-color) !important;
+    box-shadow: var(--dk-glow) !important;
 }

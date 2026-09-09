@@ -1,0 +1,98 @@
+/* ============================================================================
+   DinkFlix Theme — login.css
+   Quiet, glassy sign-in screen matching the DinkFlix palette.
+   ============================================================================ */
+
+body:has(#loginPage) .backdropContainer {
+    background: radial-gradient(circle at 20% 20%, rgba(0, 255, 198, 0.10), transparent 55%),
+                var(--primary-background-color) !important;
+    z-index: -2;
+}
+
+#loginPage .padded-left.padded-right.padded-bottom-page {
+    margin: 0 auto !important;
+    width: 42em !important;
+    max-width: 92vw !important;
+    background: rgba(11, 15, 28, 0.75) !important;
+    backdrop-filter: blur(var(--dk-blur)) !important;
+    border-radius: var(--dk-rounded) !important;
+    border: 1px solid var(--primary-background-transparent);
+}
+
+#loginPage h1 {
+    text-align: center !important;
+    color: var(--primary-accent-color) !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.06em;
+}
+#loginPage h1::after { content: " DINKFLIX"; }
+
+#loginPage .sectionTitle {
+    text-align: center;
+    margin: 0 auto 1.2em !important;
+    color: #ffffffb0;
+}
+
+#loginPage .squareCard { transition: transform 0.25s ease; }
+#loginPage .cardImageContainer {
+    border-radius: 50% !important;
+    aspect-ratio: 1 / 1 !important;
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+#loginPage .squareCard:hover .cardImageContainer,
+#loginPage .squareCard:focus-within .cardImageContainer {
+    transform: scale(1.06) !important;
+    box-shadow: var(--dk-glow) !important;
+}
+
+#loginPage .emby-input {
+    border-radius: 10px !important;
+    background-color: var(--tertiary-background-color) !important;
+    color: #ffffff !important;
+    border: 1px solid var(--primary-background-transparent) !important;
+}
+#loginPage .emby-input:focus {
+    outline: none;
+    border-color: var(--primary-accent-color) !important;
+    box-shadow: 0 0 0 3px var(--primary-background-transparent) !important;
+}
+#loginPage .inputLabel { color: var(--primary-accent-color) !important; font-weight: 700; }
+
+#loginPage button.emby-button[type="submit"],
+#loginPage .btnQuick,
+#loginPage .btnManual,
+#loginPage .btnSelectServer {
+    background-color: var(--primary-accent-color) !important;
+    color: var(--text-color) !important;
+    border-radius: 100px !important;
+    font-weight: 700;
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+#loginPage button.emby-button[type="submit"]:hover,
+#loginPage .btnQuick:hover {
+    box-shadow: var(--dk-glow) !important;
+    transform: translateY(-1px);
+}
+#loginPage button.emby-button[type="button"].btnCancel {
+    background-color: rgba(220, 53, 69, 0.6) !important;
+    color: #fff !important;
+    border-radius: 100px !important;
+}
+
+#loginPage::after {
+    content: var(--footer-message, "");
+    display: block;
+    text-align: center;
+    margin-top: 1.5em;
+    font-size: 0.9em;
+    letter-spacing: 0.04em;
+    color: var(--primary-accent-color);
+    opacity: 0.55;
+}
+
+@media (max-width: 600px) {
+    #loginPage .padded-left.padded-right.padded-bottom-page {
+        width: 95% !important;
+        padding: 1em !important;
+    }
+}

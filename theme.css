@@ -1,0 +1,153 @@
+/* ============================================================================
+   DinkFlix Theme — theme.css (core layout)
+   Lightweight, modern, self-contained. No dependency on any other theme repo.
+   Import order: colors/dinkflix.css -> theme.css -> login.css -> extras.css
+   ============================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+body, h1, h2, h3, h4, h5, h6, p, button, input, select, textarea {
+    font-family: 'Manrope', sans-serif !important;
+}
+
+/* ---------- Base background ---------- */
+html, body {
+    background-color: var(--primary-background-color) !important;
+}
+.backgroundContainer:not(.withBackdrop):not(.backgroundContainer-transparent) {
+    background-color: var(--secondary-background-transparent) !important;
+}
+
+/* ---------- Top bar (Jellyfin 12 "modern" MUI layout) ---------- */
+.MuiAppBar-root,
+.MuiAppBar-root.MuiAppBar-colorTransparent,
+.MuiAppBar-root.MuiAppBar-colorDefault {
+    background-color: var(--header-background-color) !important;
+    background-image: none !important;
+    backdrop-filter: blur(var(--dk-blur)) !important;
+    box-shadow: none !important;
+    border-bottom: 1px solid var(--primary-background-transparent);
+}
+.MuiToolbar-root .MuiIconButton-root { color: #ffffff !important; }
+.MuiToolbar-root .MuiIconButton-root:hover,
+.MuiToolbar-root .MuiIconButton-root:focus-visible {
+    color: var(--primary-accent-color) !important;
+    background-color: var(--primary-background-transparent) !important;
+}
+
+/* ---------- Classic header (non-MUI pages) ---------- */
+.headerTabs, .headerRight {
+    background: var(--header-background-color) !important;
+    border-radius: 100px !important;
+    backdrop-filter: blur(var(--dk-blur)) !important;
+}
+.emby-tab-button:hover { background-color: var(--primary-accent-color) !important; border-radius: 100px !important; }
+.emby-tab-button-active {
+    background-color: var(--primary-accent-color) !important;
+    color: var(--text-color) !important;
+    border-radius: 100px !important;
+}
+
+/* ---------- Nav drawer / sidebar ---------- */
+.mainDrawer,
+.MuiDrawer-paper.MuiDrawer-paper.MuiDrawer-paper,
+.MuiPaper-root.MuiDrawer-paperAnchorDockedLeft {
+    background: rgba(11, 15, 28, 0.88) !important;
+    backdrop-filter: blur(var(--dk-blur)) !important;
+    border-top-right-radius: 24px !important;
+    border-bottom-right-radius: 24px !important;
+    border-right: none !important;
+}
+.navMenuOption, .MuiListItemButton-root {
+    border-radius: 10px !important;
+    transition: background var(--dk-transition), color var(--dk-transition), transform var(--dk-transition) !important;
+}
+.navMenuOption-selected, .MuiListItemButton-root.Mui-selected {
+    background: var(--secondary-accent-color) !important;
+    color: var(--primary-accent-color) !important;
+}
+.navMenuOption:hover:not(.navMenuOption-selected),
+.MuiListItemButton-root:hover:not(.Mui-selected) {
+    background: var(--primary-background-transparent) !important;
+    color: var(--primary-accent-color) !important;
+    transform: translateX(2px);
+}
+
+/* ---------- Cards ---------- */
+.card, .cardBox, .cardScalable, .cardImageContainer, .cardPadder {
+    border-radius: var(--dk-rounded) !important;
+    overflow: hidden !important;
+}
+.card-hoverable, .cardScalable {
+    transition: transform var(--dk-transition), box-shadow var(--dk-transition) !important;
+}
+div.card-hoverable:hover .cardBox-bottompadded.cardBox > .cardScalable {
+    transform: translateY(-4px) scale(1.015);
+    box-shadow: var(--dk-glow) !important;
+    border: 1px solid var(--primary-accent-color);
+}
+
+/* ---------- Buttons ---------- */
+.raised, .button-submit, .fab, .emby-button.button-submit {
+    border-radius: 100px !important;
+    transition: box-shadow var(--dk-transition), transform var(--dk-transition) !important;
+}
+.button-submit, .fab, .MuiButton-root.MuiButton-containedSizeMedium {
+    background: var(--primary-accent-color) !important;
+    color: var(--text-color) !important;
+}
+.raised:hover, .button-submit:hover, .fab:hover {
+    box-shadow: var(--dk-glow) !important;
+    transform: translateY(-1px);
+}
+.mainDetailButtons .btnPlay {
+    background: var(--primary-accent-color) !important;
+    color: var(--text-color) !important;
+    border-radius: var(--dk-rounded) !important;
+}
+.mainDetailButtons .btnPlay:hover {
+    box-shadow: var(--dk-glow) !important;
+}
+
+/* ---------- Player progress bar ---------- */
+.mdl-slider-background-flex {
+    height: 8px !important;
+    border-radius: 100px !important;
+    background: hsla(0, 0%, 100%, .12) !important;
+}
+.mdl-slider-background-lower,
+.itemProgressBarForeground,
+progress::-webkit-progress-value,
+progress[aria-valuenow]:before {
+    background: var(--primary-accent-color) !important;
+    border-radius: 100px !important;
+}
+.itemProgressBar {
+    background: var(--primary-background-transparent) !important;
+}
+
+/* ---------- Dialogs, menus, popovers ---------- */
+.dialog,
+.MuiDialog-paper,
+.MuiMenu-paper.MuiMenu-paper,
+.MuiPopover-paper.MuiPopover-paper {
+    background: rgba(11, 15, 28, 0.94) !important;
+    backdrop-filter: blur(var(--dk-blur)) !important;
+    border-radius: var(--dk-rounded) !important;
+    border: 1px solid var(--primary-background-transparent) !important;
+}
+
+/* ---------- Scrollbar & selection ---------- */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--primary-background-color); }
+::-webkit-scrollbar-thumb { background: var(--secondary-background-color); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary-accent-color); }
+::selection { background: var(--primary-accent-color); color: var(--text-color); }
+
+/* ---------- Misc accents ---------- */
+.sectionTitle, .headerUsername, .username {
+    color: var(--primary-accent-color) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em;
+}
+.playstatebutton-icon-played { color: var(--primary-accent-color) !important; }
