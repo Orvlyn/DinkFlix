@@ -1,6 +1,6 @@
-/* DinkFlix Standalone Theme
-   Paste ONLY this into Jellyfin → Dashboard → Branding → Custom CSS
-   Do NOT import ElegantFin anymore.
+/* DinkFlix Full Theme v4
+   Paste ONLY this line into Jellyfin → Dashboard → Branding → Custom CSS
+   Delete any previous CSS first.
 */
 
-@import url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix.css?v=3");
+@import url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix.css?v=4");

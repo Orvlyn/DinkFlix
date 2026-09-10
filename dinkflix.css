@@ -1,67 +1,81 @@
 /*
- * DinkFlix — Standalone Jellyfin Web Theme
- * Version: 3.0.0
+ * DinkFlix — Full Standalone Theme for Jellyfin Web
+ * Version: 4.0
  *
- * Fully independent. Do NOT import ElegantFin.
+ * Background: #050810
+ * Accent:    #00FFC6
  *
- * Installation:
- * Dashboard → Branding → Custom CSS
- * Paste only:
- * @import url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix.css?v=3");
+ * Install (Dashboard → Branding → Custom CSS):
+ * @import url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix.css?v=4");
+ *
+ * Do NOT import any other theme.
  */
 
 /* =========================================================
-   ROOT VARIABLES
+   VARIABLES
    ========================================================= */
 :root {
-  --df-bg: #0a0d12;
-  --df-bg2: #0f141b;
-  --df-surface: #141b24;
-  --df-surface2: #1a2330;
-  --df-border: rgba(255, 255, 255, 0.07);
-  --df-border-hover: rgba(0, 255, 198, 0.35);
-  --df-text: #f1f4f6;
-  --df-muted: #8b97a3;
-  --df-accent: #00ffc6;
-  --df-accent-hover: #33ffd4;
-  --df-accent-soft: rgba(0, 255, 198, 0.12);
-  --df-accent-glow: rgba(0, 255, 198, 0.22);
-  --df-radius: 10px;
-  --df-radius-sm: 7px;
-  --df-radius-lg: 14px;
-  --df-shadow: 0 14px 40px rgba(0, 0, 0, 0.4);
-  --df-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --bg: #050810;
+  --bg-elevated: #0a0f18;
+  --surface: #0e1520;
+  --surface-2: #131c2a;
+  --border: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.1);
+  --text: #f2f5f7;
+  --text-secondary: #9aa6b2;
+  --text-muted: #6b7682;
+  --accent: #00ffc6;
+  --accent-hover: #3dffd4;
+  --accent-soft: rgba(0, 255, 198, 0.1);
+  --accent-glow: rgba(0, 255, 198, 0.25);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+  --shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  --font: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 /* =========================================================
-   GLOBAL
+   BASE
    ========================================================= */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 html, body, .backgroundContainer, .skinBody {
-  background: var(--df-bg) !important;
-  color: var(--df-text) !important;
+  background-color: var(--bg) !important;
+  color: var(--text) !important;
+  font-family: var(--font) !important;
 }
 
 body {
   background:
-    radial-gradient(1100px 600px at 90% -10%, rgba(0, 255, 198, 0.035), transparent 55%),
-    radial-gradient(800px 500px at -5% 25%, rgba(0, 130, 255, 0.02), transparent 55%),
-    var(--df-bg) !important;
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    radial-gradient(1200px 700px at 85% -15%, rgba(0, 255, 198, 0.04), transparent 60%),
+    radial-gradient(900px 600px at -10% 30%, rgba(30, 80, 180, 0.03), transparent 55%),
+    var(--bg) !important;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
-a { color: inherit; text-decoration: none; }
+a {
+  color: inherit;
+  text-decoration: none;
+}
 
+/* Scrollbars */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 255, 198, 0.25) transparent;
+  scrollbar-color: rgba(0, 255, 198, 0.2) transparent;
 }
-*::-webkit-scrollbar { width: 7px; height: 7px; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
 *::-webkit-scrollbar-track { background: transparent; }
 *::-webkit-scrollbar-thumb {
-  background: rgba(0, 255, 198, 0.22);
-  border-radius: 999px;
+  background: rgba(0, 255, 198, 0.18);
+  border-radius: 99px;
 }
-*::-webkit-scrollbar-thumb:hover { background: rgba(0, 255, 198, 0.4); }
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 198, 0.35);
+}
 
 /* =========================================================
    HEADER
@@ -69,52 +83,63 @@ a { color: inherit; text-decoration: none; }
 .skinHeader,
 .skinHeader-withBackground,
 .skinHeader.semiTransparent,
-.skinHeader-blurred {
+.skinHeader-blurred,
+.skinHeader.headroom {
   background: linear-gradient(
     180deg,
-    rgba(10, 13, 18, 0.97) 0%,
-    rgba(10, 13, 18, 0.88) 70%,
-    rgba(10, 13, 18, 0) 100%
+    rgba(5, 8, 16, 0.98) 0%,
+    rgba(5, 8, 16, 0.9) 60%,
+    rgba(5, 8, 16, 0) 100%
   ) !important;
-  backdrop-filter: blur(18px) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
-  box-shadow: none !important;
+  backdrop-filter: blur(20px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+  box-shadow: none !important;
 }
 
+.headerTop {
+  height: 64px !important;
+  min-height: 64px !important;
+}
+
+/* Buttons in header */
 .headerButton,
 .paper-icon-button-light {
-  color: var(--df-muted) !important;
-  border-radius: var(--df-radius-sm) !important;
-  transition: color 0.18s var(--df-ease), background 0.18s var(--df-ease);
+  color: var(--text-secondary) !important;
+  border-radius: var(--radius-sm) !important;
+  transition: color 0.2s ease, background 0.2s ease !important;
 }
 .headerButton:hover,
 .paper-icon-button-light:hover {
-  color: var(--df-text) !important;
+  color: var(--text) !important;
   background: rgba(255, 255, 255, 0.06) !important;
 }
 
-/* LOGO */
+/* ========== LOGO ========== */
 .headerLogo,
 .headerLogoLink,
 .headerLogoImage,
 .pageTitleWithLogo,
 .pageTitleWithDefaultLogo,
-.mainDrawerLogo {
+.mainDrawerLogo,
+.skinHeader .headerLogo,
+.skinHeader .headerLogoLink {
   background-image: url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dnk.png") !important;
   background-repeat: no-repeat !important;
-  background-position: center left !important;
+  background-position: left center !important;
   background-size: contain !important;
-  width: 110px !important;
-  min-width: 110px !important;
-  height: 34px !important;
-  min-height: 34px !important;
+  width: 120px !important;
+  min-width: 120px !important;
+  height: 36px !important;
+  min-height: 36px !important;
   font-size: 0 !important;
   color: transparent !important;
   text-indent: -9999px !important;
   overflow: hidden !important;
+  margin-right: 12px !important;
 }
 
+/* Hide original logos */
 .headerLogo img,
 .headerLogoLink img,
 .headerLogoImage img,
@@ -123,164 +148,222 @@ a { color: inherit; text-decoration: none; }
 .headerLogo svg,
 .headerLogoLink svg,
 .headerHomeButton img,
-.headerHomeButton svg {
+.headerHomeButton svg,
+.headerHomeButton .material-icons {
   display: none !important;
   opacity: 0 !important;
-  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 /* =========================================================
    HOME PAGE
    ========================================================= */
-.homePage {
+.homePage,
+.homeSectionsContainer {
   background: transparent !important;
+  padding-top: 8px !important;
 }
 
+/* Section titles */
 .sectionTitle,
-.homePage .sectionTitle {
-  color: var(--df-text) !important;
-  font-size: 1.25rem !important;
+.homePage .sectionTitle,
+.sectionTitleTextButton {
+  color: var(--text) !important;
+  font-size: 1.35rem !important;
   font-weight: 700 !important;
-  letter-spacing: -0.02em !important;
+  letter-spacing: -0.03em !important;
+  margin-bottom: 4px !important;
+}
+
+.sectionTitleContainer {
+  margin-top: 2rem !important;
+  margin-bottom: 0.75rem !important;
+  padding-left: 2px !important;
 }
 
 .sectionTitleContainer .emby-button,
-.homePage .sectionTitleContainer .emby-button {
-  color: var(--df-muted) !important;
-  font-size: 0.78rem !important;
+.sectionTitleTextButton {
+  color: var(--text-secondary) !important;
+  font-size: 0.8rem !important;
   font-weight: 600 !important;
+  letter-spacing: 0.03em !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.04em !important;
 }
-.sectionTitleContainer .emby-button:hover {
-  color: var(--df-accent) !important;
+.sectionTitleContainer .emby-button:hover,
+.sectionTitleTextButton:hover {
+  color: var(--accent) !important;
+  background: transparent !important;
 }
 
-/* First section elevated panel */
+/* First home section (libraries / My Media) */
 .homePage .homePageSection:first-of-type {
-  margin-top: 0.6rem;
-  padding: 1.15rem 1.2rem 1.3rem;
-  border-radius: var(--df-radius-lg);
-  border: 1px solid var(--df-border);
-  background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.008)),
-              rgba(15, 20, 28, 0.8);
-  box-shadow: var(--df-shadow);
+  margin: 1rem 0 0.5rem !important;
+  padding: 1.25rem 1.35rem 1.4rem !important;
+  border-radius: var(--radius-lg) !important;
+  border: 1px solid var(--border) !important;
+  background: linear-gradient(160deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%),
+              var(--surface) !important;
+  box-shadow: var(--shadow) !important;
 }
 
 /* =========================================================
    CARDS
    ========================================================= */
+.card {
+  transition: transform 0.25s ease !important;
+}
+
 .cardScalable,
 .cardBox,
 .visualCardBox {
-  border-radius: var(--df-radius) !important;
-  border: 1px solid var(--df-border) !important;
+  border-radius: var(--radius) !important;
+  border: 1px solid var(--border) !important;
   overflow: hidden !important;
-  transition: transform 0.2s var(--df-ease), border-color 0.2s var(--df-ease), box-shadow 0.2s var(--df-ease);
+  background: var(--surface) !important;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease !important;
 }
 
 .card-hoverable:hover .cardScalable,
 .card-hoverable:hover .visualCardBox,
 .cardBox:hover {
-  border-color: var(--df-border-hover) !important;
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45) !important;
-  transform: translateY(-3px);
+  border-color: var(--accent) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 255, 198, 0.15) !important;
+  transform: translateY(-4px) scale(1.02) !important;
 }
 
 .cardImageContainer {
   border-radius: inherit !important;
+  background-color: var(--surface-2) !important;
 }
 
 .cardOverlayContainer {
-  background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.65)) !important;
-  transition: opacity 0.25s var(--df-ease);
+  background: linear-gradient(
+    180deg,
+    transparent 20%,
+    rgba(5, 8, 16, 0.75) 100%
+  ) !important;
+  opacity: 0;
+  transition: opacity 0.3s ease !important;
+}
+.card-hoverable:hover .cardOverlayContainer {
+  opacity: 1 !important;
 }
 
-.cardText {
-  color: var(--df-text) !important;
-  font-weight: 550;
+.cardText,
+.cardTextCentered {
+  color: var(--text) !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+  letter-spacing: -0.01em !important;
 }
 .cardText-secondary {
-  color: var(--df-muted) !important;
+  color: var(--text-muted) !important;
+  font-weight: 450 !important;
+  font-size: 0.8rem !important;
 }
 
-/* Progress */
+/* Progress bar */
 .itemProgressBar {
-  background: rgba(255,255,255,0.12) !important;
   height: 3px !important;
-  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 99px !important;
+  overflow: hidden !important;
 }
 .itemProgressBarForeground {
-  background: var(--df-accent) !important;
-  box-shadow: 0 0 10px var(--df-accent-glow) !important;
-  border-radius: 999px !important;
+  background: var(--accent) !important;
+  box-shadow: 0 0 12px var(--accent-glow) !important;
+  border-radius: 99px !important;
 }
 
+/* Indicators */
 .playedIndicator,
-.countIndicator {
-  background: var(--df-accent) !important;
-  color: #06110e !important;
+.countIndicator,
+.fullSyncIndicator {
+  background: var(--accent) !important;
+  color: #03120e !important;
   font-weight: 700 !important;
+  border: none !important;
+  box-shadow: 0 2px 8px var(--accent-glow) !important;
 }
 
 /* =========================================================
    BUTTONS
    ========================================================= */
 .emby-button {
-  border-radius: var(--df-radius-sm) !important;
-  transition: all 0.18s var(--df-ease) !important;
+  border-radius: var(--radius-sm) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em !important;
+  transition: all 0.2s ease !important;
 }
 
 .button-submit,
 .button-primary,
 .raised.emby-button,
 .emby-button.raised,
-.btnPlay {
-  background: var(--df-accent) !important;
-  color: #06110e !important;
+.btnPlay,
+.detailButton.btnPlay {
+  background: var(--accent) !important;
+  color: #03120e !important;
   border: none !important;
   font-weight: 700 !important;
-  box-shadow: 0 6px 22px var(--df-accent-glow) !important;
+  box-shadow: 0 6px 20px var(--accent-glow) !important;
 }
-
 .button-submit:hover,
 .button-primary:hover,
 .raised.emby-button:hover,
 .btnPlay:hover {
-  background: var(--df-accent-hover) !important;
-  transform: translateY(-1px);
-  box-shadow: 0 10px 28px rgba(0, 255, 198, 0.3) !important;
+  background: var(--accent-hover) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 10px 28px rgba(0, 255, 198, 0.35) !important;
 }
 
 .button-flat,
-.emby-button-flat {
-  color: var(--df-muted) !important;
+.emby-button-flat,
+.detailButton:not(.btnPlay) {
+  color: var(--text-secondary) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid var(--border) !important;
 }
-.button-flat:hover {
-  color: var(--df-text) !important;
-  background: rgba(255,255,255,0.06) !important;
+.button-flat:hover,
+.detailButton:not(.btnPlay):hover {
+  color: var(--text) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: var(--border-strong) !important;
 }
 
 /* =========================================================
-   FORMS
+   FORMS / INPUTS
    ========================================================= */
 .emby-input,
 .emby-textarea,
 .emby-select,
-.emby-select-withcolor {
-  background: var(--df-surface) !important;
-  border: 1px solid var(--df-border) !important;
-  border-radius: var(--df-radius-sm) !important;
-  color: var(--df-text) !important;
+.emby-select-withcolor,
+input[type="text"],
+input[type="password"],
+textarea {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-sm) !important;
+  color: var(--text) !important;
+  padding: 0.7em 1em !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
 }
-
 .emby-input:focus,
 .emby-textarea:focus,
 .emby-select:focus,
 .emby-select-withcolor:focus {
-  border-color: var(--df-accent) !important;
-  box-shadow: 0 0 0 3px var(--df-accent-soft) !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px var(--accent-soft) !important;
   outline: none !important;
+}
+
+/* =================================================
+.inputLabel,
+.selectLabel,
+.textareaLabel {
+  color: var(--text-secondary) !important;
+  font-weight: 500 !important;
 }
 
 /* =========================================================
@@ -290,56 +373,67 @@ a { color: inherit; text-decoration: none; }
 .dialogContainer,
 .mainDrawer,
 .actionSheet,
-.paperList {
-  background: var(--df-bg2) !important;
-  border: 1px solid var(--df-border) !important;
-  border-radius: var(--df-radius-lg) !important;
-  box-shadow: 0 28px 70px rgba(0,0,0,0.55) !important;
+.paperList,
+.navDrawer {
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6) !important;
 }
 
 .listItem {
-  border-radius: var(--df-radius-sm);
-  transition: background 0.15s var(--df-ease);
+  border-radius: var(--radius-sm) !important;
+  transition: background 0.15s ease !important;
 }
 .listItem:hover,
-.listItem:focus-visible {
-  background: var(--df-accent-soft) !important;
+.listItem:focus-visible,
+.navMenuOption:hover {
+  background: var(--accent-soft) !important;
 }
-.listItemIcon {
-  color: var(--df-muted);
+.listItemIcon,
+.navMenuOption .material-icons {
+  color: var(--text-muted) !important;
 }
 .listItem:hover .listItemIcon {
-  color: var(--df-accent);
+  color: var(--accent) !important;
 }
 
 /* =========================================================
-   DETAIL PAGES
+   DETAIL / ITEM PAGES
    ========================================================= */
-.detailPage {
+.detailPage,
+.itemDetailPage {
   background: transparent !important;
 }
 
 .itemName,
-.detailPage .itemName {
-  color: var(--df-text) !important;
+.detailPage .itemName,
+.nameContainer h1 {
+  color: var(--text) !important;
   font-weight: 750 !important;
-  letter-spacing: -0.03em !important;
+  letter-spacing: -0.035em !important;
+  line-height: 1.15 !important;
 }
 
 .itemMiscInfo,
 .itemOverview,
 .detailPage .itemMiscInfo,
-.detailPage .itemOverview {
-  color: var(--df-muted) !important;
+.detailPage .itemOverview,
+.tagline {
+  color: var(--text-secondary) !important;
 }
 
 .itemBackdrop {
-  opacity: 0.65 !important;
+  opacity: 0.7 !important;
 }
 .itemBackdrop::after {
   background:
-    linear-gradient(90deg, var(--df-bg) 0%, rgba(10,13,18,0.9) 22%, rgba(10,13,18,0.25) 55%, rgba(10,13,18,0.92) 100%),
-    linear-gradient(0deg, var(--df-bg) 0%, transparent 42%, rgba(10,13,18,0.3) 100%) !important;
+    linear-gradient(90deg, var(--bg) 0%, rgba(5,8,16,0.92) 20%, rgba(5,8,16,0.3) 55%, rgba(5,8,16,0.95) 100%),
+    linear-gradient(0deg, var(--bg) 0%, transparent 40%, rgba(5,8,16,0.4) 100%) !important;
+}
+
+.detailLogo {
+  filter: drop-shadow(0 8px 24px rgba(0,0,0,0.5));
 }
 
 /* =========================================================
@@ -351,71 +445,98 @@ a { color: inherit; text-decoration: none; }
 }
 
 .videoOsdBottom {
-  background: linear-gradient(0deg, rgba(0,0,0,0.92), rgba(0,0,0,0.45) 60%, transparent) !important;
+  background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 55%, transparent 100%) !important;
 }
 .videoOsdTop,
 .osdHeader {
-  background: linear-gradient(180deg, rgba(0,0,0,0.75), transparent) !important;
+  background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%) !important;
 }
 
-.mdl-slider-background-lower {
-  background: var(--df-accent) !important;
+.mdl-slider-background-lower,
+.sliderBubble {
+  background: var(--accent) !important;
 }
 
 .pausedVideoPlayer {
-  background: #05070a !important;
+  background: #030508 !important;
 }
 
 /* =========================================================
    SEARCH
    ========================================================= */
-.searchfields {
-  background: rgba(15, 20, 27, 0.92) !important;
-  border: 1px solid var(--df-border) !important;
-  border-radius: var(--df-radius) !important;
-  backdrop-filter: blur(12px);
+.searchfields,
+.searchFields {
+  background: rgba(10, 15, 24, 0.95) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  backdrop-filter: blur(16px) !important;
 }
 
 /* =========================================================
-   LOGIN
+   LOGIN PAGE
    ========================================================= */
 #loginPage {
-  background: var(--df-bg) !important;
+  background: var(--bg) !important;
+  min-height: 100vh !important;
 }
 #loginPage .padded-left.padded-right.padded-bottom-page {
-  background: var(--df-bg2) !important;
-  border: 1px solid var(--df-border) !important;
-  border-radius: var(--df-radius-lg) !important;
-  box-shadow: var(--df-shadow) !important;
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow) !important;
+  padding: 2.5rem !important;
+}
+
+/* =========================================================
+   MISC CLEANUP
+   ========================================================= */
+.toast {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-sm) !important;
+  color: var(--text) !important;
+}
+
+.progressring-spiner {
+  border-color: var(--accent) !important;
 }
 
 /* =========================================================
    MOBILE
    ========================================================= */
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .headerLogo,
   .headerLogoLink,
   .headerLogoImage,
   .pageTitleWithLogo {
-    width: 88px !important;
-    min-width: 88px !important;
-    height: 28px !important;
+    width: 96px !important;
+    min-width: 96px !important;
+    height: 30px !important;
+  }
+
+  .headerTop {
+    height: 56px !important;
+    min-height: 56px !important;
+  }
+
+  .sectionTitle {
+    font-size: 1.15rem !important;
   }
 
   .homePage .homePageSection:first-of-type {
-    padding: 0.85rem 0.8rem 1rem;
-    border-radius: 12px;
+    padding: 1rem !important;
+    margin: 0.5rem 0 !important;
   }
 
   .card-hoverable:hover .cardScalable,
   .cardBox:hover {
-    transform: none;
+    transform: none !important;
   }
 
   .button-submit:hover,
   .button-primary:hover,
   .raised.emby-button:hover {
-    transform: none;
+    transform: none !important;
   }
 }
 
