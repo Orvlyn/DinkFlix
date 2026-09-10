@@ -1,6 +1,5 @@
-/* DinkFlix on top of ElegantFin
-   Paste BOTH lines into Custom CSS
+/* DinkFlix Complete Standalone Theme
+   Paste ONLY this one line
 */
 
-@import url("https://cdn.jsdelivr.net/gh/lscambo13/ElegantFin@main/Theme/ElegantFin-jellyfin-theme-build-latest-minified.css");
-@import url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix.css?v=6");
+@import url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix.css?v=7");
