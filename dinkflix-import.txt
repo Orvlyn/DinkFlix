@@ -1,6 +1,3 @@
-/* DinkFlix Full Theme v4
-   Paste ONLY this line into Jellyfin → Dashboard → Branding → Custom CSS
-   Delete any previous CSS first.
-*/
+/* DinkFlix v5 — paste ONLY this */
 
-@import url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix.css?v=4");
+@import url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix.css?v=5");
