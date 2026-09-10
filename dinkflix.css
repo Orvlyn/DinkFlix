@@ -1,0 +1,326 @@
+/*
+ * DinkFlix v2.1 — Stronger customization layer for ElegantFin + Jellyfin Web
+ *
+ * Load AFTER ElegantFin:
+ * @import url("https://cdn.jsdelivr.net/gh/lscambo13/ElegantFin@main/Theme/ElegantFin-jellyfin-theme-build-latest-minified.css");
+ * @import url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix.css?v=2.1");
+ *
+ * This version aggressively overrides ElegantFin variables + logo for a clear visual change.
+ */
+
+/* =========================================================
+   1. OVERRIDE ELEGANTFIN CSS VARIABLES (biggest visual impact)
+   ========================================================= */
+
+:root {
+  /* Backgrounds – deeper and cleaner */
+  --darkerGradientPoint: #0a0d12 !important;
+  --darkerGradientPointAlpha: rgba(10, 13, 18, 0.92) !important;
+  --lighterGradientPoint: #111821 !important;
+  --lighterGradientPointAlpha: rgba(17, 24, 33, 0.9) !important;
+
+  /* Header / surfaces */
+  --headerColor: rgba(10, 13, 18, 0.88) !important;
+  --drawerColor: rgba(12, 16, 22, 0.96) !important;
+
+  /* Borders */
+  --borderColor: rgba(255, 255, 255, 0.08) !important;
+  --darkerBorderColor: rgba(255, 255, 255, 0.05) !important;
+  --lighterBorderColor: rgba(255, 255, 255, 0.14) !important;
+
+  /* Text */
+  --textColor: #f1f4f6 !important;
+  --dimTextColor: #8b97a3 !important;
+  --fullContrastColor: #ffffff !important;
+
+  /* Accent → DinkFlix cyan */
+  --accentColor: #00ffc6 !important;
+  --accentHoverColor: #33ffd4 !important;
+  --semiTransparentAccentColor: rgba(0, 255, 198, 0.14) !important;
+
+  /* Buttons */
+  --btnSubmitColor: #00ffc6 !important;
+  --btnSubmitBorderColor: #00ffc6 !important;
+  --btnMiniPlayColor: #00e6b4 !important;
+  --btnMiniPlayBorderColor: #00ffc6 !important;
+  --checkboxCheckedBgColor: #00ffc6 !important;
+
+  /* Cards / progress */
+  --cardHoverBorderColor: rgba(0, 255, 198, 0.55) !important;
+  --cardResumeProgressColor: #00ffc6 !important;
+  --highlightOutlineColor: #00ffc6 !important;
+  --osdSeekBarPlayedColor: #00ffc6 !important;
+  --osdSeekBarThumbColor: #00ffc6 !important;
+
+  /* Hover / active */
+  --hoverBackgroundColor: rgba(0, 255, 198, 0.12) !important;
+  --activeBackgroundColor: rgba(0, 255, 198, 0.18) !important;
+  --activeTextColor: #ffffff !important;
+
+  /* Misc */
+  --selectorBackgroundColor: #151c26 !important;
+  --selectorBackgroundColorAlpha: rgba(21, 28, 38, 0.75) !important;
+}
+
+/* =========================================================
+   2. LOGO – cover every common ElegantFin / Jellyfin selector
+   ========================================================= */
+
+.headerLogo,
+.headerLogoLink,
+.headerLogoImage,
+.pageTitleWithLogo,
+.pageTitleWithDefaultLogo,
+.mainDrawerLogo,
+.skinHeader .headerLogo,
+.skinHeader .headerLogoLink {
+  background-image: url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dnk.png") !important;
+  background-repeat: no-repeat !important;
+  background-position: center left !important;
+  background-size: contain !important;
+  width: 110px !important;
+  min-width: 110px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  font-size: 0 !important;
+  color: transparent !important;
+  text-indent: -9999px !important;
+  overflow: hidden !important;
+}
+
+/* Hide original Jellyfin / ElegantFin logo images & SVGs */
+.headerLogo img,
+.headerLogoLink img,
+.headerLogoImage img,
+.pageTitleWithLogo img,
+.pageTitleWithDefaultLogo img,
+.headerLogo svg,
+.headerLogoLink svg,
+.headerHomeButton img,
+.headerHomeButton svg {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* Slightly larger logo on big screens */
+@media (min-width: 1400px) {
+  .headerLogo,
+  .headerLogoLink,
+  .headerLogoImage,
+  .pageTitleWithLogo {
+    width: 128px !important;
+    min-width: 128px !important;
+    height: 38px !important;
+  }
+}
+
+/* =========================================================
+   3. GLOBAL BACKGROUND & HEADER
+   ========================================================= */
+
+html,
+body,
+.backgroundContainer,
+.skinBody {
+  background-color: #0a0d12 !important;
+}
+
+body {
+  background:
+    radial-gradient(1100px 580px at 88% -12%, rgba(0, 255, 198, 0.04), transparent 55%),
+    radial-gradient(800px 480px at -8% 20%, rgba(0, 140, 255, 0.025), transparent 55%),
+    #0a0d12 !important;
+}
+
+.skinHeader,
+.skinHeader-withBackground,
+.skinHeader.semiTransparent,
+.skinHeader-blurred {
+  background: linear-gradient(
+    180deg,
+    rgba(10, 13, 18, 0.97) 0%,
+    rgba(10, 13, 18, 0.88) 65%,
+    rgba(10, 13, 18, 0) 100%
+  ) !important;
+  backdrop-filter: blur(18px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
+  box-shadow: none !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+/* =========================================================
+   4. HOME PAGE SECTIONS
+   ========================================================= */
+
+.homePage .sectionTitle {
+  color: #f1f4f6 !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.homePage .sectionTitleContainer .emby-button {
+  color: #8b97a3 !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  font-size: 0.78rem !important;
+  letter-spacing: 0.04em !important;
+}
+
+.homePage .sectionTitleContainer .emby-button:hover {
+  color: #00ffc6 !important;
+}
+
+/* First home section (libraries) gets a subtle elevated panel */
+.homePage .homePageSection:first-of-type {
+  margin-top: 0.5rem;
+  padding: 1.1rem 1.15rem 1.25rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01)),
+              rgba(15, 20, 28, 0.75);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+}
+
+/* =========================================================
+   5. CARDS
+   ========================================================= */
+
+.cardScalable,
+.cardBox {
+  border-radius: 10px !important;
+}
+
+.card-hoverable:hover .cardScalable,
+.card-hoverable:hover .visualCardBox {
+  border-color: rgba(0, 255, 198, 0.45) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Progress bar */
+.itemProgressBarForeground,
+.cardBox .itemProgressBarForeground {
+  background: #00ffc6 !important;
+  box-shadow: 0 0 10px rgba(0, 255, 198, 0.35) !important;
+}
+
+.playedIndicator,
+.countIndicator {
+  background: #00ffc6 !important;
+  color: #06110e !important;
+}
+
+/* =========================================================
+   6. BUTTONS
+   ========================================================= */
+
+.button-submit,
+.button-primary,
+.raised.emby-button,
+.emby-button.raised {
+  background: #00ffc6 !important;
+  color: #06110e !important;
+  border: none !important;
+  font-weight: 700 !important;
+  box-shadow: 0 6px 22px rgba(0, 255, 198, 0.22) !important;
+}
+
+.button-submit:hover,
+.button-primary:hover,
+.raised.emby-button:hover {
+  background: #33ffd4 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(0, 255, 198, 0.3) !important;
+}
+
+/* =========================================================
+   7. DETAIL PAGES & PLAYER
+   ========================================================= */
+
+.itemBackdrop::after {
+  background:
+    linear-gradient(90deg, #0a0d12 0%, rgba(10, 13, 18, 0.9) 22%, rgba(10, 13, 18, 0.25) 55%, rgba(10, 13, 18, 0.92) 100%),
+    linear-gradient(0deg, #0a0d12 0%, transparent 40%, rgba(10, 13, 18, 0.3) 100%) !important;
+}
+
+.videoOsdBottom {
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.92), rgba(0, 0, 0, 0.45) 60%, transparent) !important;
+}
+
+.mdl-slider-background-lower {
+  background: #00ffc6 !important;
+}
+
+/* =========================================================
+   8. DIALOGS / DRAWERS
+   ========================================================= */
+
+.dialog,
+.mainDrawer,
+.actionSheet {
+  background: #0f141b !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.55) !important;
+}
+
+.listItem:hover,
+.listItem:focus-visible {
+  background: rgba(0, 255, 198, 0.07) !important;
+}
+
+/* =========================================================
+   9. SCROLLBARS
+   ========================================================= */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 255, 198, 0.25) transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 198, 0.22);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 198, 0.4);
+}
+
+/* =========================================================
+   10. MOBILE TWEAKS
+   ========================================================= */
+
+@media (max-width: 720px) {
+  .headerLogo,
+  .headerLogoLink,
+  .headerLogoImage,
+  .pageTitleWithLogo {
+    width: 88px !important;
+    min-width: 88px !important;
+    height: 28px !important;
+  }
+
+  .homePage .homePageSection:first-of-type {
+    padding: 0.8rem 0.75rem 0.95rem;
+    border-radius: 10px;
+  }
+
+  .button-submit:hover,
+  .button-primary:hover,
+  .raised.emby-button:hover {
+    transform: none;
+  }
+}
+
+/* =========================================================
+   11. REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

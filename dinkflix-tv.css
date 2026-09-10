@@ -1,0 +1,34 @@
+/*
+ * DinkFlix — Optional TV / large-screen refinements
+ * Useful for 10-foot UI and high-DPI displays.
+ */
+
+@media (min-width: 1600px) {
+  .homePage .sectionTitle {
+    font-size: 1.28rem !important;
+    letter-spacing: -0.025em;
+  }
+
+  .homePage .homePageSection:first-of-type {
+    padding: 1.25rem 1.3rem 1.4rem;
+  }
+
+  .cardBox {
+    border-radius: 10px !important;
+  }
+
+  .skinHeader .headerLogo {
+    width: 110px;
+    min-width: 110px;
+    height: 32px;
+  }
+}
+
+/* Extra focus visibility for remote navigation */
+@media (pointer: coarse) {
+  .cardBox:focus-within,
+  .cardBox:focus-visible {
+    outline-width: 3px !important;
+    outline-offset: 4px;
+  }
+}

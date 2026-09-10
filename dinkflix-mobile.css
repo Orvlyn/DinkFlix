@@ -1,0 +1,27 @@
+/*
+ * DinkFlix — Optional mobile refinements
+ * Only needed if you want extra mobile-specific polish beyond the main file.
+ */
+
+@media (max-width: 720px) {
+  .skinHeader {
+    backdrop-filter: blur(12px) saturate(130%);
+    -webkit-backdrop-filter: blur(12px) saturate(130%);
+  }
+
+  .homePage .itemsContainer {
+    padding-bottom: 0.35rem;
+  }
+
+  .homePage .cardBox {
+    margin-right: 0.4rem;
+  }
+
+  .dialog {
+    max-width: calc(100vw - 18px);
+  }
+
+  .sectionTitle {
+    font-size: 1rem !important;
+  }
+}
