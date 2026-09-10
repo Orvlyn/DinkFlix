@@ -1,295 +1,173 @@
 /*
- * DinkFlix v5 — Aggressive full theme
- * Background #050810 | Accent #00FFC6
+ * DinkFlix — Premium recolor + branding layer for ElegantFin
+ * Version: 6.0
  *
- * ONLY this in Custom CSS:
- * @import url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix.css?v=5");
+ * This is meant to be loaded AFTER ElegantFin.
+ * It keeps all of ElegantFin’s layout work and only changes the look.
  */
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
-
 :root {
-  --bg: #050810;
-  --bg2: #080c14;
-  --surface: #0c121c;
-  --surface2: #111925;
-  --border: rgba(255,255,255,0.055);
-  --border2: rgba(255,255,255,0.09);
-  --text: #f0f3f6;
-  --muted: #8b96a3;
-  --faint: #5c6773;
-  --accent: #00ffc6;
-  --accent2: #2dffe0;
-  --accent-soft: rgba(0,255,198,0.11);
-  --accent-glow: rgba(0,255,198,0.28);
-  --r: 11px;
-  --r-sm: 7px;
-  --r-lg: 16px;
-  --font: "Inter", system-ui, -apple-system, sans-serif;
+  /* ===== Core backgrounds ===== */
+  --darkerGradientPoint: #050810 !important;
+  --darkerGradientPointAlpha: rgba(5, 8, 16, 0.92) !important;
+  --lighterGradientPoint: #0c121c !important;
+  --lighterGradientPointAlpha: rgba(12, 18, 28, 0.9) !important;
+
+  /* ===== Header / drawer ===== */
+  --headerColor: rgba(5, 8, 16, 0.88) !important;
+  --drawerColor: rgba(8, 12, 20, 0.96) !important;
+
+  /* ===== Borders ===== */
+  --borderColor: rgba(255, 255, 255, 0.07) !important;
+  --darkerBorderColor: rgba(255, 255, 255, 0.045) !important;
+  --lighterBorderColor: rgba(255, 255, 255, 0.12) !important;
+
+  /* ===== Text ===== */
+  --textColor: #f0f3f6 !important;
+  --dimTextColor: #8b96a3 !important;
+  --fullContrastColor: #ffffff !important;
+
+  /* ===== Accent (cyan) ===== */
+  --accentColor: #00ffc6 !important;
+  --accentHoverColor: #33ffd4 !important;
+  --semiTransparentAccentColor: rgba(0, 255, 198, 0.13) !important;
+
+  /* ===== Buttons ===== */
+  --btnSubmitColor: #00ffc6 !important;
+  --btnSubmitBorderColor: #00ffc6 !important;
+  --btnMiniPlayColor: #00e6b4 !important;
+  --btnMiniPlayBorderColor: #00ffc6 !important;
+  --checkboxCheckedBgColor: #00ffc6 !important;
+
+  /* ===== Cards / progress / focus ===== */
+  --cardHoverBorderColor: rgba(0, 255, 198, 0.55) !important;
+  --cardResumeProgressColor: #00ffc6 !important;
+  --highlightOutlineColor: #00ffc6 !important;
+  --osdSeekBarPlayedColor: #00ffc6 !important;
+  --osdSeekBarThumbColor: #00ffc6 !important;
+
+  /* ===== Hover / active ===== */
+  --hoverBackgroundColor: rgba(0, 255, 198, 0.12) !important;
+  --activeBackgroundColor: rgba(0, 255, 198, 0.16) !important;
+  --activeTextColor: #ffffff !important;
+
+  /* ===== Misc ===== */
+  --selectorBackgroundColor: #111925 !important;
+  --selectorBackgroundColorAlpha: rgba(17, 25, 37, 0.75) !important;
 }
 
-/* ========== GLOBAL ========== */
-html, body, .backgroundContainer, .skinBody, .mainAnimatedPages {
-  background: var(--bg) !important;
-  color: var(--text) !important;
-  font-family: var(--font) !important;
-}
+/* =========================================================
+   LOGO — force DinkFlix branding
+   ========================================================= */
 
-body {
-  background:
-    radial-gradient(1000px 600px at 90% -20%, rgba(0,255,198,0.045), transparent 55%),
-    radial-gradient(800px 500px at -15% 40%, rgba(40,90,200,0.03), transparent 50%),
-    var(--bg) !important;
-  -webkit-font-smoothing: antialiased;
-}
-
-* { scrollbar-width: thin; scrollbar-color: rgba(0,255,198,0.22) transparent; }
-*::-webkit-scrollbar { width: 7px; height: 7px; }
-*::-webkit-scrollbar-thumb { background: rgba(0,255,198,0.2); border-radius: 99px; }
-*::-webkit-scrollbar-thumb:hover { background: rgba(0,255,198,0.4); }
-
-/* ========== HEADER ========== */
-.skinHeader,
-.skinHeader-withBackground,
-.skinHeader.semiTransparent,
-.skinHeader-blurred {
-  background: linear-gradient(180deg, rgba(5,8,16,0.98) 0%, rgba(5,8,16,0.92) 55%, rgba(5,8,16,0) 100%) !important;
-  backdrop-filter: blur(22px) saturate(170%) !important;
-  -webkit-backdrop-filter: blur(22px) saturate(170%) !important;
-  border-bottom: 1px solid rgba(255,255,255,0.035) !important;
-  box-shadow: none !important;
-}
-
-.headerTop { height: 62px !important; }
-
-.headerButton, .paper-icon-button-light {
-  color: var(--muted) !important;
-  border-radius: var(--r-sm) !important;
-  transition: .18s ease !important;
-}
-.headerButton:hover, .paper-icon-button-light:hover {
-  color: var(--text) !important;
-  background: rgba(255,255,255,0.06) !important;
-}
-
-/* LOGO — hard force */
 .headerLogo,
 .headerLogoLink,
 .headerLogoImage,
 .pageTitleWithLogo,
 .pageTitleWithDefaultLogo,
 .mainDrawerLogo {
-  background: url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dnk.png") left center / contain no-repeat !important;
-  width: 118px !important;
-  min-width: 118px !important;
-  height: 34px !important;
-  min-height: 34px !important;
+  background-image: url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dnk.png") !important;
+  background-repeat: no-repeat !important;
+  background-position: left center !important;
+  background-size: contain !important;
+  width: 120px !important;
+  min-width: 120px !important;
+  height: 36px !important;
+  min-height: 36px !important;
   font-size: 0 !important;
   color: transparent !important;
   text-indent: -9999px !important;
   overflow: hidden !important;
 }
-.headerLogo img, .headerLogoLink img, .headerLogoImage img,
-.pageTitleWithLogo img, .pageTitleWithDefaultLogo img,
-.headerLogo svg, .headerLogoLink svg,
-.headerHomeButton img, .headerHomeButton svg, .headerHomeButton .material-icons {
-  display: none !important; opacity: 0 !important; width: 0 !important; height: 0 !important;
-}
 
-/* ========== HOME ========== */
-.homePage, .homeSectionsContainer { background: transparent !important; }
-
-.sectionTitle, .homePage .sectionTitle {
-  color: var(--text) !important;
-  font-size: 1.4rem !important;
-  font-weight: 700 !important;
-  letter-spacing: -0.035em !important;
-}
-
-.sectionTitleContainer {
-  margin: 2.1rem 0 0.7rem !important;
-}
-.sectionTitleContainer .emby-button, .sectionTitleTextButton {
-  color: var(--muted) !important;
-  font-size: 0.78rem !important;
-  font-weight: 600 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.05em !important;
-}
-.sectionTitleContainer .emby-button:hover { color: var(--accent) !important; }
-
-/* Elevated first section */
-.homePage .homePageSection:first-of-type {
-  margin: 0.8rem 0 0.4rem !important;
-  padding: 1.3rem 1.4rem 1.5rem !important;
-  border-radius: var(--r-lg) !important;
-  border: 1px solid var(--border) !important;
-  background: linear-gradient(155deg, rgba(255,255,255,0.035), rgba(255,255,255,0.01)), var(--surface) !important;
-  box-shadow: 0 18px 50px rgba(0,0,0,0.4) !important;
-}
-
-/* ========== CARDS — make them feel premium ========== */
-.cardScalable, .cardBox, .visualCardBox {
-  border-radius: var(--r) !important;
-  border: 1px solid var(--border) !important;
-  background: var(--surface) !important;
-  overflow: hidden !important;
-  transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease !important;
-}
-
-.card-hoverable:hover .cardScalable,
-.card-hoverable:hover .visualCardBox,
-.cardBox:hover {
-  border-color: rgba(0,255,198,0.45) !important;
-  box-shadow: 0 18px 45px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,255,198,0.12) !important;
-  transform: translateY(-5px) scale(1.025) !important;
-}
-
-.cardImageContainer {
-  background: var(--surface2) !important;
-  border-radius: inherit !important;
-}
-
-.cardOverlayContainer {
-  background: linear-gradient(180deg, transparent 25%, rgba(5,8,16,0.8) 100%) !important;
+/* Hide original logo images / SVGs */
+.headerLogo img,
+.headerLogoLink img,
+.headerLogoImage img,
+.pageTitleWithLogo img,
+.pageTitleWithDefaultLogo img,
+.headerLogo svg,
+.headerLogoLink svg,
+.headerHomeButton img,
+.headerHomeButton svg {
+  display: none !important;
   opacity: 0 !important;
-  transition: opacity .28s ease !important;
-}
-.card-hoverable:hover .cardOverlayContainer { opacity: 1 !important; }
-
-.cardText, .cardTextCentered {
-  color: var(--text) !important;
-  font-weight: 600 !important;
-  font-size: 0.9rem !important;
-  letter-spacing: -0.015em !important;
-}
-.cardText-secondary {
-  color: var(--faint) !important;
-  font-size: 0.78rem !important;
+  visibility: hidden !important;
 }
 
-/* Progress */
-.itemProgressBar {
-  height: 3.5px !important;
-  background: rgba(255,255,255,0.1) !important;
-  border-radius: 99px !important;
+/* =========================================================
+   EXTRA POLISH (on top of ElegantFin)
+   ========================================================= */
+
+/* Slightly deeper body background */
+body, .backgroundContainer, .skinBody {
+  background-color: #050810 !important;
 }
+
+/* Stronger accent on progress bars */
 .itemProgressBarForeground {
-  background: var(--accent) !important;
-  box-shadow: 0 0 14px var(--accent-glow) !important;
-  border-radius: 99px !important;
+  background: #00ffc6 !important;
+  box-shadow: 0 0 12px rgba(0, 255, 198, 0.35) !important;
 }
 
-.playedIndicator, .countIndicator {
-  background: var(--accent) !important;
+/* Accent indicators */
+.playedIndicator,
+.countIndicator {
+  background: #00ffc6 !important;
   color: #02140f !important;
-  font-weight: 700 !important;
-  border: none !important;
-  box-shadow: 0 2px 10px var(--accent-glow) !important;
 }
 
-/* ========== BUTTONS ========== */
-.emby-button { border-radius: var(--r-sm) !important; font-weight: 600 !important; transition: .18s ease !important; }
-
-.button-submit, .button-primary, .raised.emby-button, .emby-button.raised, .btnPlay {
-  background: var(--accent) !important;
+/* Primary buttons get the cyan treatment */
+.button-submit,
+.button-primary,
+.raised.emby-button,
+.btnPlay {
+  background: #00ffc6 !important;
   color: #02140f !important;
-  border: none !important;
-  font-weight: 700 !important;
-  box-shadow: 0 6px 22px var(--accent-glow) !important;
-}
-.button-submit:hover, .button-primary:hover, .raised.emby-button:hover, .btnPlay:hover {
-  background: var(--accent2) !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 12px 30px rgba(0,255,198,0.35) !important;
+  border-color: #00ffc6 !important;
 }
 
-.button-flat, .detailButton:not(.btnPlay) {
-  color: var(--muted) !important;
-  background: rgba(255,255,255,0.04) !important;
-  border: 1px solid var(--border) !important;
-}
-.button-flat:hover, .detailButton:not(.btnPlay):hover {
-  color: var(--text) !important;
-  background: rgba(255,255,255,0.08) !important;
+.button-submit:hover,
+.button-primary:hover,
+.raised.emby-button:hover,
+.btnPlay:hover {
+  background: #33ffd4 !important;
+  border-color: #33ffd4 !important;
 }
 
-/* ========== FORMS ========== */
-.emby-input, .emby-textarea, .emby-select, .emby-select-withcolor {
-  background: var(--surface) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: var(--r-sm) !important;
-  color: var(--text) !important;
-}
-.emby-input:focus, .emby-textarea:focus, .emby-select:focus {
-  border-color: var(--accent) !important;
-  box-shadow: 0 0 0 3px var(--accent-soft) !important;
-  outline: none !important;
+/* Card hover accent border */
+.card-hoverable:hover .cardScalable,
+.card-hoverable:hover .visualCardBox {
+  border-color: rgba(0, 255, 198, 0.5) !important;
 }
 
-/* ========== DIALOGS / DRAWERS ========== */
-.dialog, .mainDrawer, .actionSheet, .paperList {
-  background: var(--bg2) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: var(--r-lg) !important;
-  box-shadow: 0 30px 80px rgba(0,0,0,0.6) !important;
-}
-.listItem { border-radius: var(--r-sm) !important; transition: .15s ease !important; }
-.listItem:hover, .listItem:focus-visible { background: var(--accent-soft) !important; }
-.listItemIcon { color: var(--faint) !important; }
-.listItem:hover .listItemIcon { color: var(--accent) !important; }
-
-/* ========== DETAIL PAGE ========== */
-.itemName, .nameContainer h1 {
-  color: var(--text) !important;
-  font-weight: 750 !important;
-  letter-spacing: -0.04em !important;
-}
-.itemMiscInfo, .itemOverview, .tagline { color: var(--muted) !important; }
-
-.itemBackdrop { opacity: 0.68 !important; }
-.itemBackdrop::after {
-  background:
-    linear-gradient(90deg, var(--bg) 0%, rgba(5,8,16,0.93) 18%, rgba(5,8,16,0.25) 52%, rgba(5,8,16,0.95) 100%),
-    linear-gradient(0deg, var(--bg) 0%, transparent 38%, rgba(5,8,16,0.35) 100%) !important;
+/* Focus rings */
+.card:focus .cardBox.visualCardBox,
+.card:focus .cardBox:not(.visualCardBox) .cardScalable,
+.emby-button.show-focus:focus {
+  border-color: #00ffc6 !important;
+  outline-color: #00ffc6 !important;
 }
 
-/* ========== PLAYER ========== */
-.videoPlayerContainer, .nowPlayingPage { background: #000 !important; }
-.videoOsdBottom {
-  background: linear-gradient(0deg, rgba(0,0,0,0.95), rgba(0,0,0,0.5) 55%, transparent) !important;
+/* Scrollbar accent */
+* {
+  scrollbar-color: rgba(0, 255, 198, 0.25) transparent;
 }
-.videoOsdTop, .osdHeader {
-  background: linear-gradient(180deg, rgba(0,0,0,0.8), transparent) !important;
+*::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 198, 0.22);
 }
-.mdl-slider-background-lower { background: var(--accent) !important; }
-
-/* ========== SEARCH / LOGIN ========== */
-.searchfields {
-  background: rgba(8,12,20,0.95) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: var(--r) !important;
-  backdrop-filter: blur(16px) !important;
-}
-#loginPage { background: var(--bg) !important; }
-#loginPage .padded-left.padded-right.padded-bottom-page {
-  background: var(--bg2) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: var(--r-lg) !important;
-  box-shadow: 0 25px 60px rgba(0,0,0,0.5) !important;
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 198, 0.4);
 }
 
-/* ========== MOBILE ========== */
-@media (max-width: 768px) {
-  .headerLogo, .headerLogoLink, .headerLogoImage, .pageTitleWithLogo {
-    width: 96px !important; min-width: 96px !important; height: 29px !important;
+/* Mobile logo size */
+@media (max-width: 720px) {
+  .headerLogo,
+  .headerLogoLink,
+  .headerLogoImage,
+  .pageTitleWithLogo {
+    width: 96px !important;
+    min-width: 96px !important;
+    height: 30px !important;
   }
-  .sectionTitle { font-size: 1.2rem !important; }
-  .homePage .homePageSection:first-of-type { padding: 1rem !important; }
-  .card-hoverable:hover .cardScalable, .cardBox:hover { transform: none !important; }
-  .button-submit:hover, .button-primary:hover, .raised.emby-button:hover { transform: none !important; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
