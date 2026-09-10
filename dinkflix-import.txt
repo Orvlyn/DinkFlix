@@ -1,5 +1,0 @@
-/* DinkFlix v9 — Full theme based on ElegantFin
-   Paste ONLY this:
-*/
-
-@import url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix.css?v=9");
