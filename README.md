@@ -1,34 +1,24 @@
 # DinkFlix
 
-Premium cyan recolor + branding layer for **ElegantFin**.
+Full Jellyfin theme based on **ElegantFin v26.09.05**, completely recolored and branded.
 
-Keeps all of ElegantFin’s excellent layout, cards, detail pages, player and responsive work — then shifts the entire color system to a deep `#050810` background with `#00FFC6` accent and your logo.
+- Background: `#050810`
+- Accent: `#00FFC6`
+- Your logo forced in the header
+- All of ElegantFin’s layout, cards, detail pages, player, mobile & TV work preserved
 
 ## Install
 
-In **Dashboard → Branding → Custom CSS** paste:
+**Dashboard → Branding → Custom CSS**
 
 ```css
-@import url("https://cdn.jsdelivr.net/gh/lscambo13/ElegantFin@main/Theme/ElegantFin-jellyfin-theme-build-latest-minified.css");
-@import url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix.css?v=6");
+@import url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix.css?v=9");
 ```
 
-Save and hard-refresh (`Ctrl + Shift + R`).
+Or paste the entire contents of `dinkflix.css` directly.
 
-## What it changes
+Hard refresh after saving (`Ctrl + Shift + R`).
 
-- Background → deep `#050810`
-- Accent → cyan `#00FFC6` (buttons, progress, focus, indicators, hover)
-- Logo → your `dnk.png`
-- Scrollbars, card hover borders, and a few extra polish rules
+## Credits
 
-Everything else (layout, spacing, animations, mobile/TV handling) stays ElegantFin.
-
-## Files
-
-- `dinkflix.css` — the override layer
-- `dnk.png` — your logo (must be in the repo root)
-
-## License
-
-MIT (this layer only). ElegantFin remains under its own license.
+Built on top of the excellent [ElegantFin](https://github.com/lscambo13/ElegantFin) by lscambo13.
