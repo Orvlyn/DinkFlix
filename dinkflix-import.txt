@@ -1,9 +1,6 @@
-/* Paste this into Jellyfin → Dashboard → Branding → Custom CSS */
-
-@import url("https://cdn.jsdelivr.net/gh/lscambo13/ElegantFin@main/Theme/ElegantFin-jellyfin-theme-build-latest-minified.css");
-@import url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix.css?v=2.1");
-
-/* Optional extras (only if you want them):
-@import url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix-mobile.css");
-@import url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix-tv.css");
+/* DinkFlix Standalone Theme
+   Paste ONLY this into Jellyfin → Dashboard → Branding → Custom CSS
+   Do NOT import ElegantFin anymore.
 */
+
+@import url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix.css?v=3");

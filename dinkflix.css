@@ -1,79 +1,106 @@
 /*
- * DinkFlix v2.1 — Stronger customization layer for ElegantFin + Jellyfin Web
+ * DinkFlix — Standalone Jellyfin Web Theme
+ * Version: 3.0.0
  *
- * Load AFTER ElegantFin:
- * @import url("https://cdn.jsdelivr.net/gh/lscambo13/ElegantFin@main/Theme/ElegantFin-jellyfin-theme-build-latest-minified.css");
- * @import url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix.css?v=2.1");
+ * Fully independent. Do NOT import ElegantFin.
  *
- * This version aggressively overrides ElegantFin variables + logo for a clear visual change.
+ * Installation:
+ * Dashboard → Branding → Custom CSS
+ * Paste only:
+ * @import url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix.css?v=3");
  */
 
 /* =========================================================
-   1. OVERRIDE ELEGANTFIN CSS VARIABLES (biggest visual impact)
+   ROOT VARIABLES
    ========================================================= */
-
 :root {
-  /* Backgrounds – deeper and cleaner */
-  --darkerGradientPoint: #0a0d12 !important;
-  --darkerGradientPointAlpha: rgba(10, 13, 18, 0.92) !important;
-  --lighterGradientPoint: #111821 !important;
-  --lighterGradientPointAlpha: rgba(17, 24, 33, 0.9) !important;
-
-  /* Header / surfaces */
-  --headerColor: rgba(10, 13, 18, 0.88) !important;
-  --drawerColor: rgba(12, 16, 22, 0.96) !important;
-
-  /* Borders */
-  --borderColor: rgba(255, 255, 255, 0.08) !important;
-  --darkerBorderColor: rgba(255, 255, 255, 0.05) !important;
-  --lighterBorderColor: rgba(255, 255, 255, 0.14) !important;
-
-  /* Text */
-  --textColor: #f1f4f6 !important;
-  --dimTextColor: #8b97a3 !important;
-  --fullContrastColor: #ffffff !important;
-
-  /* Accent → DinkFlix cyan */
-  --accentColor: #00ffc6 !important;
-  --accentHoverColor: #33ffd4 !important;
-  --semiTransparentAccentColor: rgba(0, 255, 198, 0.14) !important;
-
-  /* Buttons */
-  --btnSubmitColor: #00ffc6 !important;
-  --btnSubmitBorderColor: #00ffc6 !important;
-  --btnMiniPlayColor: #00e6b4 !important;
-  --btnMiniPlayBorderColor: #00ffc6 !important;
-  --checkboxCheckedBgColor: #00ffc6 !important;
-
-  /* Cards / progress */
-  --cardHoverBorderColor: rgba(0, 255, 198, 0.55) !important;
-  --cardResumeProgressColor: #00ffc6 !important;
-  --highlightOutlineColor: #00ffc6 !important;
-  --osdSeekBarPlayedColor: #00ffc6 !important;
-  --osdSeekBarThumbColor: #00ffc6 !important;
-
-  /* Hover / active */
-  --hoverBackgroundColor: rgba(0, 255, 198, 0.12) !important;
-  --activeBackgroundColor: rgba(0, 255, 198, 0.18) !important;
-  --activeTextColor: #ffffff !important;
-
-  /* Misc */
-  --selectorBackgroundColor: #151c26 !important;
-  --selectorBackgroundColorAlpha: rgba(21, 28, 38, 0.75) !important;
+  --df-bg: #0a0d12;
+  --df-bg2: #0f141b;
+  --df-surface: #141b24;
+  --df-surface2: #1a2330;
+  --df-border: rgba(255, 255, 255, 0.07);
+  --df-border-hover: rgba(0, 255, 198, 0.35);
+  --df-text: #f1f4f6;
+  --df-muted: #8b97a3;
+  --df-accent: #00ffc6;
+  --df-accent-hover: #33ffd4;
+  --df-accent-soft: rgba(0, 255, 198, 0.12);
+  --df-accent-glow: rgba(0, 255, 198, 0.22);
+  --df-radius: 10px;
+  --df-radius-sm: 7px;
+  --df-radius-lg: 14px;
+  --df-shadow: 0 14px 40px rgba(0, 0, 0, 0.4);
+  --df-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* =========================================================
-   2. LOGO – cover every common ElegantFin / Jellyfin selector
+   GLOBAL
    ========================================================= */
+html, body, .backgroundContainer, .skinBody {
+  background: var(--df-bg) !important;
+  color: var(--df-text) !important;
+}
 
+body {
+  background:
+    radial-gradient(1100px 600px at 90% -10%, rgba(0, 255, 198, 0.035), transparent 55%),
+    radial-gradient(800px 500px at -5% 25%, rgba(0, 130, 255, 0.02), transparent 55%),
+    var(--df-bg) !important;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+a { color: inherit; text-decoration: none; }
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 255, 198, 0.25) transparent;
+}
+*::-webkit-scrollbar { width: 7px; height: 7px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 198, 0.22);
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-thumb:hover { background: rgba(0, 255, 198, 0.4); }
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+.skinHeader,
+.skinHeader-withBackground,
+.skinHeader.semiTransparent,
+.skinHeader-blurred {
+  background: linear-gradient(
+    180deg,
+    rgba(10, 13, 18, 0.97) 0%,
+    rgba(10, 13, 18, 0.88) 70%,
+    rgba(10, 13, 18, 0) 100%
+  ) !important;
+  backdrop-filter: blur(18px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
+  box-shadow: none !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.headerButton,
+.paper-icon-button-light {
+  color: var(--df-muted) !important;
+  border-radius: var(--df-radius-sm) !important;
+  transition: color 0.18s var(--df-ease), background 0.18s var(--df-ease);
+}
+.headerButton:hover,
+.paper-icon-button-light:hover {
+  color: var(--df-text) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* LOGO */
 .headerLogo,
 .headerLogoLink,
 .headerLogoImage,
 .pageTitleWithLogo,
 .pageTitleWithDefaultLogo,
-.mainDrawerLogo,
-.skinHeader .headerLogo,
-.skinHeader .headerLogoLink {
+.mainDrawerLogo {
   background-image: url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dnk.png") !important;
   background-repeat: no-repeat !important;
   background-position: center left !important;
@@ -88,7 +115,6 @@
   overflow: hidden !important;
 }
 
-/* Hide original Jellyfin / ElegantFin logo images & SVGs */
 .headerLogo img,
 .headerLogoLink img,
 .headerLogoImage img,
@@ -103,193 +129,269 @@
   visibility: hidden !important;
 }
 
-/* Slightly larger logo on big screens */
-@media (min-width: 1400px) {
-  .headerLogo,
-  .headerLogoLink,
-  .headerLogoImage,
-  .pageTitleWithLogo {
-    width: 128px !important;
-    min-width: 128px !important;
-    height: 38px !important;
-  }
-}
-
 /* =========================================================
-   3. GLOBAL BACKGROUND & HEADER
+   HOME PAGE
    ========================================================= */
-
-html,
-body,
-.backgroundContainer,
-.skinBody {
-  background-color: #0a0d12 !important;
+.homePage {
+  background: transparent !important;
 }
 
-body {
-  background:
-    radial-gradient(1100px 580px at 88% -12%, rgba(0, 255, 198, 0.04), transparent 55%),
-    radial-gradient(800px 480px at -8% 20%, rgba(0, 140, 255, 0.025), transparent 55%),
-    #0a0d12 !important;
-}
-
-.skinHeader,
-.skinHeader-withBackground,
-.skinHeader.semiTransparent,
-.skinHeader-blurred {
-  background: linear-gradient(
-    180deg,
-    rgba(10, 13, 18, 0.97) 0%,
-    rgba(10, 13, 18, 0.88) 65%,
-    rgba(10, 13, 18, 0) 100%
-  ) !important;
-  backdrop-filter: blur(18px) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
-  box-shadow: none !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
-}
-
-/* =========================================================
-   4. HOME PAGE SECTIONS
-   ========================================================= */
-
+.sectionTitle,
 .homePage .sectionTitle {
-  color: #f1f4f6 !important;
+  color: var(--df-text) !important;
+  font-size: 1.25rem !important;
   font-weight: 700 !important;
   letter-spacing: -0.02em !important;
 }
 
+.sectionTitleContainer .emby-button,
 .homePage .sectionTitleContainer .emby-button {
-  color: #8b97a3 !important;
+  color: var(--df-muted) !important;
+  font-size: 0.78rem !important;
   font-weight: 600 !important;
   text-transform: uppercase !important;
-  font-size: 0.78rem !important;
   letter-spacing: 0.04em !important;
 }
-
-.homePage .sectionTitleContainer .emby-button:hover {
-  color: #00ffc6 !important;
+.sectionTitleContainer .emby-button:hover {
+  color: var(--df-accent) !important;
 }
 
-/* First home section (libraries) gets a subtle elevated panel */
+/* First section elevated panel */
 .homePage .homePageSection:first-of-type {
-  margin-top: 0.5rem;
-  padding: 1.1rem 1.15rem 1.25rem;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01)),
-              rgba(15, 20, 28, 0.75);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+  margin-top: 0.6rem;
+  padding: 1.15rem 1.2rem 1.3rem;
+  border-radius: var(--df-radius-lg);
+  border: 1px solid var(--df-border);
+  background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.008)),
+              rgba(15, 20, 28, 0.8);
+  box-shadow: var(--df-shadow);
 }
 
 /* =========================================================
-   5. CARDS
+   CARDS
    ========================================================= */
-
 .cardScalable,
-.cardBox {
-  border-radius: 10px !important;
+.cardBox,
+.visualCardBox {
+  border-radius: var(--df-radius) !important;
+  border: 1px solid var(--df-border) !important;
+  overflow: hidden !important;
+  transition: transform 0.2s var(--df-ease), border-color 0.2s var(--df-ease), box-shadow 0.2s var(--df-ease);
 }
 
 .card-hoverable:hover .cardScalable,
-.card-hoverable:hover .visualCardBox {
-  border-color: rgba(0, 255, 198, 0.45) !important;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4) !important;
+.card-hoverable:hover .visualCardBox,
+.cardBox:hover {
+  border-color: var(--df-border-hover) !important;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45) !important;
+  transform: translateY(-3px);
 }
 
-/* Progress bar */
-.itemProgressBarForeground,
-.cardBox .itemProgressBarForeground {
-  background: #00ffc6 !important;
-  box-shadow: 0 0 10px rgba(0, 255, 198, 0.35) !important;
+.cardImageContainer {
+  border-radius: inherit !important;
+}
+
+.cardOverlayContainer {
+  background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.65)) !important;
+  transition: opacity 0.25s var(--df-ease);
+}
+
+.cardText {
+  color: var(--df-text) !important;
+  font-weight: 550;
+}
+.cardText-secondary {
+  color: var(--df-muted) !important;
+}
+
+/* Progress */
+.itemProgressBar {
+  background: rgba(255,255,255,0.12) !important;
+  height: 3px !important;
+  border-radius: 999px !important;
+}
+.itemProgressBarForeground {
+  background: var(--df-accent) !important;
+  box-shadow: 0 0 10px var(--df-accent-glow) !important;
+  border-radius: 999px !important;
 }
 
 .playedIndicator,
 .countIndicator {
-  background: #00ffc6 !important;
+  background: var(--df-accent) !important;
   color: #06110e !important;
+  font-weight: 700 !important;
 }
 
 /* =========================================================
-   6. BUTTONS
+   BUTTONS
    ========================================================= */
+.emby-button {
+  border-radius: var(--df-radius-sm) !important;
+  transition: all 0.18s var(--df-ease) !important;
+}
 
 .button-submit,
 .button-primary,
 .raised.emby-button,
-.emby-button.raised {
-  background: #00ffc6 !important;
+.emby-button.raised,
+.btnPlay {
+  background: var(--df-accent) !important;
   color: #06110e !important;
   border: none !important;
   font-weight: 700 !important;
-  box-shadow: 0 6px 22px rgba(0, 255, 198, 0.22) !important;
+  box-shadow: 0 6px 22px var(--df-accent-glow) !important;
 }
 
 .button-submit:hover,
 .button-primary:hover,
-.raised.emby-button:hover {
-  background: #33ffd4 !important;
+.raised.emby-button:hover,
+.btnPlay:hover {
+  background: var(--df-accent-hover) !important;
   transform: translateY(-1px);
   box-shadow: 0 10px 28px rgba(0, 255, 198, 0.3) !important;
 }
 
-/* =========================================================
-   7. DETAIL PAGES & PLAYER
-   ========================================================= */
+.button-flat,
+.emby-button-flat {
+  color: var(--df-muted) !important;
+}
+.button-flat:hover {
+  color: var(--df-text) !important;
+  background: rgba(255,255,255,0.06) !important;
+}
 
+/* =========================================================
+   FORMS
+   ========================================================= */
+.emby-input,
+.emby-textarea,
+.emby-select,
+.emby-select-withcolor {
+  background: var(--df-surface) !important;
+  border: 1px solid var(--df-border) !important;
+  border-radius: var(--df-radius-sm) !important;
+  color: var(--df-text) !important;
+}
+
+.emby-input:focus,
+.emby-textarea:focus,
+.emby-select:focus,
+.emby-select-withcolor:focus {
+  border-color: var(--df-accent) !important;
+  box-shadow: 0 0 0 3px var(--df-accent-soft) !important;
+  outline: none !important;
+}
+
+/* =========================================================
+   DIALOGS / DRAWERS / MENUS
+   ========================================================= */
+.dialog,
+.dialogContainer,
+.mainDrawer,
+.actionSheet,
+.paperList {
+  background: var(--df-bg2) !important;
+  border: 1px solid var(--df-border) !important;
+  border-radius: var(--df-radius-lg) !important;
+  box-shadow: 0 28px 70px rgba(0,0,0,0.55) !important;
+}
+
+.listItem {
+  border-radius: var(--df-radius-sm);
+  transition: background 0.15s var(--df-ease);
+}
+.listItem:hover,
+.listItem:focus-visible {
+  background: var(--df-accent-soft) !important;
+}
+.listItemIcon {
+  color: var(--df-muted);
+}
+.listItem:hover .listItemIcon {
+  color: var(--df-accent);
+}
+
+/* =========================================================
+   DETAIL PAGES
+   ========================================================= */
+.detailPage {
+  background: transparent !important;
+}
+
+.itemName,
+.detailPage .itemName {
+  color: var(--df-text) !important;
+  font-weight: 750 !important;
+  letter-spacing: -0.03em !important;
+}
+
+.itemMiscInfo,
+.itemOverview,
+.detailPage .itemMiscInfo,
+.detailPage .itemOverview {
+  color: var(--df-muted) !important;
+}
+
+.itemBackdrop {
+  opacity: 0.65 !important;
+}
 .itemBackdrop::after {
   background:
-    linear-gradient(90deg, #0a0d12 0%, rgba(10, 13, 18, 0.9) 22%, rgba(10, 13, 18, 0.25) 55%, rgba(10, 13, 18, 0.92) 100%),
-    linear-gradient(0deg, #0a0d12 0%, transparent 40%, rgba(10, 13, 18, 0.3) 100%) !important;
+    linear-gradient(90deg, var(--df-bg) 0%, rgba(10,13,18,0.9) 22%, rgba(10,13,18,0.25) 55%, rgba(10,13,18,0.92) 100%),
+    linear-gradient(0deg, var(--df-bg) 0%, transparent 42%, rgba(10,13,18,0.3) 100%) !important;
+}
+
+/* =========================================================
+   PLAYER / OSD
+   ========================================================= */
+.videoPlayerContainer,
+.nowPlayingPage {
+  background: #000 !important;
 }
 
 .videoOsdBottom {
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.92), rgba(0, 0, 0, 0.45) 60%, transparent) !important;
+  background: linear-gradient(0deg, rgba(0,0,0,0.92), rgba(0,0,0,0.45) 60%, transparent) !important;
+}
+.videoOsdTop,
+.osdHeader {
+  background: linear-gradient(180deg, rgba(0,0,0,0.75), transparent) !important;
 }
 
 .mdl-slider-background-lower {
-  background: #00ffc6 !important;
+  background: var(--df-accent) !important;
+}
+
+.pausedVideoPlayer {
+  background: #05070a !important;
 }
 
 /* =========================================================
-   8. DIALOGS / DRAWERS
+   SEARCH
    ========================================================= */
-
-.dialog,
-.mainDrawer,
-.actionSheet {
-  background: #0f141b !important;
-  border: 1px solid rgba(255, 255, 255, 0.07) !important;
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.55) !important;
-}
-
-.listItem:hover,
-.listItem:focus-visible {
-  background: rgba(0, 255, 198, 0.07) !important;
+.searchfields {
+  background: rgba(15, 20, 27, 0.92) !important;
+  border: 1px solid var(--df-border) !important;
+  border-radius: var(--df-radius) !important;
+  backdrop-filter: blur(12px);
 }
 
 /* =========================================================
-   9. SCROLLBARS
+   LOGIN
    ========================================================= */
-
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0, 255, 198, 0.25) transparent;
+#loginPage {
+  background: var(--df-bg) !important;
 }
-
-*::-webkit-scrollbar-thumb {
-  background: rgba(0, 255, 198, 0.22);
-  border-radius: 999px;
-}
-
-*::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 255, 198, 0.4);
+#loginPage .padded-left.padded-right.padded-bottom-page {
+  background: var(--df-bg2) !important;
+  border: 1px solid var(--df-border) !important;
+  border-radius: var(--df-radius-lg) !important;
+  box-shadow: var(--df-shadow) !important;
 }
 
 /* =========================================================
-   10. MOBILE TWEAKS
+   MOBILE
    ========================================================= */
-
 @media (max-width: 720px) {
   .headerLogo,
   .headerLogoLink,
@@ -301,8 +403,13 @@ body {
   }
 
   .homePage .homePageSection:first-of-type {
-    padding: 0.8rem 0.75rem 0.95rem;
-    border-radius: 10px;
+    padding: 0.85rem 0.8rem 1rem;
+    border-radius: 12px;
+  }
+
+  .card-hoverable:hover .cardScalable,
+  .cardBox:hover {
+    transform: none;
   }
 
   .button-submit:hover,
@@ -313,13 +420,10 @@ body {
 }
 
 /* =========================================================
-   11. REDUCED MOTION
+   REDUCED MOTION
    ========================================================= */
-
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }
