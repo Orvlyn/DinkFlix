@@ -1,9 +1,11 @@
-{
-  "guid": "B4A9D4E6-4E4D-4F42-9E90-9C5B4D4B8D2B",
-  "name": "DINKFLIX",
-  "overview": "Native Jellyfin 12 theme with lightweight DINKFLIX enhancements.",
-  "description": "A standalone DINKFLIX visual theme that styles Jellyfin's native UI. Optional plugin enhancements add only features CSS cannot provide.",
-  "owner": "Orvlyn",
-  "category": "General",
-  "versions": []
-}
+[
+  {
+    "guid": "B4A9D4E6-4E4D-4F42-9E90-9C5B4D4B8D2B",
+    "name": "DINKFLIX",
+    "overview": "Native Jellyfin 12 theme with lightweight DINKFLIX enhancements.",
+    "description": "A standalone DINKFLIX visual theme that styles Jellyfin's native UI. Optional plugin enhancements add only features CSS cannot provide.",
+    "owner": "Orvlyn",
+    "category": "General",
+    "versions": []
+  }
+]
