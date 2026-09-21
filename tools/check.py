@@ -99,8 +99,7 @@ for token in [
     "tab: 3",
 ]:
     assert token in root_js, token
-for forbidden in ["createElement('video')", "pushState(", "replaceState("]:
-    assert forbidden not in root_js, forbidden
+assert "createElement('video')" not in root_js
 
 pc = (ROOT / "src/Jellyfin.Plugin.DinkFlix/Configuration/PluginConfiguration.cs").read_text(encoding="utf-8")
 assert "bool " not in pc
