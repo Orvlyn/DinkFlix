@@ -12,8 +12,8 @@
         "changelog": "DINKFLIX 8.1.0.1: Jellyfin-native theme and lightweight enhancements.",
         "targetAbi": "12.0.0.0",
         "sourceUrl": "https://github.com/Orvlyn/DinkFlix/releases/download/v8.1.0.1/DinkFlix_8.1.0.1.zip",
-        "checksum": "575d76e74cc73607c8c453a9031cc2e5",
-        "timestamp": "2026-09-21T17:00:34Z",
+        "checksum": "f2f1b340fe37acf188fbd6d2586ce5f2",
+        "timestamp": "2026-09-21T17:01:45Z",
         "framework": "net10.0"
       },
       {
