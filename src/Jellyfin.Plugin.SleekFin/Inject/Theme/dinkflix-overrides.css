@@ -1,6 +1,5 @@
-/* DINKFLIX visual layer
- * Based on SleekFin. Original project credit is retained in the repository README.
- */
+/* DINKFLIX visual layer based on SleekFin. */
+
 html.sleekfin-main-ui:root {
     --sleekfin-accent: #00ffc6;
     --sleekfin-accent-soft: rgba(0, 255, 198, 0.14);
@@ -23,57 +22,126 @@ html.sleekfin-main-ui:root {
 html.sleekfin-main-ui,
 html.sleekfin-main-ui body,
 html.sleekfin-main-ui .skinBody,
-html.sleekfin-main-ui .mainAnimatedPage {
+html.sleekfin-main-ui .mainAnimatedPage,
+html.sleekfin-main-ui #indexPage {
     background: var(--sleekfin-background) !important;
 }
 
+/* Premium dark glass navigation. */
 html.sleekfin-main-ui .skinHeader {
     position: sticky;
     top: 0;
     z-index: 1000;
-    background: rgba(5, 8, 16, 0.94);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-    backdrop-filter: blur(14px) saturate(125%);
+    background: linear-gradient(180deg, rgba(8, 14, 25, 0.98), rgba(5, 8, 16, 0.91)) !important;
+    border-bottom: 1px solid rgba(0, 255, 198, 0.13);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.24);
+    backdrop-filter: blur(18px) saturate(140%);
+}
+
+html.sleekfin-main-ui .skinHeader .headerButton,
+html.sleekfin-main-ui .skinHeader .paper-icon-button-light,
+html.sleekfin-main-ui .skinHeader a {
+    transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+html.sleekfin-main-ui .skinHeader .headerButton:hover,
+html.sleekfin-main-ui .skinHeader .paper-icon-button-light:hover,
+html.sleekfin-main-ui .skinHeader a:hover {
+    background: rgba(0, 255, 198, 0.09) !important;
+    color: var(--sleekfin-accent) !important;
+}
+
+/* Restore the hero as a substantial, visible feature area. */
+html.sleekfin-main-ui .sleekfin-hero {
+    position: relative !important;
+    display: block !important;
+    visibility: visible !important;
+    height: clamp(620px, 78vh, 900px) !important;
+    min-height: 620px !important;
+    margin-top: 0 !important;
+    overflow: hidden !important;
+    isolation: isolate;
+    background: var(--sleekfin-background) !important;
+}
+
+html.sleekfin-main-ui .sleekfin-hero-slide {
+    display: block !important;
+    visibility: hidden;
+    z-index: 1;
+}
+
+html.sleekfin-main-ui .sleekfin-hero-slide[data-active="true"] {
+    visibility: visible !important;
+    z-index: 2;
+}
+
+html.sleekfin-main-ui .sleekfin-hero-backdrop {
+    z-index: 0;
+    opacity: 0.96 !important;
+}
+
+html.sleekfin-main-ui .sleekfin-hero-vignette,
+html.sleekfin-main-ui .sleekfin-hero-seam {
+    z-index: 1;
+}
+
+html.sleekfin-main-ui .sleekfin-hero-content {
+    position: relative;
+    z-index: 3;
+    min-height: 100%;
+    padding-top: 150px;
+    padding-bottom: 110px;
+}
+
+html.sleekfin-main-ui .sleekfin-hero-stack {
+    max-width: 650px;
+}
+
+html.sleekfin-main-ui .sleekfin-hero-title-box {
+    width: min(500px, 78vw);
+    min-height: 150px;
+}
+
+html.sleekfin-main-ui .sleekfin-hero-title-logo {
+    height: 150px;
+}
+
+html.sleekfin-main-ui .sleekfin-hero-description {
+    max-width: 620px;
+    font-size: 16px;
+    line-height: 1.55;
+}
+
+/* Larger native Jellyfin cards with generous breathing room. */
+html.sleekfin-main-ui .itemsContainer,
+html.sleekfin-main-ui .scrollSlider {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 255, 198, 0.48) transparent;
+}
+
+html.sleekfin-main-ui .sectionTitle {
+    margin-top: 30px;
+    margin-bottom: 18px;
+    letter-spacing: -0.02em;
+    font-size: clamp(21px, 1.6vw, 28px);
+    font-weight: 500;
+}
+
+html.sleekfin-main-ui :is(.overflowPortraitCard, .portraitCard) {
+    width: clamp(220px, 16vw, 285px) !important;
+    max-width: 285px !important;
+    flex: 0 0 clamp(220px, 16vw, 285px) !important;
+}
+
+html.sleekfin-main-ui :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) {
+    width: clamp(350px, 32vw, 460px) !important;
+    max-width: 460px !important;
+    flex: 0 0 clamp(350px, 32vw, 460px) !important;
 }
 
 html.sleekfin-main-ui .cardBox,
 html.sleekfin-main-ui .cardScalable {
-    border-radius: 10px;
-}
-
-html.sleekfin-main-ui .cardBox:hover,
-html.sleekfin-main-ui .cardBox:focus-within {
-    outline: 1px solid rgba(0, 255, 198, 0.32);
-    outline-offset: 2px;
-}
-
-html.sleekfin-main-ui .itemsContainer,
-html.sleekfin-main-ui .scrollSlider {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0, 255, 198, 0.45) transparent;
-}
-
-html.sleekfin-main-ui .sectionTitle {
-    letter-spacing: -0.015em;
-    font-weight: 500;
-}
-
-html.sleekfin-main-ui button:focus-visible,
-html.sleekfin-main-ui a:focus-visible,
-html.sleekfin-main-ui [tabindex]:focus-visible {
-    outline: 2px solid #00ffc6;
-    outline-offset: 3px;
-}
-
-/* Larger native Jellyfin cards; no forced six-column grid. */
-html.sleekfin-main-ui :is(.overflowPortraitCard, .portraitCard) {
-    width: clamp(190px, 14vw, 230px);
-    max-width: 230px;
-}
-
-html.sleekfin-main-ui :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) {
-    width: clamp(280px, 28vw, 360px);
-    max-width: 360px;
+    border-radius: 13px;
 }
 
 html.sleekfin-main-ui .cardImageContainer,
@@ -82,48 +150,56 @@ html.sleekfin-main-ui .cardContent {
     overflow: hidden;
 }
 
+html.sleekfin-main-ui .cardBox:hover,
+html.sleekfin-main-ui .cardBox:focus-within {
+    outline: 1px solid rgba(0, 255, 198, 0.32);
+    outline-offset: 3px;
+}
+
 html.sleekfin-main-ui .cardContent {
     transition: transform 220ms ease, border-color 220ms ease;
 }
 
 html.sleekfin-main-ui .card:hover .cardContent {
-    transform: translateY(-3px);
+    transform: translateY(-4px);
+}
+
+/* Make resume content feel like a primary section. */
+html.sleekfin-main-ui :is(.section0, .resumeSection, .continueWatchingSection) :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) {
+    width: clamp(390px, 35vw, 520px) !important;
+    max-width: 520px !important;
+    flex-basis: clamp(390px, 35vw, 520px) !important;
+}
+
+html.sleekfin-main-ui .itemProgressBar {
+    height: 5px;
+    background: rgba(156, 170, 176, 0.28);
 }
 
 html.sleekfin-main-ui .itemProgressBarForeground {
     background: var(--sleekfin-accent) !important;
 }
 
-html.sleekfin-main-ui .itemProgressBar {
-    background: rgba(156, 170, 176, 0.28);
-    height: 4px;
-}
-
-html.sleekfin-main-ui .sleekfin-hero,
-html.sleekfin-main-ui .sleekfin-hero-slide {
-    background: var(--sleekfin-background);
+html.sleekfin-main-ui button:focus-visible,
+html.sleekfin-main-ui a:focus-visible,
+html.sleekfin-main-ui [tabindex]:focus-visible {
+    outline: 2px solid var(--sleekfin-accent);
+    outline-offset: 3px;
 }
 
 html.sleekfin-main-ui .sleekfin-hero-pager {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    position: absolute;
+    z-index: 8;
     right: clamp(24px, 5vw, 72px);
-    bottom: 28px;
-    z-index: 12;
+    bottom: 34px;
 }
 
 html.sleekfin-main-ui .sleekfin-hero-pager-button {
-    min-width: 34px;
-    height: 28px;
-    padding: 0 10px;
-    border: 1px solid rgba(241, 247, 246, 0.22);
+    min-width: 42px;
+    height: 32px;
+    border: 1px solid rgba(241, 247, 246, 0.25);
     border-radius: 999px;
-    background: rgba(5, 8, 16, 0.64);
+    background: rgba(5, 8, 16, 0.72);
     color: var(--sleekfin-muted);
-    cursor: pointer;
-    transition: background 180ms ease, color 180ms ease, border-color 180ms ease, transform 180ms ease;
 }
 
 html.sleekfin-main-ui .sleekfin-hero-pager-button[data-active="true"],
@@ -132,35 +208,51 @@ html.sleekfin-main-ui .sleekfin-hero-pager-button:focus-visible {
     background: var(--sleekfin-accent);
     border-color: var(--sleekfin-accent);
     color: #04100d;
-    transform: translateY(-1px);
 }
 
-html.sleekfin-main-ui .sleekfin-hero-pager-button:focus-visible {
-    outline: 2px solid #fff;
-    outline-offset: 3px;
-}
+@media (max-width: 900px) {
+    html.sleekfin-main-ui .sleekfin-hero {
+        height: 650px !important;
+        min-height: 650px !important;
+    }
 
-/* Keep the detail back control clickable without changing player layering. */
-html.sleekfin-main-ui .sleekfin-details-back {
-    position: relative;
-    z-index: 20;
-    pointer-events: auto;
+    html.sleekfin-main-ui .sleekfin-hero-content {
+        padding-top: 110px;
+        padding-bottom: 85px;
+    }
+
+    html.sleekfin-main-ui :is(.overflowPortraitCard, .portraitCard) {
+        width: 205px !important;
+        max-width: 205px !important;
+        flex-basis: 205px !important;
+    }
 }
 
 @media (max-width: 650px) {
+    html.sleekfin-main-ui .sleekfin-hero {
+        height: 570px !important;
+        min-height: 570px !important;
+    }
+
+    html.sleekfin-main-ui .sleekfin-hero-title-box {
+        width: min(340px, 82vw);
+        min-height: 100px;
+    }
+
+    html.sleekfin-main-ui .sleekfin-hero-title-logo {
+        height: 100px;
+    }
+
     html.sleekfin-main-ui :is(.overflowPortraitCard, .portraitCard) {
-        width: 165px;
-        max-width: 165px;
+        width: 175px !important;
+        max-width: 175px !important;
+        flex-basis: 175px !important;
     }
 
     html.sleekfin-main-ui :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) {
-        width: 280px;
-        max-width: 280px;
-    }
-
-    html.sleekfin-main-ui .sleekfin-hero-pager {
-        right: 20px;
-        bottom: 18px;
+        width: 290px !important;
+        max-width: 290px !important;
+        flex-basis: 290px !important;
     }
 }
 
