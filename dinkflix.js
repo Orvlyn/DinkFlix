@@ -1571,11 +1571,7 @@
     }
     await loadViews();
     migrateLegacyOuterQuery();
-    const migrated = normalizeLegacyHash();
-    if (migrated) {
-      document.documentElement.classList.add('df-dinkflix-boot-ready');
-      return;
-    }
+    normalizeLegacyHash();
     buildNav();
     bindGlobal();
     try {
