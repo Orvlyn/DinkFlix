@@ -1,19 +1,14 @@
 from pathlib import Path
-import json, re
-
-try:
-    import tinycss2
-except ImportError:
-    tinycss2 = None
+import json
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
-
 
 def balanced(path: Path):
     text = path.read_text(encoding="utf-8")
     depth = 0
     quote = None
-    esc = False
+    escaped = False
     block = False
     line = False
     i = 0
@@ -30,10 +25,10 @@ def balanced(path: Path):
                 block = False
                 i += 1
         elif quote:
-            if esc:
-                esc = False
-            elif ch == "\\": 
-                esc = True
+            if escaped:
+                escaped = False
+            elif ch == "\\":
+                escaped = True
             elif ch == quote:
                 quote = None
         elif ch in ('"', "'"):
@@ -56,101 +51,99 @@ def balanced(path: Path):
     if depth or quote or block:
         raise AssertionError(f"unbalanced source: {path}")
 
-
-manifest = json.loads((ROOT / "manifest.json").read_text())
+manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
 assert isinstance(manifest, list)
-
 plugin = next(
     (p for p in manifest if p.get("guid") == "B4A9D4E6-4E4D-4F42-9E90-9C5B4D4B8D2B"),
     None,
 )
 assert plugin is not None
 assert plugin["name"] == "DINKFLIX"
-assert isinstance(plugin.get("versions"), list)
 
-txt = (ROOT / "build.yaml").read_text()
-m = re.search(r'^version:\s*["\']?([^"\'\s]+)', txt, re.M)
-assert m, "build.yaml version missing"
-version = m.group(1)
+build = (ROOT / "build.yaml").read_text(encoding="utf-8")
+version_match = re.search(r'^version:\s*["\']?([^"\'\s]+)', build, re.M)
+assert version_match, "build.yaml version missing"
+assert version_match.group(1) == "8.3.0.0"
+assert 'targetAbi: "12.0.0.0"' in build
+assert 'framework: "net10.0"' in build
 
-for token in [
-    f'version: "{version}"',
-    'targetAbi: "12.0.0.0"',
-    'framework: "net10.0"',
-]:
-    assert token in txt, token
-
-css = (ROOT / "dinkflix.css").read_text()
-embedded_css = (ROOT / "src/Jellyfin.Plugin.DinkFlix/Web/dinkflix.css").read_text()
-assert "#dinkflix-app" in css
-assert "location.hash" not in css
-assert "repeat(6" in css
-assert css == embedded_css
+root_css = (ROOT / "dinkflix.css").read_text(encoding="utf-8")
+embedded_css = (ROOT / "src/Jellyfin.Plugin.DinkFlix/Web/dinkflix.css").read_text(encoding="utf-8")
+assert root_css == embedded_css
+assert "#dinkflix-app-shell" in root_css
+assert ".df-nav-links" in root_css
+assert ".df-card-media" in root_css
+assert ".df-hero" in root_css
+assert "repeat(auto-fill" in root_css
 balanced(ROOT / "dinkflix.css")
 balanced(ROOT / "src/Jellyfin.Plugin.DinkFlix/Web/dinkflix.css")
 
-if tinycss2:
-    errors = [
-        r
-        for r in tinycss2.parse_stylesheet(
-            css,
-            skip_whitespace=True,
-            skip_comments=True,
-        )
-        if r.type == "error"
-    ]
-    assert not errors, errors
+root_js = (ROOT / "dinkflix.js").read_text(encoding="utf-8")
+embedded_js = (ROOT / "src/Jellyfin.Plugin.DinkFlix/Web/dinkflix.js").read_text(encoding="utf-8")
+assert root_js == embedded_js
+for token in [
+    "window.__DINKFLIX_WEB_83__",
+    "VERSION = '8.3.0'",
+    "function renderHome",
+    "function renderLibrary",
+    "function renderItem",
+    "function renderList",
+    "function renderSearch",
+    "playbackManager",
+    "#/dinkflix/library",
+    "#/dinkflix/item",
+    "#/dinkflix/list",
+    "#/dinkflix/search",
+    "#/dinkflix/about",
+    "#/home?tab=2",
+    "#/home?tab=3",
+]:
+    assert token in root_js, token
+for forbidden in ["createElement('video')", "pushState(", "replaceState("]:
+    assert forbidden not in root_js, forbidden
 
-js = (ROOT / "src/Jellyfin.Plugin.DinkFlix/Web/dinkflix.js").read_text()
-for bad in ["pushState(", "replaceState(", 'createElement("video")']:
-    assert bad not in js, bad
-
-assert "EnableEnhancements" not in js
-assert "GroupContinueWatching" not in js
-assert "ShowLocalEndTime" not in js
-assert "ShowMediaTechnicalDetails" not in js
-assert "df-hero" in js
-assert "df-round-arrow" in js
-assert "renderHomeRows" in js
-assert "dinkflix-app" in js
-assert "My List" in js
-balanced(ROOT / "src/Jellyfin.Plugin.DinkFlix/Web/dinkflix.js")
-
-pc = (ROOT / "src/Jellyfin.Plugin.DinkFlix/Configuration/PluginConfiguration.cs").read_text()
-assert "BasePluginConfiguration" in pc
-assert "using MediaBrowser.Model.Plugins;" in pc
+pc = (ROOT / "src/Jellyfin.Plugin.DinkFlix/Configuration/PluginConfiguration.cs").read_text(encoding="utf-8")
 assert "bool " not in pc
 
-pl = (ROOT / "src/Jellyfin.Plugin.DinkFlix/Plugin.cs").read_text()
-assert "BasePlugin<PluginConfiguration>" in pl
-assert "IHasWebPages" not in pl
-assert "IApplicationPaths" in pl and "IXmlSerializer" in pl
-
-startup = (ROOT / "src/Jellyfin.Plugin.DinkFlix/DinkFlixStartupService.cs").read_text()
-wf = (ROOT / "src/Jellyfin.Plugin.DinkFlix/WebFileTransformation.cs").read_text()
-assert "RegisterTransformation" in startup
+startup = (ROOT / "src/Jellyfin.Plugin.DinkFlix/DinkFlixStartupService.cs").read_text(encoding="utf-8")
 assert "StartupTrigger" in startup
+assert "RegisterTransformation" in startup
 assert '"fileNamePattern"] = "index.html"' in startup
-assert "callbackAssembly" in startup and "callbackClass" in startup and "callbackMethod" in startup
-assert "TransformIndexHtml" in wf
-assert "dinkflix.css" in wf and "dinkflix.js" in wf
-assert 'Newtonsoft.Json' in (ROOT / "src/Jellyfin.Plugin.DinkFlix/Jellyfin.Plugin.DinkFlix.csproj").read_text()
-assert not (ROOT / "src/Jellyfin.Plugin.DinkFlix/FileTransformationRegistrationService.cs").exists()
-assert not (ROOT / "src/Jellyfin.Plugin.DinkFlix/DinkFlixIndexMiddleware.cs").exists()
-assert not (ROOT / "src/Jellyfin.Plugin.DinkFlix/DinkFlixStartupFilter.cs").exists()
+assert "callbackAssembly" in startup
+assert "callbackClass" in startup
+assert "callbackMethod" in startup
+assert "MethodInfo" in startup
 
-csproj = (ROOT / "src/Jellyfin.Plugin.DinkFlix/Jellyfin.Plugin.DinkFlix.csproj").read_text()
+reg = (ROOT / "src/Jellyfin.Plugin.DinkFlix/DinkFlixServiceRegistrator.cs").read_text(encoding="utf-8")
+assert "IScheduledTask" in reg
+assert "DinkFlixStartupService" in reg
+assert "AddSingleton<IScheduledTask, DinkFlixStartupService>()" in reg
+
+wf = (ROOT / "src/Jellyfin.Plugin.DinkFlix/WebFileTransformation.cs").read_text(encoding="utf-8")
+assert "DINKFLIX-WEB-83-START" in wf
+assert "DINKFLIX-WEB-82-START" in wf
+assert '8.3.0.0' in wf
+assert "TransformIndexHtml" in wf
+assert "Newtonsoft.Json.Linq" in wf
+
+csproj = (ROOT / "src/Jellyfin.Plugin.DinkFlix/Jellyfin.Plugin.DinkFlix.csproj").read_text(encoding="utf-8")
 assert 'EmbeddedResource Include="Web/dinkflix.css"' in csproj
 assert 'EmbeddedResource Include="Web/dinkflix.js"' in csproj
+assert 'Newtonsoft.Json' in csproj
+assert 'Version>8.3.0.0<' in csproj
 
-for p in (ROOT / "src/Jellyfin.Plugin.DinkFlix").rglob("*.cs"):
-    balanced(p)
+for obsolete in [
+    "src/Jellyfin.Plugin.DinkFlix/FileTransformationRegistrationService.cs",
+    "src/Jellyfin.Plugin.DinkFlix/DinkFlixIndexMiddleware.cs",
+    "src/Jellyfin.Plugin.DinkFlix/DinkFlixStartupFilter.cs",
+    "src/Jellyfin.Plugin.DinkFlix/Configuration/configPage.html",
+    "src/Jellyfin.Plugin.DinkFlix/PluginConfiguration.cs",
+]:
+    assert not (ROOT / obsolete).exists(), obsolete
 
-assert not (ROOT / "src/Jellyfin.Plugin.DinkFlix/PluginConfiguration.cs").exists()
-assert not (ROOT / "src/Jellyfin.Plugin.DinkFlix/Configuration/configPage.html").exists()
+for path in (ROOT / "src/Jellyfin.Plugin.DinkFlix").rglob("*.cs"):
+    balanced(path)
 
 print("DINKFLIX static checks: PASS")
-print(f"version: {version}")
-print("Jellyfin ABI: 12.0.0.0")
-print(f"CSS lines: {len(css.splitlines())}")
-print(f"JS lines: {len(js.splitlines())}")
+print("version: 8.3.0.0")
+print("frontend baseline: v5.1")

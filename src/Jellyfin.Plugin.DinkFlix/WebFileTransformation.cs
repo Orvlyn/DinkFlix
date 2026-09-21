@@ -8,9 +8,9 @@ namespace Jellyfin.Plugin.DinkFlix;
 /// </summary>
 public static class WebFileTransformation
 {
-    private const string StartMarker = "<!-- DINKFLIX-WEB-82-START -->";
-    private const string EndMarker = "<!-- DINKFLIX-WEB-82-END -->";
-    private const string FrontendVersion = "8.2.0.0";
+    private const string StartMarker = "<!-- DINKFLIX-WEB-83-START -->";
+    private const string EndMarker = "<!-- DINKFLIX-WEB-83-END -->";
+    private const string FrontendVersion = "8.3.0.0";
 
     public static string TransformIndexHtml(JObject input)
     {
@@ -86,6 +86,7 @@ public static class WebFileTransformation
         string[] starts =
         {
             StartMarker,
+            "<!-- DINKFLIX-WEB-82-START -->",
             "<!-- DINKFLIX-WEB-81-START -->",
             "<!-- DINKFLIX-WEB-80-START -->",
             "<!-- DINKFLIX-WEB-60-START -->",
@@ -98,6 +99,7 @@ public static class WebFileTransformation
         string[] ends =
         {
             EndMarker,
+            "<!-- DINKFLIX-WEB-82-END -->",
             "<!-- DINKFLIX-WEB-81-END -->",
             "<!-- DINKFLIX-WEB-80-END -->",
             "<!-- DINKFLIX-WEB-60-END -->",

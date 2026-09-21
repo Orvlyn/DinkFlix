@@ -84,9 +84,14 @@ public sealed class DinkFlixStartupService : IScheduledTask
                 ["callbackMethod"] = nameof(WebFileTransformation.TransformIndexHtml)
             };
 
-            pluginInterfaceType
-                .GetMethod("RegisterTransformation")
-                ?.Invoke(null, new object?[] { payload });
+            MethodInfo? registerMethod = pluginInterfaceType.GetMethod("RegisterTransformation");
+            if (registerMethod is null)
+            {
+                _logger.LogWarning("DINKFLIX found File Transformation but RegisterTransformation is unavailable.");
+                return;
+            }
+
+            registerMethod.Invoke(null, new object?[] { payload });
 
             _logger.LogInformation("DINKFLIX registered its index.html transformation with File Transformation.");
         }
