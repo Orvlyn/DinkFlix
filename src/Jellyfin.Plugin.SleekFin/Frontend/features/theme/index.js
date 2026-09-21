@@ -4,13 +4,17 @@ const WINDOW_EVENTS = ['hashchange', 'pageshow', 'popstate'];
 function createThemeFeature() {
   let started = false;
 
-  function isDashboardRoute() {
-    const route = (window.location.hash.slice(1) || window.location.pathname).split('?')[0].toLowerCase();
-    return route === '/dashboard' || route.startsWith('/dashboard/') || route === '/configurationpage' || route === '/metadata';
+  function getRoute() {
+    return (window.location.hash.slice(1) || window.location.pathname).split('?')[0].toLowerCase();
+  }
+
+  function isExcludedRoute() {
+    const route = getRoute();
+    return route === '/dashboard' || route.startsWith('/dashboard/') || route === '/configurationpage' || route.startsWith('/configurationpage/') || route === '/metadata' || route.startsWith('/metadata/') || route.startsWith('/video/') || route.startsWith('/playback/') || route.startsWith('/player/') || route.startsWith('/mypreferences') || route.startsWith('/login') || route.startsWith('/wizard');
   }
 
   function reconcile() {
-    document.documentElement.classList.toggle(ROOT_CLASS, !isDashboardRoute());
+    document.documentElement.classList.toggle(ROOT_CLASS, !isExcludedRoute());
   }
 
   function start() {
