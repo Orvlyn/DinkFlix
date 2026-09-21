@@ -1,0 +1,50 @@
+/* Final details corrections: keep the back control separate from action buttons and restore cast scrolling. */
+
+html.sleekfin-details-mounted #itemDetailPage[data-sleekfin-details] .sleekfin-details-stack {
+    padding-top: 68px;
+}
+
+html.sleekfin-details-mounted #itemDetailPage[data-sleekfin-details] .sleekfin-details-back {
+    left: var(--sleekfin-page-gutter) !important;
+    top: 20px !important;
+    z-index: 50 !important;
+}
+
+html.sleekfin-details-mounted #castCollapsible > [is="emby-scroller"] {
+    overflow: visible !important;
+    position: relative;
+}
+
+html.sleekfin-details-mounted #castCollapsible #castContent {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 16px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    transform: none !important;
+    width: 100% !important;
+}
+
+html.sleekfin-details-mounted #castCollapsible .card {
+    flex: 0 0 148px !important;
+    width: 148px !important;
+}
+
+html.sleekfin-details-mounted #castCollapsible .emby-scrollbuttons,
+html.sleekfin-details-mounted #castCollapsible .scrollButton {
+    display: flex !important;
+    pointer-events: auto !important;
+    z-index: 20 !important;
+}
+
+@media (max-width: 767px) {
+    html.sleekfin-details-mounted #itemDetailPage[data-sleekfin-details] .sleekfin-details-stack {
+        padding-top: 58px;
+    }
+    html.sleekfin-details-mounted #castCollapsible .card {
+        flex-basis: 132px !important;
+        width: 132px !important;
+    }
+}
