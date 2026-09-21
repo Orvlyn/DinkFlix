@@ -3,12 +3,12 @@
 (() => {
   'use strict';
 
-  if (window.__DINKFLIX_WEB_83__) {
+  if (window.__DINKFLIX_WEB_84__) {
     return;
   }
-  window.__DINKFLIX_WEB_83__ = true;
+  window.__DINKFLIX_WEB_84__ = true;
 
-  const VERSION = '8.3.0';
+  const VERSION = '8.4.0';
   const state = {
     user: null,
     userId: null,
@@ -241,20 +241,33 @@
 
   function getRoute() {
     const { path, params } = parseHash();
+    // Legacy DINKFLIX paths are migration-only.
     if (path === '/dinkflix/library') {
-      return { type: 'library', viewId: params.get('viewId') };
+      return { type: 'legacy-library', viewId: params.get('viewId') };
     }
     if (path === '/dinkflix/item') {
-      return { type: 'item', id: params.get('id') };
+      return { type: 'legacy-item', id: params.get('id') };
     }
     if (path === '/dinkflix/list') {
-      return { type: 'list' };
+      return { type: 'legacy-list' };
     }
     if (path === '/dinkflix/search') {
-      return { type: 'search', q: params.get('q') || '' };
+      return { type: 'legacy-search', q: params.get('q') || '' };
     }
     if (path === '/dinkflix/about') {
-      return { type: 'about' };
+      return { type: 'legacy-about' };
+    }
+    if (path === '/details' && params.get('df') === 'dinkflix') {
+      return { type: 'item', id: params.get('id') };
+    }
+    if ((path === '/movies' || path === '/tv' || path === '/tvshows') && params.get('df') === 'dinkflix') {
+      return { type: 'library', viewId: params.get('topParentId'), collectionType: params.get('collectionType') };
+    }
+    if (path === '/search' && params.get('df') === 'dinkflix') {
+      return { type: 'search', q: params.get('q') || '' };
+    }
+    if (path === '/home' && params.get('df') === 'dinkflix-list') {
+      return { type: 'list' };
     }
     if (path === '/home' && params.get('df') === 'library') {
       return { type: 'library', viewId: params.get('viewId') };
@@ -294,15 +307,17 @@
     if (path === '/home' && routeParams.df) {
       const df = routeParams.df;
       delete routeParams.df;
-      const routeMap = {
-        library: '/dinkflix/library',
-        item: '/dinkflix/item',
-        list: '/dinkflix/list',
-        search: '/dinkflix/search',
-        about: '/dinkflix/about'
-      };
-      if (routeMap[df]) {
-        path = routeMap[df];
+      if (df === 'item') {
+        path = '/details';
+        routeParams.df = 'dinkflix';
+      } else if (df === 'list') {
+        routeParams.tab = 1;
+        routeParams.df = 'dinkflix-list';
+      } else if (df === 'search') {
+        path = '/search';
+        routeParams.df = 'dinkflix';
+      } else if (df === 'about') {
+        routeParams.df = 'about';
       }
     }
     const query = new URLSearchParams();
@@ -344,7 +359,14 @@
   }
 
   function viewHref(view) {
-    return `#/dinkflix/library?viewId=${encodeURIComponent(view.Id)}`;
+    const type = String(view?.CollectionType || '').toLowerCase();
+    const path = type === 'tvshows' ? '/tv' : '/movies';
+    const params = new URLSearchParams({
+      topParentId: view.Id,
+      collectionType: view.CollectionType || '',
+      df: 'dinkflix'
+    });
+    return `#${path}?${params.toString()}`;
   }
 
   const icons = {
@@ -528,9 +550,16 @@
   }
 
   function navigateToView(view) {
-    if (view?.Id) {
-      setHash('/home', { df: 'library', viewId: view.Id });
+    if (!view?.Id) {
+      return;
     }
+    const type = String(view.CollectionType || '').toLowerCase();
+    const path = type === 'tvshows' ? '/tv' : '/movies';
+    setHash(path, {
+      topParentId: view.Id,
+      collectionType: view.CollectionType || '',
+      df: 'dinkflix'
+    });
   }
 
   function avatar() {
@@ -744,7 +773,7 @@
       anchor.addEventListener('click', (event) => {
         event.preventDefault();
         event.stopPropagation();
-        setHash('/home', { df: 'item', id: anchor.dataset.dfItem });
+        setHash('/details', { df: 'dinkflix', id: anchor.dataset.dfItem, serverId: state.serverId });
       });
     });
     root.querySelectorAll('[data-df-menu]').forEach((button) => {
@@ -779,7 +808,7 @@
       const items = await getItems({ IncludeItemTypes: 'Movie,Series', Limit: 100, SortBy: 'DateCreated', SortOrder: 'Descending' });
       if (items.length) {
         rememberItems(items);
-        setHash('/home', { df: 'item', id: items[Math.floor(Math.random() * items.length)].Id });
+        setHash('/details', { df: 'dinkflix', id: items[Math.floor(Math.random() * items.length)].Id, serverId: state.serverId });
       }
     } catch {
       toast('Could not choose a random title.');
