@@ -21,7 +21,6 @@ const state = {
   reconcileTimer: 0,
   started: false,
   stopWatching: null,
-  mediaObserver: null,
 };
 
 function finishLoading() {
@@ -46,29 +45,8 @@ function isHomeRoute() {
 
 function findHost() {
   if (!isHomeRoute()) return null;
-  return document.querySelector('#indexPage #homeTab, #indexPage .homePage');
-}
-
-function hideMyMedia() {
-  const roots = document.querySelectorAll('#indexPage .sections, #indexPage .section, #indexPage .verticalSection');
-  roots.forEach((section) => {
-    if (section.closest('.sleekfin-hero')) return;
-    const text = (section.querySelector('.sectionTitle, h2, h3, .sectionTitleContainer')?.textContent || '').trim().replace(/\s+/g, ' ').toLowerCase();
-    if (text === 'my media' || text.startsWith('my media ')) {
-      section.classList.add('dinkflix-hidden-my-media');
-    }
-  });
-}
-
-function startMyMediaHider() {
-  hideMyMedia();
-  state.mediaObserver = new MutationObserver(hideMyMedia);
-  state.mediaObserver.observe(document.body, { childList: true, subtree: true });
-}
-
-function stopMyMediaHider() {
-  state.mediaObserver?.disconnect();
-  state.mediaObserver = null;
+  const candidates = document.querySelectorAll('#indexPage #homeTab .sections, #indexPage .homePage .sections');
+  return Array.from(candidates).find((element) => dom.isVisible(element)) || null;
 }
 
 function removeMount() {
@@ -88,7 +66,7 @@ function unmount() {
 
 function createRoot(host) {
   const root = dom.element('<div is="emby-itemscontainer" class="sleekfin-hero itemsContainer" data-contextmenu="false" data-multiselect="false" data-state="loading"></div>');
-  host.insertBefore(root, host.firstChild);
+  host.parentNode.insertBefore(root, host);
   state.mount = root;
   finishLoading();
   if (window.CustomElements && typeof window.CustomElements.upgradeSubtree === 'function') {
@@ -149,7 +127,7 @@ function reconcile() {
     removeMount();
     return;
   }
-  if (state.mount && dom.isConnected(state.mount) && state.mount.parentNode === host) return;
+  if (state.mount && dom.isConnected(state.mount) && state.mount.nextElementSibling === host) return;
   if (state.failedHost === host) return;
   unmount();
   mount(host);
@@ -179,7 +157,6 @@ function start() {
   state.started = true;
   state.stopWatching = dom.watchSpa(scheduleReconcile, { events: WINDOW_EVENTS, viewshow: true });
   window.addEventListener(SETTINGS_EVENT, reloadSettings);
-  startMyMediaHider();
   scheduleReconcile();
 }
 
@@ -190,7 +167,6 @@ function stop() {
   state.stopWatching?.();
   state.stopWatching = null;
   window.removeEventListener(SETTINGS_EVENT, reloadSettings);
-  stopMyMediaHider();
   unmount();
   finishLoading();
 }
