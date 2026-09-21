@@ -1101,13 +1101,87 @@
     }
   }
 
+  async function getContinueWatching() {
+    const [episodes, movies] = await Promise.all([
+      getItems({
+        IncludeItemTypes: 'Episode',
+        IsResumable: true,
+        SortBy: 'DatePlayed',
+        SortOrder: 'Descending',
+        Limit: 60
+      }),
+      getItems({
+        IncludeItemTypes: 'Movie',
+        IsResumable: true,
+        SortBy: 'DatePlayed',
+        SortOrder: 'Descending',
+        Limit: 20
+      })
+    ]);
+
+    const bySeries = new Map();
+    episodes.forEach((episode) => {
+      if (episode?.SeriesId && !bySeries.has(episode.SeriesId)) {
+        bySeries.set(episode.SeriesId, episode);
+      }
+    });
+
+    const seriesIds = [...bySeries.keys()];
+    let series = [];
+    if (seriesIds.length) {
+      series = await getItems({
+        Ids: seriesIds.join(','),
+        IncludeItemTypes: 'Series',
+        Limit: seriesIds.length,
+        SortBy: 'SortName',
+        SortOrder: 'Ascending'
+      }).catch(() => []);
+    }
+
+    const result = [];
+    series.forEach((show) => {
+      const episode = bySeries.get(show.Id);
+      if (!episode) {
+        return;
+      }
+      const remainingTicks = Math.max(
+        0,
+        Number(episode.RunTimeTicks || 0) - Number(episode.UserData?.PlaybackPositionTicks || 0)
+      );
+      const display = {
+        ...show,
+        __dfResumeEpisodeId: episode.Id,
+        __dfContinueLabel: 'S' + String(episode.ParentIndexNumber || 0).padStart(2, '0')
+          + ' · E' + String(episode.IndexNumber || 0).padStart(2, '0')
+          + ' · ' + (humanMinutes(remainingTicks) || 'Resume') + ' left',
+        UserData: episode.UserData || show.UserData
+      };
+      state.cardData.set(show.Id, display);
+      state.cardData.set(episode.Id, episode);
+      result.push(display);
+    });
+
+    movies.forEach((movie) => {
+      const remainingTicks = Math.max(
+        0,
+        Number(movie.RunTimeTicks || 0) - Number(movie.UserData?.PlaybackPositionTicks || 0)
+      );
+      result.push({
+        ...movie,
+        __dfContinueLabel: (humanMinutes(remainingTicks) || 'Resume') + ' left'
+      });
+    });
+
+    return result.slice(0, 40);
+  }
+
   async function renderHome() {
     const shell = ensureShell();
     shell.innerHTML = '<div class="df-home-loading"><div class="df-loading-line"></div><div class="df-loading-line short"></div></div>';
     try {
       const results = await Promise.allSettled([
         getItems({ IncludeItemTypes: 'Movie,Series', SortBy: 'DateCreated', SortOrder: 'Descending', Limit: 24 }),
-        getItems({ IncludeItemTypes: 'Movie,Episode', IsResumable: true, SortBy: 'DatePlayed', SortOrder: 'Descending', Limit: 16 }),
+        getContinueWatching(),
         getItems({ IncludeItemTypes: 'Movie,Series', IsPlayed: true, SortBy: 'DatePlayed', SortOrder: 'Descending', Limit: 16 }),
         getItems({ IncludeItemTypes: 'Movie,Series', IsFavorite: true, SortBy: 'SortName', SortOrder: 'Ascending', Limit: 16 }),
         getItems({ IncludeItemTypes: 'Movie', SortBy: 'DateCreated', SortOrder: 'Descending', Limit: 16 }),
@@ -1266,6 +1340,7 @@
       return;
     }
     state.cardData.set(item.Id, item);
+    document.title = (item.Name || 'DINKFLIX') + ' — DINKFLIX';
     const kind = item.Type === 'Series' ? 'TV Series' : item.Type === 'Season' ? 'Season' : item.Type === 'Episode' ? 'Episode' : 'Movie';
     const cast = (item.People || []).filter((person) => person?.PersonId).slice(0, 10);
     const background = backdropUrl(item, 2400);
@@ -1278,7 +1353,11 @@
       childItems = await getItems({ ParentId: item.Id, IncludeItemTypes: 'Episode', Limit: 200, SortBy: 'IndexNumber', SortOrder: 'Ascending', Fields: 'PrimaryImageAspectRatio,Overview,UserData,ProductionYear,PremiereDate,IndexNumber,ParentIndexNumber,RunTimeTicks,ImageTags,BackdropImageTags,Width,Height,VideoRange,VideoRangeType,CommunityRating,OfficialRating,Tags,Genres' }).catch(() => []);
     }
     rememberItems(childItems);
-    const children = item.Type === 'Season' ? `<section class="df-detail-section"><div class="df-section-head"><h2 class="df-section-title">Episodes</h2></div><div class="df-detail-episodes">${childItems.map((episode) => `<button class="df-episode-row" type="button" data-df-episode="${esc(episode.Id)}"><span class="df-episode-number">${esc(String(episode.IndexNumber ?? '').padStart(2, '0'))}</span><span class="df-episode-copy"><strong>${esc(episode.Name || 'Episode')}</strong><small>${esc(episode.Overview || '')}</small></span><span class="df-episode-time">${esc(humanMinutes(episode.RunTimeTicks))}</span></button>`).join('')}</div></section>` : item.Type === 'Series' ? `<section class="df-detail-section"><div class="df-section-head"><h2 class="df-section-title">Seasons</h2></div><div class="df-row">${childItems.map(card).join('')}</div></section>` : '';
+    const children = item.Type === 'Season'
+      ? section('Episodes', childItems)
+      : item.Type === 'Series'
+        ? section('Seasons', childItems)
+        : '';
     shell.innerHTML = `<article class="df-detail"><div class="df-detail-bg" style="background-image:url('${esc(background)}')"></div><div class="df-detail-vignette"></div><div class="df-detail-content"><div class="df-detail-poster"><img loading="eager" src="${esc(poster)}" alt="${esc(item.Name)}"></div><div><div class="df-kicker">${esc(kind)}</div><h1 class="df-detail-title">${esc(item.Name)}</h1><div class="df-detail-meta"><span>${esc(fmtYear(item.ProductionYear || item.PremiereDate || item.DateCreated))}</span>${humanMinutes(item.RunTimeTicks) ? `<span>•</span><span>${humanMinutes(item.RunTimeTicks)}</span>` : ''}${badgeHtml(item)}</div><div class="df-detail-tags">${(item.Genres || []).slice(0, 5).map((genre) => `<span class="df-badge tag">${esc(genre)}</span>`).join('')}${tagHtml(item)}</div><p class="df-detail-overview">${esc(item.Overview || 'No overview available.')}</p><div class="df-actions"><button class="df-button df-button-primary" id="df-detail-play" type="button">${svg('play')} ${item.UserData?.PlaybackPositionTicks ? 'Resume' : 'Play'}</button><button class="df-button df-button-secondary" id="df-detail-list" type="button">${item.UserData?.IsFavorite ? '✓ In My List' : '＋ My List'}</button><button class="df-button df-button-secondary" id="df-detail-more" type="button">${svg('dots')} More</button></div>${children}${cast.length ? `<div class="df-detail-cast"><h3>Cast</h3><div class="df-cast-row">${cast.map((person) => `<div class="df-cast"><img loading="lazy" src="${esc(person.PrimaryImageTag ? `${baseUrl()}/Persons/${encodeURIComponent(person.PersonId)}/Images/Primary?tag=${encodeURIComponent(person.PrimaryImageTag)}&maxWidth=168` : '')}" alt="${esc(person.Name || '')}"><div class="df-cast-name">${esc(person.Name || '')}</div></div>`).join('')}</div></div>` : ''}</div></div></article>`;
     shell.querySelector('#df-detail-play').addEventListener('click', () => playItem(item));
     shell.querySelector('#df-detail-list').addEventListener('click', async () => {
@@ -1458,6 +1537,11 @@
       renderAbout();
     } else if (route.type === 'playback') {
       autoPlayFallback();
+    } else {
+      // Let Jellyfin render every native/utility route it owns.
+      // This is essential for Requests, Bookmarks, Calendar, Profile,
+      // Preferences, Dashboard, native Search, and the native player.
+      fallbackToNative();
     }
   }
 
