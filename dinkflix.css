@@ -51,6 +51,113 @@ body.df-df-native-public{background:#07090c!important}body.df-df-native-public .
 @media (max-width:1180px){body{min-width:0}.df-nav-links{max-width:44vw}.df-nav-link{font-size:12px;padding:0 8px}.df-nav-link.df-active:after{left:8px;right:8px}:root{--df-card-w:214px}.df-detail-content{grid-template-columns:210px minmax(0,1fr);gap:26px}.df-about-grid{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 
+/* DINKFLIX 8.5: native Jellyfin chrome, direct-play bridge, and theme tokens. */
+:root{
+  --accentColor:var(--df-accent);
+  --accentHoverColor:#24ffd1;
+  --btnSubmitColor:var(--df-accent);
+  --btnSubmitBorderColor:var(--df-accent);
+  --btnPlayColor:var(--df-accent);
+  --btnPlayBorderColor:var(--df-accent);
+  --primary-color:var(--df-accent);
+  --themePrimaryColor:var(--df-accent);
+  --headerColor:#0b1015;
+  --headerBackground:rgba(7,9,12,.92);
+  --selectorBackgroundColor:#10171d;
+  --drawerColor:#0c1217;
+  --textColor:var(--df-text);
+  --dimTextColor:var(--df-text-3);
+  --fullContrastColor:#fff;
+  --zeroContrastColor:#03100c;
+  --borderColor:rgba(255,255,255,.10);
+  --lighterBorderColor:rgba(255,255,255,.14);
+  --jf-palette-primary-main:var(--df-accent);
+  --jf-palette-primary-light:#24ffd1;
+  --jf-palette-primary-dark:#00cfa2;
+  --jf-palette-primary-contrastText:#03100c;
+  --jf-palette-secondary-main:var(--df-accent);
+  --jf-palette-action-hover:rgba(0,255,198,.10);
+  --jf-palette-action-selected:rgba(0,255,198,.14);
+  --jf-palette-action-focus:rgba(0,255,198,.16);
+  --jf-palette-primary-mainChannel:0 255 198;
+  --jf-palette-secondary-mainChannel:0 255 198;
+}
+.df-page{
+  padding-top:calc(var(--df-nav-h) + 34px);
+}
+html.df-dinkflix-launching::after{
+  content:"Starting playback…";
+  position:fixed;
+  inset:0;
+  z-index:2147483646;
+  display:grid;
+  place-items:center;
+  background:#05070a;
+  color:#eef4f4;
+  font-size:15px;
+  font-weight:600;
+  letter-spacing:.04em;
+  pointer-events:all;
+}
+body.df-df-native-public :is(.MuiButton-containedPrimary,.MuiButton-colorPrimary,.button-submit,.button-submit-color,.btnSubmit){
+  background:var(--df-accent)!important;
+  border-color:var(--df-accent)!important;
+  color:#03100c!important;
+}
+body.df-df-native-public :is(.MuiButton-textPrimary,.button-accent,.button-link):not(:disabled){
+  color:var(--df-accent)!important;
+}
+body.df-df-native-public :is(.MuiOutlinedInput-root,.MuiInputBase-root):focus-within{
+  outline-color:rgba(0,255,198,.45);
+  border-color:var(--df-accent)!important;
+}
+body.df-df-native-public :is(.MuiCheckbox-colorPrimary,.MuiRadio-colorPrimary,.MuiSwitch-colorPrimary,.MuiSlider-root){
+  color:var(--df-accent)!important;
+}
+body.df-df-native-public :is(.MuiTabs-indicator,.MuiLinearProgress-bar,.MuiCircularProgress-root){
+  background-color:var(--df-accent)!important;
+  color:var(--df-accent)!important;
+}
+body.df-df-native-playback .skinHeader-withBackground.osdHeader{
+  background:linear-gradient(180deg,rgba(3,5,7,.96),rgba(3,5,7,.54) 58%,transparent)!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+body.df-df-native-playback .videoOsdBottom.videoOsdBottom-maincontrols{
+  background:linear-gradient(0deg,rgba(3,5,7,.97),rgba(3,5,7,.66) 48%,transparent)!important;
+}
+body.df-df-native-playback :is(.videoOsdBottom button,.osdControls button,.videoOsdBottom .paper-icon-button-light,.videoOsdBottom .button-flat){
+  color:#f0f4f5!important;
+}
+body.df-df-native-playback :is(.videoOsdBottom button:hover,.osdControls button:hover,.videoOsdBottom .paper-icon-button-light:hover,.videoOsdBottom .button-flat:hover){
+  color:var(--df-accent)!important;
+  background:rgba(0,255,198,.08)!important;
+}
+body.df-df-native-playback .videoOsdBottom.videoOsdBottom-maincontrols .btnPause{
+  color:var(--df-accent)!important;
+}
+body.df-df-native-playback :is(input[type="range"]::-webkit-slider-thumb,.progressring-on,.itemLinearProgress .MuiLinearProgress-bar){
+  accent-color:var(--df-accent);
+}
+body.df-df-native-playback :is(.btnSkipIntro,.btnSkip){
+  background:rgba(0,255,198,.12)!important;
+  border:1px solid rgba(0,255,198,.28)!important;
+  color:var(--df-accent)!important;
+  border-radius:9px!important;
+}
+body.df-df-native-playback :is(.MuiIconButton-root,.paper-icon-button-light):hover{
+  color:var(--df-accent)!important;
+}
+body.df-df-native-public .MuiAppBar-root{
+  background:rgba(9,14,18,.92)!important;
+  border-bottom:1px solid rgba(255,255,255,.08)!important;
+  box-shadow:0 10px 30px rgba(0,0,0,.18)!important;
+}
+body.df-df-native-public :is(.MuiPaper-root,.MuiCard-root){
+  background:var(--selectorBackgroundColor);
+  color:var(--df-text);
+}
+
 /* DINKFLIX 8.4: native-route integration, six-card rows, and first-load cover. */
 html:not(.df-dinkflix-boot-ready)::before{
   content:"DINKFLIX";
@@ -67,7 +174,7 @@ html:not(.df-dinkflix-boot-ready)::before{
   pointer-events:all;
 }
 #dinkflix-nav{
-  position:fixed!important;
+  position:absolute!important;
   top:0!important;
   left:0!important;
   right:0!important;
