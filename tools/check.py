@@ -81,10 +81,14 @@ for token in [
     assert token in txt, token
 
 css = (ROOT / "dinkflix.css").read_text()
+embedded_css = (ROOT / "src/Jellyfin.Plugin.DinkFlix/Web/dinkflix.css").read_text()
 assert "#dinkflix-app" in css
 assert "location.hash" not in css
 assert "--jf-palette-primary-main" in css
+assert "repeat(6" in css
+assert css == embedded_css
 balanced(ROOT / "dinkflix.css")
+balanced(ROOT / "src/Jellyfin.Plugin.DinkFlix/Web/dinkflix.css")
 
 if tinycss2:
     errors = [
@@ -131,7 +135,8 @@ assert 'app.UseMiddleware<DinkFlixIndexMiddleware>()' in (
 ).read_text()
 
 csproj = (ROOT / "src/Jellyfin.Plugin.DinkFlix/Jellyfin.Plugin.DinkFlix.csproj").read_text()
-assert 'EmbeddedResource Include="../../dinkflix.css"' in csproj
+assert 'EmbeddedResource Include="Web/dinkflix.css"' in csproj
+assert 'EmbeddedResource Include="Web/dinkflix.js"' in csproj
 
 for p in (ROOT / "src/Jellyfin.Plugin.DinkFlix").rglob("*.cs"):
     balanced(p)
