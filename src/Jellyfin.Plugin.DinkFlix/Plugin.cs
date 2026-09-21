@@ -22,5 +22,5 @@ public sealed class Plugin : BasePlugin<PluginConfiguration>
     public override Guid Id => PluginId;
 
     public override string Description =>
-        "DINKFLIX theme and frontend enhancements. Everything is always enabled.";
+        "Standalone DINKFLIX theme and frontend experience. All DINKFLIX features are always enabled.";
 }
