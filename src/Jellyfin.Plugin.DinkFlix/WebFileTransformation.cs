@@ -4,31 +4,24 @@ using Newtonsoft.Json.Linq;
 namespace Jellyfin.Plugin.DinkFlix;
 
 /// <summary>
-/// Transforms Jellyfin Web's index.html by injecting the DINKFLIX frontend.
+/// Transforms Jellyfin Web's index.html by injecting the DINKFLIX native visual layer.
 /// </summary>
 public static class WebFileTransformation
 {
-    private const string StartMarker = "<!-- DINKFLIX-WEB-85-START -->";
-    private const string EndMarker = "<!-- DINKFLIX-WEB-85-END -->";
-    private const string FrontendVersion = "8.5.0.0";
+    private const string StartMarker = "<!-- DINKFLIX-WEB-90-START -->";
+    private const string EndMarker = "<!-- DINKFLIX-WEB-90-END -->";
+    private const string FrontendVersion = "9.0.0.0";
 
     public static string TransformIndexHtml(JObject input)
     {
         string contents = input["contents"]?.Value<string>() ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(contents))
-        {
-            return contents;
-        }
+        if (string.IsNullOrWhiteSpace(contents)) return contents;
 
         try
         {
             string cleaned = RemoveExistingBlocks(contents);
             int headIndex = cleaned.IndexOf("</head>", StringComparison.OrdinalIgnoreCase);
-            if (headIndex < 0)
-            {
-                return contents;
-            }
-
+            if (headIndex < 0) return contents;
             return cleaned.Insert(headIndex, BuildInjection());
         }
         catch
@@ -71,9 +64,7 @@ public static class WebFileTransformation
             .FirstOrDefault(name => name.EndsWith($".Web.{fileName}", StringComparison.OrdinalIgnoreCase));
 
         if (resourceName is null)
-        {
             throw new InvalidOperationException($"Embedded DINKFLIX resource not found: {fileName}");
-        }
 
         using Stream stream = assembly.GetManifestResourceStream(resourceName)
             ?? throw new InvalidOperationException($"Unable to open embedded resource: {resourceName}");
@@ -83,43 +74,19 @@ public static class WebFileTransformation
 
     private static string RemoveExistingBlocks(string input)
     {
-        string[] starts =
+        string[] versions = { "90", "85", "82", "81", "80", "60", "52", "51" };
+        foreach (string version in versions)
         {
-            StartMarker,
-            "<!-- DINKFLIX-WEB-82-START -->",
-            "<!-- DINKFLIX-WEB-81-START -->",
-            "<!-- DINKFLIX-WEB-80-START -->",
-            "<!-- DINKFLIX-WEB-60-START -->",
-            "<!-- DINKFLIX-WEB-52-START -->",
-            "<!-- DINKFLIX-WEB-51-START -->",
-            "<!-- DINKFLIX-WEB-4:START -->",
-            "<!-- DINKFLIX-WEB-3:START -->"
-        };
-
-        string[] ends =
-        {
-            EndMarker,
-            "<!-- DINKFLIX-WEB-82-END -->",
-            "<!-- DINKFLIX-WEB-81-END -->",
-            "<!-- DINKFLIX-WEB-80-END -->",
-            "<!-- DINKFLIX-WEB-60-END -->",
-            "<!-- DINKFLIX-WEB-52-END -->",
-            "<!-- DINKFLIX-WEB-51-END -->",
-            "<!-- DINKFLIX-WEB-4:END -->",
-            "<!-- DINKFLIX-WEB-3:END -->"
-        };
-
-        for (int index = 0; index < starts.Length; index++)
-        {
-            int start = input.IndexOf(starts[index], StringComparison.Ordinal);
-            int end = input.IndexOf(ends[index], StringComparison.Ordinal);
+            string startMarker = $"<!-- DINKFLIX-WEB-{version}-START -->";
+            string endMarker = $"<!-- DINKFLIX-WEB-{version}-END -->";
+            int start = input.IndexOf(startMarker, StringComparison.Ordinal);
+            int end = input.IndexOf(endMarker, StringComparison.Ordinal);
             if (start >= 0 && end > start)
             {
-                end += ends[index].Length;
+                end += endMarker.Length;
                 input = input.Remove(start, end - start);
             }
         }
-
         return input;
     }
 }
