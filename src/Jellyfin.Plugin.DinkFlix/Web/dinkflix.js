@@ -3,13 +3,13 @@
 (function () {
   'use strict';
 
-  if (window.__DINKFLIX_WEB_80__) {
+  if (window.__DINKFLIX_WEB_810__) {
     return;
   }
   window.__DINKFLIX_WEB_60__ = true;
 
-  var VERSION = '8.0.0.0';
-  var PLUGIN_ID = '9b8e4d39-6a4c-4b5d-b6aa-d2b1c4f3c9e8';
+  var VERSION = '8.1.0.0';
+  var PLUGIN_ID = 'B4A9D4E6-4E4D-4F42-9E90-9C5B4D4B8D2B';
   var state = {
     user: null,
     userId: '',
@@ -1018,6 +1018,10 @@
     } else if (item.Type === 'Season') {
       details.episodes = await getItems({ ParentId: item.Id, IncludeItemTypes: 'Episode', SortBy: 'IndexNumber', SortOrder: 'Ascending', Limit: 300, Fields: fields() }).catch(function () { return []; });
     }
+    if (item.ProviderIds && item.ProviderIds.Tmdb) {
+      var tmdbType = item.Type === 'Series' ? 'tv' : 'movie';
+      details.providers = await apiGet('/DinkFlix/TMDB/WatchProviders/' + encodeURIComponent(item.ProviderIds.Tmdb) + '?type=' + encodeURIComponent(tmdbType) + '&region=AU').catch(function () { return null; });
+    }
     if (item.Type === 'Movie' || item.Type === 'Series') {
       var genres = Array.isArray(item.Genres) ? item.Genres.slice(0, 2) : [];
       if (genres.length) {
@@ -1442,55 +1446,6 @@
     });
   }
 
-
-  function isNativeLibraryRoute() {
-    var path = parseHash().path;
-    return path === '/movies' || path === '/tv' || path === '/tvshows';
-  }
-
-  async function decorateNativeLibraryCards() {
-    if (!isNativeLibraryRoute()) {
-      return;
-    }
-
-    var cards = Array.from(document.querySelectorAll('.itemsContainer .card[data-id], .itemsContainer .card[data-item-id]'));
-    if (!cards.length) {
-      return;
-    }
-
-    for (var i = 0; i < cards.length; i++) {
-      var card = cards[i];
-      if (card.closest('#dinkflix-app, #dinkflix-nav')) {
-        continue;
-      }
-
-      var id = card.getAttribute('data-id') || card.getAttribute('data-item-id');
-      if (!id || card.querySelector('.df-native-badges')) {
-        continue;
-      }
-
-      var item = await getItem(id);
-      if (!item) {
-        continue;
-      }
-
-      var image = card.querySelector('.cardImageContainer');
-      if (!image) {
-        continue;
-      }
-
-      image.style.position = image.style.position || 'relative';
-
-      var badges = document.createElement('div');
-      badges.className = 'df-native-badges';
-      badges.innerHTML = coreBadges(item);
-
-      if (badges.childElementCount) {
-        image.appendChild(badges);
-      }
-    }
-  }
-
   function nativeRouteReadyDelay() {
     setTimeout(function () {
       markNativeReady();
@@ -1544,14 +1499,6 @@
       state.nav?.remove();
       state.nav = null;
     }
-    if (isNativeLibraryRoute()) {
-      setTimeout(function () {
-        decorateNativeLibraryCards().catch(function (error) {
-          console.debug('[DINKFLIX] Native library badge pass failed.', error);
-        });
-      }, 650);
-    }
-
     if (info.type === 'playback') {
       clearDinkflixRoots();
       document.body.classList.remove('df-custom-active');
