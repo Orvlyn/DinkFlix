@@ -1,11 +1,25 @@
 /* DINKFLIX focused presentation fixes.
-   This file is loaded after sleekfin-media.css so these values win over
-   the original card sizing rules. It intentionally contains no global
-   page, player, settings, or dashboard styles. */
+   Loaded after sleekfin-media.css. No global page/player/settings rules. */
 
+/* Hide only the library shortcut section labelled My Media. */
 html.sleekfin-media-mounted #indexPage .verticalSection:has(.homeLibraryButtonContainer),
-html.sleekfin-media-mounted #indexPage .sectionContainer:has(.homeLibraryButtonContainer) {
+html.sleekfin-media-mounted #indexPage .sectionContainer:has(.homeLibraryButtonContainer),
+html.sleekfin-media-mounted #indexPage .sections > :is(div, section):has(.homeLibraryButtonContainer) {
     display: none !important;
+}
+
+/* Jellyfin's cardBox controls the visible flex width, so both the wrapper
+   and the card itself are explicitly sized. */
+html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardBox:has(.card:is(.overflowPortraitCard, .portraitCard)) {
+    flex: 0 0 280px !important;
+    width: 280px !important;
+    max-width: 280px !important;
+}
+
+html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardBox:has(.card:is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard)) {
+    flex: 0 0 460px !important;
+    width: 460px !important;
+    max-width: 460px !important;
 }
 
 html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowPortraitCard, .portraitCard) {
@@ -22,11 +36,8 @@ html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecomm
     min-width: 460px !important;
 }
 
-html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardBox {
-    flex: 0 0 auto !important;
-}
-
 @media (max-width: 900px) {
+    html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardBox:has(.card:is(.overflowPortraitCard, .portraitCard)),
     html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowPortraitCard, .portraitCard) {
         flex-basis: 220px !important;
         width: 220px !important;
@@ -34,6 +45,7 @@ html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecomm
         min-width: 220px !important;
     }
 
+    html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardBox:has(.card:is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard)),
     html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) {
         flex-basis: 340px !important;
         width: 340px !important;
@@ -43,6 +55,7 @@ html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecomm
 }
 
 @media (max-width: 599px) {
+    html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardBox:has(.card:is(.overflowPortraitCard, .portraitCard)),
     html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowPortraitCard, .portraitCard) {
         flex-basis: 170px !important;
         width: 170px !important;
@@ -50,6 +63,7 @@ html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecomm
         min-width: 170px !important;
     }
 
+    html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardBox:has(.card:is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard)),
     html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) {
         flex-basis: 280px !important;
         width: 280px !important;
