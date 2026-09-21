@@ -7,10 +7,10 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyName>Jellyfin.Plugin.DinkFlix</AssemblyName>
     <RootNamespace>Jellyfin.Plugin.DinkFlix</RootNamespace>
-    <Version>7.0.0.4</Version>
-    <AssemblyVersion>7.0.0.4</AssemblyVersion>
-    <FileVersion>7.0.0.4</FileVersion>
-    <PackageVersion>7.0.0.4</PackageVersion>
+    <Version>7.0.0.5</Version>
+    <AssemblyVersion>7.0.0.5</AssemblyVersion>
+    <FileVersion>7.0.0.5</FileVersion>
+    <PackageVersion>7.0.0.5</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,7 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Configuration/configPage.html" />
-    <EmbeddedResource Include="Web/dinkflix.js" />
+    <EmbeddedResource Include="Configuration/configPage.html" LogicalName="Jellyfin.Plugin.DinkFlix.Configuration.configPage.html" />
+    <EmbeddedResource Include="Web/dinkflix.js" LogicalName="Jellyfin.Plugin.DinkFlix.Web.dinkflix.js" />
+    <EmbeddedResource Include="../../../../dinkflix.css" LogicalName="Jellyfin.Plugin.DinkFlix.Web.dinkflix.css" />
   </ItemGroup>
 </Project>
