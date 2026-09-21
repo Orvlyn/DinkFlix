@@ -81,7 +81,7 @@ for token in [
     assert token in txt, token
 
 css = (ROOT / "dinkflix.css").read_text()
-assert "#dinkflix-app" not in css
+assert "#dinkflix-app" in css
 assert "location.hash" not in css
 assert "--jf-palette-primary-main" in css
 balanced(ROOT / "dinkflix.css")
@@ -99,13 +99,16 @@ if tinycss2:
     assert not errors, errors
 
 js = (ROOT / "src/Jellyfin.Plugin.DinkFlix/Web/dinkflix.js").read_text()
-for bad in ["pushState(", "replaceState(", 'createElement("video")', "#dinkflix-app"]:
+for bad in ["pushState(", "replaceState(", 'createElement("video")']:
     assert bad not in js, bad
 
 assert "EnableEnhancements" not in js
 assert "GroupContinueWatching" not in js
 assert "ShowLocalEndTime" not in js
 assert "ShowMediaTechnicalDetails" not in js
+assert "df-hero" in js
+assert "dinkflix-app" in js
+assert "My List" in js
 balanced(ROOT / "src/Jellyfin.Plugin.DinkFlix/Web/dinkflix.js")
 
 pc = (ROOT / "src/Jellyfin.Plugin.DinkFlix/Configuration/PluginConfiguration.cs").read_text()
