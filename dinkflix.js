@@ -1568,6 +1568,13 @@
       // This is essential for Requests, Bookmarks, Calendar, Profile,
       // Preferences, Dashboard, native Search, and the native player.
       fallbackToNative();
+
+      // The native details page is used only as the invisible Jellyfin
+      // playback bridge. Trigger its real Play/Resume button automatically.
+      const { path } = parseHash();
+      if (path === '/details' && sessionStorage.getItem('dinkflix-play-bridge')) {
+        autoPlayFallback();
+      }
     }
   }
 
