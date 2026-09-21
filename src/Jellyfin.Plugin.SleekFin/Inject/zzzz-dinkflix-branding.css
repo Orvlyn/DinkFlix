@@ -1,0 +1,62 @@
+/* DINKFLIX branding overrides for the original working SleekFin implementation. */
+
+html.sleekfin-main-ui:root {
+    --sleekfin-accent: #00ffc6 !important;
+    --sleekfin-background: #050810 !important;
+    --sleekfin-primary: #00ffc6 !important;
+    --jf-palette-primary-main: #00ffc6 !important;
+    --jf-palette-primary-mainChannel: 0 255 198 !important;
+    --jf-palette-primary-dark: #00b89a !important;
+    --jf-palette-primary-darkChannel: 0 184 154 !important;
+    --jf-palette-primary-light: #66ffe0 !important;
+    --jf-palette-primary-lightChannel: 102 255 224 !important;
+    --jf-palette-secondary-main: #00ffc6 !important;
+    --jf-palette-secondary-mainChannel: 0 255 198 !important;
+    --jf-palette-secondary-dark: #00b89a !important;
+    --jf-palette-secondary-darkChannel: 0 184 154 !important;
+    --jf-palette-secondary-light: #66ffe0 !important;
+    --jf-palette-secondary-lightChannel: 102 255 224 !important;
+    --jf-palette-error-main: #00ffc6 !important;
+    --jf-palette-error-mainChannel: 0 255 198 !important;
+    --jf-palette-starIcon-main: #00ffc6 !important;
+    --jf-palette-starIcon-mainChannel: 0 255 198 !important;
+    --jf-palette-LinearProgress-primaryBg: rgba(0, 255, 198, 0.28) !important;
+    --jf-palette-LinearProgress-secondaryBg: rgba(0, 255, 198, 0.28) !important;
+    --jf-palette-LinearProgress-errorBg: rgba(0, 255, 198, 0.28) !important;
+    --jf-palette-Slider-primaryTrack: #00ffc6 !important;
+}
+
+/* Larger native Jellyfin cards; scoped to media pages only. */
+html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowPortraitCard, .portraitCard) {
+    max-width: 280px !important;
+}
+
+html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) {
+    max-width: 460px !important;
+}
+
+html.sleekfin-media-mounted #indexPage .itemsContainer .cardBox {
+    margin-inline-end: 16px !important;
+}
+
+html.sleekfin-media-mounted #indexPage .itemsContainer .cardScalable {
+    border-radius: 12px;
+}
+
+/* Larger cast cards while retaining the original horizontal scroller. */
+html.sleekfin-details-mounted #castCollapsible .card {
+    flex: 0 0 176px !important;
+    width: 176px !important;
+}
+
+@media (max-width: 767px) {
+    html.sleekfin-details-mounted #castCollapsible .card {
+        flex-basis: 156px !important;
+        width: 156px !important;
+    }
+}
+
+/* Larger similar-title grid cards. */
+html.sleekfin-details-mounted #similarCollapsible .similarContent {
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)) !important;
+}
