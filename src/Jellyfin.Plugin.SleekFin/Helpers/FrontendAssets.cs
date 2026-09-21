@@ -23,6 +23,7 @@ public static class FrontendAssets
         new("sleekfin-fonts.css", "Theme"),
         new("sleekfin-tokens.css", "Theme"),
         new("sleekfin-foundation.css", "Theme"),
+        new("dinkflix-overrides.css", "Theme"),
         new("sleekfin-control-surface.css", "Components"),
         new("sleekfin-button.css", "Components"),
         new("sleekfin-section-heading.css", "Components"),
