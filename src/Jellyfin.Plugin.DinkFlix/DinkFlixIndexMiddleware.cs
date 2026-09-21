@@ -4,7 +4,6 @@ using MediaBrowser.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Net.Http.Headers;
-using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.DinkFlix;
 
@@ -18,12 +17,9 @@ public sealed class DinkFlixIndexMiddleware
     private const string Marker = "dinkflix-boot";
 
     private readonly RequestDelegate _next;
-    private readonly ILogger<DinkFlixIndexMiddleware> _logger;
-
-    public DinkFlixIndexMiddleware(RequestDelegate next, ILogger<DinkFlixIndexMiddleware> logger)
+    public DinkFlixIndexMiddleware(RequestDelegate next)
     {
         _next = next;
-        _logger = logger;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -97,7 +93,6 @@ public sealed class DinkFlixIndexMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "DINKFLIX failed to transform Jellyfin Web index; returning the native response.");
             context.Response.Body = originalBody;
             context.Features.Set(originalFeature);
 
@@ -144,7 +139,7 @@ public sealed class DinkFlixIndexMiddleware
             await using var stream = typeof(Plugin).Assembly.GetManifestResourceStream(ScriptResource);
             if (stream is null)
             {
-                _logger.LogWarning("DINKFLIX resource {Resource} was not found in the assembly.", ScriptResource);
+
                 return null;
             }
 
@@ -153,7 +148,6 @@ public sealed class DinkFlixIndexMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "DINKFLIX could not read its embedded frontend resource.");
             return null;
         }
     }
