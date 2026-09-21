@@ -1,0 +1,128 @@
+name: Publish DINKFLIX
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Read version
+        id: version
+        shell: bash
+        run: |
+          VERSION=$(python3 - <<'PY'
+          import re
+          from pathlib import Path
+          text=Path('build.yaml').read_text()
+          m=re.search(r'^version:\s*["\']?([^"\'\s]+)', text, re.M)
+          if not m:
+              raise SystemExit('version missing from build.yaml')
+          print(m.group(1))
+          PY
+          )
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Guard release tag
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: |
+          expected="v${{ steps.version.outputs.version }}"
+          actual="${GITHUB_REF_NAME}"
+          test "$expected" = "$actual" || { echo "Tag $actual does not match $expected"; exit 1; }
+
+      - name: Static checks
+        run: |
+          python3 tools/check.py
+          node --check src/Jellyfin.Plugin.DinkFlix/Web/dinkflix.js
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore src/Jellyfin.Plugin.DinkFlix/Jellyfin.Plugin.DinkFlix.csproj
+
+      - name: Build
+        run: dotnet build src/Jellyfin.Plugin.DinkFlix/Jellyfin.Plugin.DinkFlix.csproj -c Release --no-restore
+
+      - name: Package plugin
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist/package
+          cp src/Jellyfin.Plugin.DinkFlix/bin/Release/net10.0/Jellyfin.Plugin.DinkFlix.dll dist/package/
+          if [ -f src/Jellyfin.Plugin.DinkFlix/bin/Release/net10.0/Jellyfin.Plugin.DinkFlix.pdb ]; then
+            cp src/Jellyfin.Plugin.DinkFlix/bin/Release/net10.0/Jellyfin.Plugin.DinkFlix.pdb dist/package/
+          fi
+          cd dist/package
+          zip -q -9 "../../DinkFlix_${{ steps.version.outputs.version }}.zip" ./*
+          cd ../..
+          md5sum "DinkFlix_${{ steps.version.outputs.version }}.zip" | cut -d' ' -f1 > dist/checksum.md5
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DINKFLIX-${{ steps.version.outputs.version }}
+          path: DinkFlix_${{ steps.version.outputs.version }}.zip
+          if-no-files-found: error
+
+      - name: Generate manifest entry
+        shell: python
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          TAG: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+        run: |
+          import hashlib, json, os
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          package = Path(f"DinkFlix_{os.environ['VERSION']}.zip")
+          md5 = hashlib.md5(package.read_bytes()).hexdigest()
+          manifest = json.loads(Path("manifest.json").read_text())
+          entry = {
+              "version": os.environ["VERSION"],
+              "changelog": f"DINKFLIX {os.environ['VERSION']}: native Jellyfin 12 theme with lightweight frontend enhancements.",
+              "targetAbi": "12.0.0.0",
+              "sourceUrl": f"https://github.com/Orvlyn/DinkFlix/releases/download/{os.environ['TAG']}/{package.name}",
+              "checksum": md5,
+              "timestamp": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+              "framework": "net10.0"
+          }
+          versions = [v for v in manifest.get("versions", []) if v.get("version") != entry["version"]]
+          manifest["versions"] = [entry] + versions
+          Path("dist/manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+
+      - name: Upload release package
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            DinkFlix_${{ steps.version.outputs.version }}.zip
+            dist/manifest.json
+            dist/checksum.md5
+          generate_release_notes: true
+
+      - name: Publish manifest to repository
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: |
+          cp dist/manifest.json manifest.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add manifest.json
+          git diff --cached --quiet || git commit -m "chore: publish DINKFLIX ${{ steps.version.outputs.version }} manifest"
+          git push origin HEAD:main
