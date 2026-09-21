@@ -3,6 +3,8 @@ name: Publish DINKFLIX
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
 
