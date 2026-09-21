@@ -35,7 +35,10 @@ assert manifest['guid'] == 'B4A9D4E6-4E4D-4F42-9E90-9C5B4D4B8D2B'
 assert manifest['versions'] == []
 
 txt = (ROOT/'build.yaml').read_text()
-for token in ['version: "7.0.0.2"','targetAbi: "12.0.0.0"','framework: "net10.0"']:
+m = re.search(r'^version:\s*["\']?([^"\'\s]+)', txt, re.M)
+assert m, 'build.yaml version missing'
+version = m.group(1)
+for token in [f'version: "{version}"','targetAbi: "12.0.0.0"','framework: "net10.0"']:
     assert token in txt, token
 
 css = (ROOT/'dinkflix.css').read_text()
@@ -70,7 +73,7 @@ for p in (ROOT/'src/Jellyfin.Plugin.DinkFlix').rglob('*.cs'):
 assert not (ROOT/'src/Jellyfin.Plugin.DinkFlix/PluginConfiguration.cs').exists()
 
 print('DINKFLIX static checks: PASS')
-print('version: 7.0.0.2')
+print(f'version: {version}')
 print('Jellyfin ABI: 12.0.0.0')
 print(f'CSS lines: {len(css.splitlines())}')
 print(f'JS lines: {len(js.splitlines())}')
