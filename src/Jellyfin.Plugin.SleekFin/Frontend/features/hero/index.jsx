@@ -21,6 +21,7 @@ const state = {
   reconcileTimer: 0,
   started: false,
   stopWatching: null,
+  domObserver: null,
 };
 
 function finishLoading() {
@@ -109,18 +110,11 @@ function mount(host) {
     })
     .then((result) => {
       if (!result || generation !== state.generation) return;
-      if (result.entries.length) {
-        renderHero(root, result.entries, result.settings);
-      } else {
-        state.failedHost = host;
-        finishLoading();
-      }
+      if (result.entries.length) renderHero(root, result.entries, result.settings);
+      else finishLoading();
     })
     .catch(() => {
-      if (generation === state.generation) {
-        state.failedHost = host;
-        finishLoading();
-      }
+      if (generation === state.generation) finishLoading();
     });
 }
 
@@ -155,6 +149,15 @@ function scheduleReconcile() {
   }, 0);
 }
 
+function startDomObserver() {
+  if (state.domObserver || typeof MutationObserver === 'undefined' || !document.body) return;
+  state.domObserver = new MutationObserver((mutations) => {
+    const relevant = mutations.some((mutation) => !mutation.target.closest?.('.sleekfin-hero'));
+    if (relevant) scheduleReconcile();
+  });
+  state.domObserver.observe(document.body, { childList: true, subtree: true });
+}
+
 function reloadSettings() {
   if (!state.started) return;
   state.enabled = null;
@@ -167,6 +170,7 @@ function start() {
   state.started = true;
   state.stopWatching = dom.watchSpa(scheduleReconcile, { events: WINDOW_EVENTS, viewshow: true });
   window.addEventListener(SETTINGS_EVENT, reloadSettings);
+  startDomObserver();
   scheduleReconcile();
 }
 
@@ -176,6 +180,8 @@ function stop() {
   state.reconcileTimer = 0;
   state.stopWatching?.();
   state.stopWatching = null;
+  state.domObserver?.disconnect();
+  state.domObserver = null;
   window.removeEventListener(SETTINGS_EVENT, reloadSettings);
   unmount();
   finishLoading();
