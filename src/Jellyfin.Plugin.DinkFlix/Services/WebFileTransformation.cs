@@ -4,23 +4,23 @@ using System.Text.Json;
 namespace Jellyfin.Plugin.DinkFlix.Services;
 
 /// <summary>
-/// File Transformation callback that embeds the DINKFLIX Web frontend into Jellyfin Web.
+/// Embeds the DINKFLIX frontend into Jellyfin Web index.html.
 /// </summary>
 public static class WebFileTransformation
 {
-    private const string StartMarker = "<!-- DINKFLIX-WEB-52-START -->";
-    private const string EndMarker = "<!-- DINKFLIX-WEB-52-END -->";
-    private const string FrontendVersion = "5.2.1";
+    private const string StartMarker = "<!-- DINKFLIX-WEB-60-START -->";
+    private const string EndMarker = "<!-- DINKFLIX-WEB-60-END -->";
+    private const string FrontendVersion = "6.0.0";
 
     /// <summary>
-    /// Transforms Jellyfin Web index.html by embedding the DINKFLIX stylesheet and script.
+    /// Transforms the Jellyfin Web index document.
     /// </summary>
     /// <param name="input">The payload supplied by File Transformation.</param>
-    /// <returns>The transformed HTML, or the original HTML when injection is not possible.</returns>
+    /// <returns>The transformed HTML or the original HTML if transformation cannot be completed.</returns>
     public static string TransformIndexHtml(object? input)
     {
         var contents = ExtractContents(input);
-        if (string.IsNullOrEmpty(contents))
+        if (string.IsNullOrWhiteSpace(contents))
         {
             return contents;
         }
@@ -79,7 +79,7 @@ public static class WebFileTransformation
         }
         catch (JsonException)
         {
-            // The callback payload was not JSON.
+            // File Transformation supplied a non-JSON object.
         }
 
         return string.Empty;
@@ -89,10 +89,7 @@ public static class WebFileTransformation
     {
         var css = ReadEmbeddedResource("dinkflix.css");
         var js = ReadEmbeddedResource("dinkflix.js");
-
-        // Break the literal closing script tag so embedded JavaScript cannot terminate the HTML script element early.
-        var safeScriptClose = "<" + (char)92 + "/script>";
-        js = js.Replace("</script>", safeScriptClose, StringComparison.OrdinalIgnoreCase);
+        js = js.Replace("</script>", "<\\/script>", StringComparison.OrdinalIgnoreCase);
 
         var builder = new StringBuilder();
         builder.Append('\n');
@@ -132,13 +129,16 @@ public static class WebFileTransformation
 
     private static string RemoveExistingBlocks(string input)
     {
-        foreach (var pair in new[]
+        var markerPairs = new[]
         {
+            (StartMarker, EndMarker),
             ("<!-- DINKFLIX-WEB-52-START -->", "<!-- DINKFLIX-WEB-52-END -->"),
             ("<!-- DINKFLIX-WEB-51-START -->", "<!-- DINKFLIX-WEB-51-END -->"),
             ("<!-- DINKFLIX-WEB-4:START -->", "<!-- DINKFLIX-WEB-4:END -->"),
             ("<!-- DINKFLIX-WEB-3:START -->", "<!-- DINKFLIX-WEB-3:END -->")
-        })
+        };
+
+        foreach (var pair in markerPairs)
         {
             var start = input.IndexOf(pair.Item1, StringComparison.Ordinal);
             var end = input.IndexOf(pair.Item2, StringComparison.Ordinal);

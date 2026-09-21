@@ -1,19 +1,72 @@
-<div data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button" data-controller="">
+<div data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button">
   <div class="content-primary">
-    <div class="verticalSection verticalSection-extrabottompadding">
+    <div class="verticalSection">
       <div class="sectionTitleContainer flex align-items-center">
         <h2 class="sectionTitle sectionTitle-cards">DINKFLIX Web</h2>
       </div>
-      <p class="fieldDescription">DINKFLIX is a desktop-first Jellyfin Web experience designed to make your server feel like a polished streaming service without replacing Jellyfin's playback engine.</p>
-      <div class="paperList">
-        <div class="listItem listItem-border">
-          <div class="listItemBody"><div class="listItemBodyText">Frontend</div><div class="secondary listItemBodyText">Injected directly by the DINKFLIX plugin. JavaScript Injector is not required for DINKFLIX.</div></div>
-        </div>
-        <div class="listItem listItem-border">
-          <div class="listItemBody"><div class="listItemBodyText">Jellyfin compatibility</div><div class="secondary listItemBodyText">Built for Jellyfin 12.1 Web and uses the current web client session for API access.</div></div>
-        </div>
+      <p class="fieldDescription">DINKFLIX is a desktop-first Jellyfin Web experience. It uses File Transformation to inject its own frontend while keeping Jellyfin's playback engine and native utility pages available.</p>
+
+      <div class="inputContainer">
+        <input is="emby-input" id="dfAccentColor" name="dfAccentColor" type="text" />
+        <div class="fieldDescription">Accent colour. Default: #00FFC6</div>
       </div>
-      <p class="fieldDescription">Your existing File Transformation, Jellyfin Enhanced, Intro Skipper and other plugins can remain installed. DINKFLIX does not require Home Screen Sections.</p>
+
+      <div class="inputContainer">
+        <input is="emby-input" id="dfHeroSeconds" name="dfHeroSeconds" type="number" min="5" max="60" step="1" />
+        <div class="fieldDescription">Seconds between Recently Added hero slides.</div>
+      </div>
+
+      <div class="inputContainer">
+        <input is="emby-input" id="dfTmdbToken" name="dfTmdbToken" type="password" autocomplete="off" />
+        <div class="fieldDescription">Optional TMDB API Read Access Token. This stays server-side and enables Australian (or another region's) streaming-provider information on DINKFLIX detail pages.</div>
+      </div>
+
+      <div class="inputContainer">
+        <input is="emby-input" id="dfTmdbRegion" name="dfTmdbRegion" type="text" maxlength="2" />
+        <div class="fieldDescription">TMDB watch-provider region, e.g. AU, US, GB.</div>
+      </div>
+
+      <div class="fieldDescription">DINKFLIX does not require JavaScript Injector or Home Screen Sections. Keep those plugins installed only for features you use elsewhere.</div>
+      <button is="emby-button" type="button" id="dfSaveButton" class="raised button-submit block formDialogFooterItem">Save</button>
+      <div id="dfSaveStatus" class="fieldDescription"></div>
     </div>
   </div>
+
+  <script type="text/javascript">
+    (function () {
+      'use strict';
+      var pluginId = '9b8e4d39-6a4c-4b5d-b6aa-d2b1c4f3c9e8';
+      var page = document.currentScript && document.currentScript.closest('.pluginConfigurationPage');
+      if (!page || !window.ApiClient) {
+        return;
+      }
+      var accent = page.querySelector('#dfAccentColor');
+      var hero = page.querySelector('#dfHeroSeconds');
+      var token = page.querySelector('#dfTmdbToken');
+      var region = page.querySelector('#dfTmdbRegion');
+      var status = page.querySelector('#dfSaveStatus');
+      var button = page.querySelector('#dfSaveButton');
+
+      window.ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+        accent.value = config.AccentColor || '#00FFC6';
+        hero.value = config.HeroRotationSeconds || 14;
+        token.value = config.TmdbReadAccessToken || '';
+        region.value = config.TmdbWatchRegion || 'AU';
+      });
+
+      button.addEventListener('click', function () {
+        var config = {
+          AccentColor: accent.value || '#00FFC6',
+          HeroRotationSeconds: Math.max(5, Math.min(60, Number(hero.value || 14))),
+          TmdbReadAccessToken: token.value || '',
+          TmdbWatchRegion: (region.value || 'AU').toUpperCase().slice(0, 2)
+        };
+        window.ApiClient.updatePluginConfiguration(pluginId, config).then(function () {
+          status.textContent = 'Saved. Restart Jellyfin or reload Jellyfin Web to apply frontend changes.';
+        }).catch(function () {
+          status.textContent = 'Could not save DINKFLIX settings.';
+        });
+      });
+    }());
+  </script>
 </div>

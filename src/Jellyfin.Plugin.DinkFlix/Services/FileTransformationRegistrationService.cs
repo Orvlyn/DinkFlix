@@ -7,46 +7,33 @@ using Microsoft.Extensions.Logging;
 namespace Jellyfin.Plugin.DinkFlix.Services;
 
 /// <summary>
-/// Registers the DINKFLIX Web transformation with the File Transformation plugin.
+/// Registers and unregisters the DINKFLIX frontend with File Transformation.
 /// </summary>
 public sealed class FileTransformationRegistrationService : IHostedService
 {
-    private static readonly Guid TransformationId = Guid.Parse("4aa2d9bf-d9d6-4f56-b3f8-7c0e8eecfb72");
+    private static readonly Guid TransformationId = Guid.Parse("7e6bf7fd-1b0d-4e7f-a580-83c2c50e9f9d");
     private readonly ILogger<FileTransformationRegistrationService> _logger;
-    private Task? _registrationTask;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileTransformationRegistrationService"/> class.
     /// </summary>
-    /// <param name="logger">The service logger.</param>
+    /// <param name="logger">Service logger.</param>
     public FileTransformationRegistrationService(ILogger<FileTransformationRegistrationService> logger)
     {
         _logger = logger;
     }
 
     /// <inheritdoc />
-    public Task StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
-        _registrationTask = RegisterWithRetryAsync(cancellationToken);
-        return Task.CompletedTask;
+        await RegisterWithRetryAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
-    public async Task StopAsync(CancellationToken cancellationToken)
+    public Task StopAsync(CancellationToken cancellationToken)
     {
-        try
-        {
-            if (_registrationTask is not null)
-            {
-                await _registrationTask.WaitAsync(cancellationToken);
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            // Jellyfin is already shutting down.
-        }
-
         TryUnregister();
+        return Task.CompletedTask;
     }
 
     private async Task RegisterWithRetryAsync(CancellationToken cancellationToken)
@@ -58,7 +45,7 @@ public sealed class FileTransformationRegistrationService : IHostedService
                 return;
             }
 
-            await Task.Delay(TimeSpan.FromSeconds(Math.Min(attempt, 3)), cancellationToken);
+            await Task.Delay(TimeSpan.FromSeconds(Math.Min(attempt, 3)), cancellationToken).ConfigureAwait(false);
         }
 
         _logger.LogError("DINKFLIX Web could not register its File Transformation hook. Confirm File Transformation 3.x is installed and restart Jellyfin.");
@@ -78,14 +65,14 @@ public sealed class FileTransformationRegistrationService : IHostedService
             var interfaceType = assembly.GetType("Jellyfin.Plugin.FileTransformation.PluginInterface", throwOnError: false);
             if (interfaceType is null)
             {
-                _logger.LogWarning("DINKFLIX Web found File Transformation, but its PluginInterface type was unavailable.");
+                _logger.LogDebug("DINKFLIX Web found File Transformation but its PluginInterface type is unavailable.");
                 return false;
             }
 
             var register = interfaceType.GetMethod("RegisterTransformation", BindingFlags.Public | BindingFlags.Static);
             if (register is null)
             {
-                _logger.LogWarning("DINKFLIX Web found File Transformation, but RegisterTransformation was unavailable.");
+                _logger.LogDebug("DINKFLIX Web found File Transformation but RegisterTransformation is unavailable.");
                 return false;
             }
 
@@ -98,14 +85,14 @@ public sealed class FileTransformationRegistrationService : IHostedService
                 modifiers: null);
             if (parse is null)
             {
-                _logger.LogWarning("DINKFLIX Web could not resolve the File Transformation JSON payload parser.");
+                _logger.LogDebug("DINKFLIX Web could not resolve File Transformation's JSON payload parser.");
                 return false;
             }
 
             var payloadJson = JsonSerializer.Serialize(new
             {
                 id = TransformationId,
-                fileNamePattern = "index.html",
+                fileNamePattern = "index.html$",
                 callbackAssembly = typeof(WebFileTransformation).Assembly.FullName,
                 callbackClass = typeof(WebFileTransformation).FullName,
                 callbackMethod = nameof(WebFileTransformation.TransformIndexHtml)

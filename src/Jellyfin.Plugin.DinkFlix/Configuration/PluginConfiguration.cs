@@ -3,27 +3,27 @@ using MediaBrowser.Model.Plugins;
 namespace Jellyfin.Plugin.DinkFlix.Configuration;
 
 /// <summary>
-/// DINKFLIX Web configuration.
+/// Stores DINKFLIX server configuration.
 /// </summary>
 public sealed class PluginConfiguration : BasePluginConfiguration
 {
     /// <summary>
-    /// Gets or sets the primary DINKFLIX accent color.
+    /// Gets or sets the DINKFLIX accent colour.
     /// </summary>
     public string AccentColor { get; set; } = "#00FFC6";
 
     /// <summary>
-    /// Gets or sets the number of seconds between featured hero changes.
+    /// Gets or sets the hero rotation interval in seconds.
     /// </summary>
     public int HeroRotationSeconds { get; set; } = 14;
 
     /// <summary>
-    /// Gets or sets a value indicating whether ratings should be displayed.
+    /// Gets or sets the optional TMDB API read access token used for watch-provider data.
     /// </summary>
-    public bool ShowRatings { get; set; } = true;
+    public string TmdbReadAccessToken { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets a value indicating whether media badges should be displayed.
+    /// Gets or sets the TMDB watch-provider region.
     /// </summary>
-    public bool ShowMediaBadges { get; set; } = true;
+    public string TmdbWatchRegion { get; set; } = "AU";
 }

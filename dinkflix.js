@@ -1,608 +1,658 @@
-/* DINKFLIX Web 5.1 — Jellyfin 12.1 desktop frontend. */
-/* jshint esversion: 11, asi: false, undef: true, unused: false */
-(() => {
+/* DINKFLIX Web 6.0.0 — Jellyfin 12.1 desktop web experience. */
+/* jshint esversion: 2021, asi: false, undef: true, unused: false */
+(function () {
   'use strict';
 
-  if (window.__DINKFLIX_WEB_50__) {
+  if (window.__DINKFLIX_WEB_60__) {
     return;
   }
-  window.__DINKFLIX_WEB_50__ = true;
+  window.__DINKFLIX_WEB_60__ = true;
 
-  const VERSION = '5.1.0';
-  const state = {
+  var VERSION = '6.0.0';
+  var PLUGIN_ID = '9b8e4d39-6a4c-4b5d-b6aa-d2b1c4f3c9e8';
+  var state = {
     user: null,
-    userId: null,
+    userId: '',
+    accessToken: '',
     serverId: '',
     views: [],
-    shell: null,
     nav: null,
+    root: null,
     menuRoot: null,
-    toastRoot: null,
-    renderKey: '',
-    custom: false,
-    route: null,
+    modalRoot: null,
+    boot: null,
+    routeCover: null,
     heroItems: [],
     heroIndex: 0,
     heroTimer: null,
     heroPaused: false,
-    scrollBound: false,
-    hashBound: false,
-    cardData: new Map()
+    rowPages: Object.create(null),
+    cardData: new Map(),
+    resumeEpisodes: new Map(),
+    lastRoute: '',
+    customRouteActive: false,
+    nativeAction: false,
+    selectionMode: false,
+    selectedIds: new Set(),
+    started: false,
+    navObserver: null
   };
 
-  const esc = (value) => String(value ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-
-  const fmtYear = (value) => {
-    if (!value) {
-      return '';
-    }
-    const match = String(value).match(/\d{4}/);
-    return match ? match[0] : '';
-  };
-
-  const humanMinutes = (ticks) => {
-    const value = Number(ticks || 0);
-    if (!value) {
-      return '';
-    }
-    const minutes = Math.round(value / 600000000);
-    if (minutes < 60) {
-      return `${minutes} min`;
-    }
-    const hours = Math.floor(minutes / 60);
-    const remainder = minutes % 60;
-    return remainder ? `${hours}h ${remainder}m` : `${hours}h`;
-  };
-
-  const playbackPercent = (item) => {
-    const position = Number(item?.UserData?.PlaybackPositionTicks || 0);
-    const total = Number(item?.RunTimeTicks || 0);
-    if (!total) {
-      return 0;
-    }
-    return Math.max(0, Math.min(100, (position / total) * 100));
-  };
-
-  function client() {
-    return window.ApiClient || null;
+  function esc(value) {
+    return String(value == null ? '' : value)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
   }
 
-  function credentials() {
+  function safeText(value) {
+    return String(value == null ? '' : value);
+  }
+
+  function getCredentials() {
     try {
-      const raw = localStorage.getItem('jellyfin_credentials');
+      var raw = localStorage.getItem('jellyfin_credentials');
       if (!raw) {
         return null;
       }
-      const data = JSON.parse(raw);
-      const servers = Array.isArray(data?.Servers) ? data.Servers : [];
-      const origin = location.origin;
-      const matching = servers.find((server) => ['ManualAddress', 'RemoteAddress', 'LocalAddress'].some((key) => {
-        try {
-          return server?.[key] && new URL(server[key]).origin === origin;
-        } catch {
-          return false;
-        }
-      }));
-      return matching || servers[servers.length - 1] || null;
-    } catch {
+      var parsed = JSON.parse(raw);
+      var servers = Array.isArray(parsed && parsed.Servers) ? parsed.Servers : [];
+      var origin = location.origin;
+      var sameOrigin = servers.find(function (server) {
+        return ['ManualAddress', 'RemoteAddress', 'LocalAddress'].some(function (key) {
+          try {
+            return server && server[key] && new URL(server[key]).origin === origin;
+          } catch (error) {
+            return false;
+          }
+        });
+      });
+      return sameOrigin || servers[servers.length - 1] || null;
+    } catch (error) {
       return null;
     }
   }
 
+  function getClient() {
+    return window.ApiClient || null;
+  }
+
   function accessToken() {
-    try {
-      const value = client()?.accessToken?.();
-      if (value) {
-        return value;
-      }
-    } catch {
-      // Use stored credentials below.
+    if (state.accessToken) {
+      return state.accessToken;
     }
-    return credentials()?.AccessToken || '';
+    var creds = getCredentials();
+    if (creds && creds.AccessToken) {
+      state.accessToken = creds.AccessToken;
+      return state.accessToken;
+    }
+    try {
+      if (getClient() && typeof getClient().accessToken === 'function') {
+        var token = getClient().accessToken();
+        if (token) {
+          state.accessToken = token;
+          return token;
+        }
+      }
+    } catch (error) {
+      // Continue with the stored credential fallback.
+    }
+    return '';
   }
 
   function currentUserId() {
-    try {
-      const value = client()?.getCurrentUserId?.();
-      if (value) {
-        return value;
-      }
-    } catch {
-      // Use stored credentials below.
+    if (state.userId) {
+      return state.userId;
     }
-    return credentials()?.UserId || null;
+    try {
+      if (getClient() && typeof getClient().getCurrentUserId === 'function') {
+        var value = getClient().getCurrentUserId();
+        if (value) {
+          state.userId = value;
+          return value;
+        }
+      }
+    } catch (error) {
+      // Continue with stored credentials.
+    }
+    var creds = getCredentials();
+    state.userId = creds && creds.UserId ? creds.UserId : '';
+    return state.userId;
   }
 
   function currentServerId() {
-    try {
-      const value = client()?.serverId?.();
-      if (value) {
-        return value;
-      }
-    } catch {
-      // Use stored credentials below.
+    if (state.serverId) {
+      return state.serverId;
     }
-    return credentials()?.Id || '';
+    try {
+      if (getClient() && typeof getClient().serverId === 'function') {
+        var value = getClient().serverId();
+        if (value) {
+          state.serverId = value;
+          return value;
+        }
+      }
+    } catch (error) {
+      // Continue with stored credentials.
+    }
+    var creds = getCredentials();
+    state.serverId = creds && creds.Id ? creds.Id : '';
+    return state.serverId;
   }
 
   function baseUrl() {
-    const path = location.pathname;
-    const marker = path.toLowerCase().indexOf('/web/');
+    var pathname = location.pathname;
+    var lower = pathname.toLowerCase();
+    var marker = lower.indexOf('/web/');
     if (marker >= 0) {
-      return location.origin + path.slice(0, marker);
+      return location.origin + pathname.slice(0, marker);
     }
-    if (path.toLowerCase().endsWith('/web')) {
-      return location.origin + path.slice(0, -4);
+    if (lower.endsWith('/web')) {
+      return location.origin + pathname.slice(0, -4);
     }
     return location.origin;
   }
 
-  function authHeaders() {
-    const token = accessToken();
-    return token ? {
-      Authorization: `MediaBrowser Token="${token}", Client="DINKFLIX Web", Device="Browser", DeviceId="dinkflix-web", Version="${VERSION}"`
-    } : {};
+  function apiUrl(path) {
+    var normalized = path.charAt(0) === '/' ? path : '/' + path;
+    var url = baseUrl() + normalized;
+    var separator = normalized.indexOf('?') >= 0 ? '&' : '?';
+    var token = accessToken();
+    if (token) {
+      url += separator + 'api_key=' + encodeURIComponent(token);
+    }
+    return url;
+  }
+
+  async function apiFetch(path, options) {
+    var opts = Object.assign({
+      credentials: 'include',
+      cache: 'no-store',
+      headers: { Accept: 'application/json' }
+    }, options || {});
+    opts.headers = Object.assign({}, opts.headers || {});
+    var response = await fetch(apiUrl(path), opts);
+    if (!response.ok) {
+      throw new Error((opts.method || 'GET') + ' ' + path + ' returned HTTP ' + response.status);
+    }
+    var text = await response.text();
+    return text ? JSON.parse(text) : null;
   }
 
   async function apiGet(path) {
-    const response = await fetch(`${baseUrl()}${path}`, {
-      method: 'GET',
-      credentials: 'include',
-      cache: 'no-store',
-      headers: {
-        Accept: 'application/json',
-        'X-Jellyfin-User-Id': state.userId || '',
-        ...authHeaders(),
-        ...(accessToken() ? { 'X-Emby-Token': accessToken() } : {})
-      }
-    });
-    if (!response.ok) {
-      throw new Error(`GET ${path} returned HTTP ${response.status}`);
-    }
-    const text = await response.text();
-    return text ? JSON.parse(text) : null;
+    return apiFetch(path, { method: 'GET' });
   }
 
-  async function apiWrite(path, method) {
-    const response = await fetch(`${baseUrl()}${path}`, {
-      method,
-      credentials: 'include',
-      cache: 'no-store',
-      headers: {
-        Accept: 'application/json',
-        'X-Jellyfin-User-Id': state.userId || '',
-        ...authHeaders(),
-        ...(accessToken() ? { 'X-Emby-Token': accessToken() } : {})
-      }
-    });
-    if (!response.ok) {
-      throw new Error(`${method} ${path} returned HTTP ${response.status}`);
+  async function apiRequest(path, method, body) {
+    var headers = { Accept: 'application/json' };
+    var payload = body;
+    if (body && typeof body !== 'string') {
+      headers['Content-Type'] = 'application/json';
+      payload = JSON.stringify(body);
     }
-    const text = await response.text();
-    return text ? JSON.parse(text) : null;
+    return apiFetch(path, { method: method, headers: headers, body: payload });
   }
 
-  function imageUrl(item, type = 'Primary', width = 900) {
-    if (!item?.Id) {
+  function imageUrl(item, type, width) {
+    if (!item || !item.Id) {
       return '';
     }
-    const tag = item?.ImageTags?.[type];
-    const params = new URLSearchParams({
-      maxWidth: String(width),
-      quality: '87'
-    });
+    var imageType = type || 'Primary';
+    var maxWidth = width || 1000;
+    var tag = item.ImageTags && item.ImageTags[imageType] ? item.ImageTags[imageType] : '';
+    var params = 'maxWidth=' + encodeURIComponent(maxWidth) + '&quality=88';
     if (tag) {
-      params.set('tag', tag);
+      params += '&tag=' + encodeURIComponent(tag);
     }
-    const token = accessToken();
-    if (token) {
-      params.set('ApiKey', token);
-    }
-    return `${baseUrl()}/Items/${encodeURIComponent(item.Id)}/Images/${type}?${params.toString()}`;
+    return apiUrl('/Items/' + encodeURIComponent(item.Id) + '/Images/' + encodeURIComponent(imageType) + '?' + params);
   }
 
-  function backdropUrl(item, width = 2200) {
-    if (!item?.Id) {
+  function personImageUrl(person, width) {
+    if (!person || !person.PersonId) {
       return '';
     }
-    const tags = Array.isArray(item?.BackdropImageTags) ? item.BackdropImageTags : [];
-    const backdropTag = tags[0] || item?.ImageTags?.Backdrop || '';
-    const type = backdropTag ? 'Backdrop' : (item?.ImageTags?.Primary ? 'Primary' : '');
-    if (!type) {
+    var params = 'maxWidth=' + encodeURIComponent(width || 168) + '&quality=84';
+    if (person.PrimaryImageTag) {
+      params += '&tag=' + encodeURIComponent(person.PrimaryImageTag);
+    }
+    return apiUrl('/Persons/' + encodeURIComponent(person.PersonId) + '/Images/Primary?' + params);
+  }
+
+  function backdropUrl(item, width) {
+    if (!item || !item.Id) {
       return '';
     }
-    const params = new URLSearchParams({
-      maxWidth: String(width),
-      quality: '86'
-    });
-    if (backdropTag) {
-      params.set('tag', backdropTag);
-    } else if (item?.ImageTags?.Primary) {
-      params.set('tag', item.ImageTags.Primary);
+    var tag = item.BackdropImageTags && item.BackdropImageTags.length ? item.BackdropImageTags[0] : '';
+    var params = 'maxWidth=' + encodeURIComponent(width || 2400) + '&quality=88';
+    if (tag) {
+      params += '&tag=' + encodeURIComponent(tag);
     }
-    const token = accessToken();
-    if (token) {
-      params.set('ApiKey', token);
-    }
-    const index = type === 'Backdrop' ? '/0' : '';
-    return `${baseUrl()}/Items/${encodeURIComponent(item.Id)}/Images/${type}${index}?${params.toString()}`;
+    return apiUrl('/Items/' + encodeURIComponent(item.Id) + '/Images/Backdrop/0?' + params);
   }
 
   function parseHash() {
-    const raw = decodeURIComponent(location.hash.replace(/^#/, '') || '/home');
-    const separator = raw.indexOf('?');
-    const path = separator >= 0 ? raw.slice(0, separator) : raw;
-    const query = separator >= 0 ? raw.slice(separator + 1) : '';
+    var raw = decodeURIComponent((location.hash || '#/home').replace(/^#/, ''));
+    var queryIndex = raw.indexOf('?');
+    var path = queryIndex >= 0 ? raw.slice(0, queryIndex) : raw;
+    var query = queryIndex >= 0 ? raw.slice(queryIndex + 1) : '';
     return { path: path || '/home', params: new URLSearchParams(query) };
   }
 
-  function getRoute() {
-    const { path, params } = parseHash();
-    if (path === '/dinkflix/library') {
-      return { type: 'library', viewId: params.get('viewId') };
-    }
-    if (path === '/dinkflix/item') {
-      return { type: 'item', id: params.get('id') };
-    }
-    if (path === '/dinkflix/list') {
+  function route() {
+    var parsed = parseHash();
+    var path = parsed.path;
+    var params = parsed.params;
+    if (path === '/home' && params.get('dinkflix') === 'list') {
       return { type: 'list' };
     }
-    if (path === '/dinkflix/search') {
-      return { type: 'search', q: params.get('q') || '' };
-    }
-    if (path === '/dinkflix/about') {
-      return { type: 'about' };
-    }
-    if (path === '/home' && params.get('df') === 'library') {
-      return { type: 'library', viewId: params.get('viewId') };
-    }
-    if (path === '/home' && params.get('df') === 'item') {
-      return { type: 'item', id: params.get('id') };
-    }
-    if (path === '/home' && params.get('df') === 'list') {
-      return { type: 'list' };
-    }
-    if (path === '/home' && params.get('df') === 'search') {
-      return { type: 'search', q: params.get('q') || '' };
-    }
-    if (path === '/home' && params.get('df') === 'about') {
+    if (path === '/home' && params.get('dinkflix') === 'about') {
       return { type: 'about' };
     }
     if (path === '/home' && !params.get('tab')) {
       return { type: 'home' };
     }
-    if (path === '/movies' || path === '/tv' || path === '/tvshows') {
-      return { type: 'library-native', viewId: params.get('topParentId'), collectionType: params.get('collectionType') };
+    if (path === '/details') {
+      return { type: 'details', id: params.get('id') || '' };
+    }
+    if (path === '/dashboard' || path.indexOf('/userpluginsettings.html') === 0 || path === '/login.html') {
+      return { type: 'native-admin' };
     }
     if (path === '/search') {
-      return { type: 'search-native' };
+      return { type: 'native-search' };
     }
     if (path === '/video' || path === '/playback' || path === '/fullscreen' || path === '/nowplaying') {
       return { type: 'playback' };
     }
-    if (path === '/dashboard' || path === '/login.html' || path.includes('login')) {
-      return { type: 'admin' };
-    }
     return { type: 'native' };
   }
 
-  function setHash(path, params = {}) {
-    closeMenus();
-    const routeParams = { ...params };
-    if (path === '/home' && routeParams.df) {
-      const df = routeParams.df;
-      delete routeParams.df;
-      const routeMap = {
-        library: '/dinkflix/library',
-        item: '/dinkflix/item',
-        list: '/dinkflix/list',
-        search: '/dinkflix/search',
-        about: '/dinkflix/about'
-      };
-      if (routeMap[df]) {
-        path = routeMap[df];
-      }
-    }
-    const query = new URLSearchParams();
-    Object.entries(routeParams).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        query.set(key, String(value));
+  function nativeHash(path, params) {
+    var query = new URLSearchParams();
+    Object.entries(params || {}).forEach(function (pair) {
+      if (pair[1] !== undefined && pair[1] !== null && pair[1] !== '') {
+        query.set(pair[0], String(pair[1]));
       }
     });
-    const next = `#${path}${query.toString() ? `?${query.toString()}` : ''}`;
+    var next = '#' + path + (query.toString() ? '?' + query.toString() : '');
+    closeMenus();
+    closeModals();
     if (location.hash !== next) {
       location.hash = next;
+    } else {
+      renderRoute();
+    }
+  }
+
+  function nowTime() {
+    return new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).format(new Date());
+  }
+
+  function endTimeLabel(runtimeTicks, positionTicks) {
+    var runtime = Number(runtimeTicks || 0);
+    var position = Number(positionTicks || 0);
+    if (!runtime) {
+      return '';
+    }
+    var remaining = Math.max(0, runtime - position);
+    var end = new Date(Date.now() + remaining / 10000);
+    return new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).format(end);
+  }
+
+  function minutesLabel(ticks) {
+    var value = Number(ticks || 0);
+    if (!value) {
+      return '';
+    }
+    var minutes = Math.round(value / 600000000);
+    var hours = Math.floor(minutes / 60);
+    var mins = minutes % 60;
+    if (hours === 0) {
+      return minutes + ' min';
+    }
+    return mins ? hours + 'h ' + mins + 'm' : hours + 'h';
+  }
+
+  function remainingLabel(item) {
+    var runtime = Number(item && item.RunTimeTicks || 0);
+    var position = Number(item && item.UserData && item.UserData.PlaybackPositionTicks || 0);
+    if (!runtime || !position || position >= runtime) {
+      return '';
+    }
+    return minutesLabel(runtime - position) + ' left';
+  }
+
+  function yearLabel(item) {
+    if (!item) {
+      return '';
+    }
+    var value = item.ProductionYear || item.PremiereDate || item.DateCreated || '';
+    var match = String(value).match(/\d{4}/);
+    return match ? match[0] : '';
+  }
+
+  function qualityBadges(item) {
+    var badges = [];
+    var width = Number(item && item.Width || 0);
+    var height = Number(item && item.Height || 0);
+    if (height >= 2000 || width >= 3500) {
+      badges.push('<span class="df-badge df-badge-quality">4K</span>');
+    } else if (height >= 1050 || width >= 1900) {
+      badges.push('<span class="df-badge df-badge-quality">1080p</span>');
+    } else if (height >= 700 || width >= 1200) {
+      badges.push('<span class="df-badge df-badge-quality">720p</span>');
+    }
+    if (item && (item.VideoRange || item.VideoRangeType || /hdr/i.test(String(item.VideoRangeType || '')))) {
+      badges.push('<span class="df-badge df-badge-hdr">HDR</span>');
+    }
+    return badges.join('');
+  }
+
+  function ratingBadge(item) {
+    if (!item || !item.CommunityRating) {
+      return '';
+    }
+    var rating = Number(item.CommunityRating);
+    return '<span class="df-badge df-badge-rating">★ ' + rating.toFixed(1) + '</span>';
+  }
+
+  function coreBadges(item) {
+    var html = ratingBadge(item) + qualityBadges(item);
+    if (item && item.OfficialRating) {
+      html += '<span class="df-badge df-badge-age">' + esc(item.OfficialRating) + '</span>';
+    }
+    return html;
+  }
+
+  function createNode(markup) {
+    var wrapper = document.createElement('div');
+    wrapper.innerHTML = markup.trim();
+    return wrapper.firstElementChild;
+  }
+
+  function ensureBoot() {
+    if (state.boot && document.body.contains(state.boot)) {
+      return state.boot;
+    }
+    var boot = createNode('<div id="dinkflix-boot" aria-live="polite"><div class="df-boot-inner"><div class="df-brand df-brand-boot"><span>DINK</span><span>FLIX</span></div><div class="df-boot-line"><span></span></div><div class="df-boot-copy">Loading DINKFLIX</div></div></div>');
+    document.body.appendChild(boot);
+    state.boot = boot;
+    return boot;
+  }
+
+  function finishBoot() {
+    document.documentElement.classList.add('df-dinkflix-started');
+    var boot = ensureBoot();
+    boot.classList.add('df-boot-hidden');
+    setTimeout(function () {
+      boot.remove();
+    }, 360);
+  }
+
+  function showRouteCover() {
+    if (state.routeCover && document.body.contains(state.routeCover)) {
+      return state.routeCover;
+    }
+    var cover = createNode('<div id="dinkflix-route-cover"><div class="df-route-cover-inner"><div class="df-brand"><span>DINK</span><span>FLIX</span></div><div class="df-route-spinner"></div></div></div>');
+    document.body.appendChild(cover);
+    state.routeCover = cover;
+    return cover;
+  }
+
+  function hideRouteCover() {
+    if (!state.routeCover) {
       return;
     }
-    renderRoute();
-  }
-
-  function nativeHash(path, params = {}) {
-    closeMenus();
-    setHash(path, params);
-  }
-
-  function isAdmin() {
-    return !!state.user?.Policy?.IsAdministrator;
-  }
-
-  function visibleViews() {
-    const excluded = new Set(['playlists', 'livetv', 'boxsets', 'channels']);
-    return state.views.filter((view) => view?.Id && !excluded.has(String(view.CollectionType || '').toLowerCase()));
-  }
-
-  function labelForView(view) {
-    const type = String(view?.CollectionType || '').toLowerCase();
-    if (type === 'movies') {
-      return 'Movies';
-    }
-    if (type === 'tvshows') {
-      return 'TV Shows';
-    }
-    return view?.Name || 'Library';
-  }
-
-  function viewHref(view) {
-    return `#/dinkflix/library?viewId=${encodeURIComponent(view.Id)}`;
-  }
-
-  const icons = {
-    home: '<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M9.5 20v-5h5v5"/>',
-    movie: '<rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M8 3.5l3 4h4l-3-4M8 20.5l3-4h4l-3 4M5 9h14M5 15h14"/>',
-    tv: '<rect x="3.5" y="4" width="17" height="16" rx="2"/><path d="M7 8h10M7 12h10M7 16h4"/>',
-    list: '<path d="M6 3.5h12v17l-6-3-6 3z"/><path d="M12 8v5M9.5 10.5h5"/>',
-    search: '<circle cx="10.8" cy="10.8" r="6.2"/><path d="m16 16 5 5"/>',
-    user: '<circle cx="12" cy="8" r="3.1"/><path d="M5.5 20c.5-3.4 3.1-5.4 6.5-5.4s6 2 6.5 5.4"/>',
-    tools: '<path d="m14.2 6.1 3.7 3.7M5 19l5.7-5.7M15.8 3.9a4 4 0 0 0-5.1 5.1l-6.2 6.2a2.1 2.1 0 1 0 3 3l6.2-6.2a4 4 0 0 0 5.1-5.1l-2.2 2.2-2.2-2.2z"/>',
-    close: '<path d="m6 6 12 12M18 6 6 18"/>',
-    dots: '<circle cx="5" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.3" fill="currentColor" stroke="none"/>',
-    play: '<path d="m8 5 11 7-11 7z" fill="currentColor" stroke="none"/>',
-    plus: '<path d="M12 5v14M5 12h14"/>',
-    info: '<circle cx="12" cy="12" r="8.5"/><path d="M12 10.4v5M12 7.6h.01"/>',
-    download: '<path d="M12 4v10M8 11l4 4 4-4M5 20h14"/>',
-    trash: '<path d="M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13"/>',
-    edit: '<path d="m5 19 3.4-.7L18.7 8a2 2 0 0 0-2.8-2.8L5.6 15.5z"/>',
-    image: '<rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9" cy="10" r="1.3"/><path d="m5 17 4.5-4 3.3 2.6 2.5-2.3 3.7 3.7"/>',
-    refresh: '<path d="M19 8a7.5 7.5 0 1 0 1 6M19 4v4h-4"/>',
-    copy: '<rect x="8" y="8" width="11" height="12" rx="2"/><path d="M5 16V6a2 2 0 0 1 2-2h8"/>',
-    collection: '<path d="M5 7h10M5 12h10M5 17h7"/><path d="M18 6v8M14 10h8"/>',
-    playlist: '<path d="M5 7h10M5 12h8M5 17h6"/><path d="M18 14v5M15.5 16.5H20"/>',
-    dice: '<rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="8" cy="8" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="16" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="8" r="1" fill="currentColor" stroke="none"/><circle cx="8" cy="16" r="1" fill="currentColor" stroke="none"/>',
-  };
-
-  function svg(name) {
-    return `<svg viewBox="0 0 24 24" aria-hidden="true">${icons[name] || icons.info}</svg>`;
-  }
-
-  function ensureShell() {
-    if (state.shell && document.body.contains(state.shell)) {
-      return state.shell;
-    }
-    const shell = document.createElement('main');
-    shell.id = 'dinkflix-app-shell';
-    document.body.appendChild(shell);
-    state.shell = shell;
-    shell.style.display = 'none';
-    return shell;
+    state.routeCover.classList.add('df-cover-hidden');
+    setTimeout(function () {
+      if (state.routeCover) {
+        state.routeCover.remove();
+        state.routeCover = null;
+      }
+    }, 260);
   }
 
   function ensureMenuRoot() {
     if (state.menuRoot && document.body.contains(state.menuRoot)) {
       return state.menuRoot;
     }
-    const root = document.createElement('div');
-    root.id = 'dinkflix-menu-root';
-    document.body.appendChild(root);
-    state.menuRoot = root;
-    return root;
+    state.menuRoot = document.createElement('div');
+    state.menuRoot.id = 'dinkflix-menu-root';
+    document.body.appendChild(state.menuRoot);
+    return state.menuRoot;
   }
 
-  function ensureToastRoot() {
-    if (state.toastRoot && document.body.contains(state.toastRoot)) {
-      return state.toastRoot;
+  function ensureModalRoot() {
+    if (state.modalRoot && document.body.contains(state.modalRoot)) {
+      return state.modalRoot;
     }
-    const root = document.createElement('div');
-    root.id = 'dinkflix-toasts';
-    document.body.appendChild(root);
-    state.toastRoot = root;
-    return root;
-  }
-
-  function toast(message) {
-    const root = ensureToastRoot();
-    const item = document.createElement('div');
-    item.className = 'df-toast';
-    item.textContent = message;
-    root.appendChild(item);
-    setTimeout(() => item.remove(), 3000);
+    state.modalRoot = document.createElement('div');
+    state.modalRoot.id = 'dinkflix-modal-root';
+    document.body.appendChild(state.modalRoot);
+    return state.modalRoot;
   }
 
   function closeMenus() {
     ensureMenuRoot().replaceChildren();
   }
 
-  function positionMenu(menu, anchor, align = 'right') {
-    if (!menu || !anchor) {
-      return;
-    }
-    const rect = anchor.getBoundingClientRect();
-    const width = menu.offsetWidth || 292;
-    const height = menu.offsetHeight || 320;
-    let left = align === 'right' ? rect.right - width : rect.left;
-    let top = rect.bottom + 7;
-    left = Math.max(10, Math.min(left, innerWidth - width - 10));
-    if (top + height > innerHeight - 10) {
-      top = Math.max(10, rect.top - height - 7);
-    }
-    menu.style.left = `${left}px`;
-    menu.style.top = `${top}px`;
+  function closeModals() {
+    ensureModalRoot().replaceChildren();
   }
 
-  function menuButton(label, icon, action, className = '') {
-    const button = document.createElement('button');
+  function toast(message) {
+    var root = ensureModalRoot();
+    var item = createNode('<div class="df-toast">' + esc(message) + '</div>');
+    root.appendChild(item);
+    setTimeout(function () {
+      item.remove();
+    }, 3000);
+  }
+
+  function svg(path) {
+    return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + path + '</svg>';
+  }
+
+  var ICON = {
+    home: '<path d="M3.5 10.8 12 4l8.5 6.8"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M9.5 20v-5h5v5"/>',
+    movie: '<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 4v4M16 4v4M4 8h16M4 16h16M8 20v-4M16 20v-4"/>',
+    tv: '<rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="M8.5 3.5 12 7l3.5-3.5"/><path d="M7.5 10h.01M11.5 10h.01M15.5 10h.01M7.5 14h.01M11.5 14h.01M15.5 14h.01"/>',
+    search: '<circle cx="10.7" cy="10.7" r="6.2"/><path d="m16 16 5 5"/>',
+    user: '<circle cx="12" cy="8" r="3.1"/><path d="M5.5 20c.5-3.4 3.1-5.4 6.5-5.4s6 2 6.5 5.4"/>',
+    dots: '<circle cx="5" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.2" fill="currentColor" stroke="none"/>',
+    play: '<path d="m8 5 10.8 7L8 19z" fill="currentColor" stroke="none"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    check: '<path d="m5.5 12.5 4.2 4.2 8.8-9"/>',
+    left: '<path d="m14.5 5-7 7 7 7"/>',
+    right: '<path d="m9.5 5 7 7-7 7"/>',
+    tools: '<path d="m15.5 4.5 4 4M5.2 18.8l8.6-8.6M6.2 15.8l2 2M16.5 7.5l-2 2"/><circle cx="17.5" cy="6.5" r="3.2"/>',
+    close: '<path d="m6 6 12 12M18 6 6 18"/>',
+    info: '<circle cx="12" cy="12" r="8.5"/><path d="M12 10.5v5M12 7.7h.01"/>',
+    download: '<path d="M12 4v10M8 11l4 4 4-4M5 20h14"/>',
+    trash: '<path d="M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13"/>',
+    refresh: '<path d="M19 8a7.5 7.5 0 1 0 1 6M19 4v4h-4"/>',
+    copy: '<rect x="8" y="8" width="11" height="12" rx="2"/><path d="M5 16V6a2 2 0 0 1 2-2h8"/>',
+    collection: '<path d="M5 7h10M5 12h10M5 17h8"/><path d="M18 6v8M14.5 10h7"/>',
+    playlist: '<path d="M5 7h10M5 12h8M5 17h6"/><path d="M18 14v5M15.5 16.5h5"/>',
+    shuffle: '<path d="M3 7h3c2 0 3.5 1 5 3l4 5c1 1.5 2.5 2 6 2M3 17h3c2 0 3.5-1 5-3l4-5c1-1.5 2.5-2 6-2"/><path d="m18 5 3 2-3 2M18 15l3 2-3 2"/>',
+    external: '<path d="M14 5h5v5M19 5l-8 8"/><path d="M19 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h5"/>'
+  };
+
+  function makeIcon(name) {
+    return svg(ICON[name] || ICON.info);
+  }
+
+  function menuItem(label, icon, handler, className) {
+    var button = document.createElement('button');
     button.type = 'button';
-    button.className = `df-menu-item ${className}`.trim();
-    button.innerHTML = `${svg(icon)}<span>${esc(label)}</span>`;
-    button.addEventListener('click', (event) => {
+    button.className = 'df-menu-item' + (className ? ' ' + className : '');
+    button.innerHTML = makeIcon(icon) + '<span>' + esc(label) + '</span>';
+    button.addEventListener('click', function (event) {
       event.preventDefault();
       event.stopPropagation();
       closeMenus();
-      action();
+      Promise.resolve(handler()).catch(function (error) {
+        console.error('[DINKFLIX] Menu action failed.', error);
+        toast('That action could not be completed.');
+      });
     });
     return button;
   }
 
   function menuSeparator() {
-    const divider = document.createElement('div');
-    divider.className = 'df-menu-sep';
-    return divider;
+    return createNode('<div class="df-menu-separator"></div>');
+  }
+
+  function positionFloating(node, anchor) {
+    if (!node || !anchor) {
+      return;
+    }
+    var rect = anchor.getBoundingClientRect();
+    var width = node.offsetWidth || 320;
+    var height = node.offsetHeight || 400;
+    var left = rect.right - width;
+    var top = rect.bottom + 8;
+    if (left < 12) {
+      left = 12;
+    }
+    if (left + width > innerWidth - 12) {
+      left = innerWidth - width - 12;
+    }
+    if (top + height > innerHeight - 12) {
+      top = rect.top - height - 8;
+    }
+    node.style.left = Math.max(12, left) + 'px';
+    node.style.top = Math.max(12, top) + 'px';
+  }
+
+  function clearDinkflixRoots() {
+    document.querySelectorAll('#dinkflix-app, #dinkflix-detail, #dinkflix-page').forEach(function (node) {
+      node.remove();
+    });
+    state.root = null;
+  }
+
+  function shouldHaveNav(routeInfo) {
+    return routeInfo.type !== 'native-admin' && routeInfo.type !== 'playback';
   }
 
   function buildNav() {
-    let nav = document.getElementById('dinkflix-nav');
-    if (nav) {
-      state.nav = nav;
-      return nav;
+    if (state.nav && document.body.contains(state.nav)) {
+      return state.nav;
     }
-    nav = document.createElement('nav');
-    nav.id = 'dinkflix-nav';
-    nav.setAttribute('aria-label', 'DINKFLIX navigation');
-    nav.innerHTML = `<div class="df-nav-inner"><a href="#/home" class="df-brand" data-df-home aria-label="DINKFLIX home"><span>DINK</span><span>FLIX</span></a><div class="df-nav-links" id="df-nav-links"></div><div class="df-nav-spacer"></div><div class="df-nav-tools"><button class="df-icon-btn" id="df-random-btn" aria-label="Surprise me" title="Surprise me">${svg('dice')}</button><button class="df-icon-btn" id="df-search-btn" aria-label="Search" title="Search">${svg('search')}</button><button class="df-icon-btn" id="df-tools-btn" aria-label="Playback and tools" title="Playback and tools">${svg('tools')}</button><button class="df-icon-btn" id="df-user-btn" aria-label="User menu" title="User menu"><span class="df-avatar" id="df-avatar">?</span></button></div></div>`;
+    var nav = createNode('<header id="dinkflix-nav" class="df-nav"><div class="df-nav-inner"><a class="df-brand" href="#/home" aria-label="DINKFLIX home"><span>DINK</span><span>FLIX</span></a><nav class="df-primary" id="df-primary" aria-label="Primary"></nav><button class="df-nav-more" id="df-nav-more" type="button">Libraries <span>⌄</span></button><div class="df-nav-spacer"></div><div class="df-nav-actions"><button class="df-icon-button" id="df-random" type="button" aria-label="Surprise me" title="Surprise me">' + makeIcon('shuffle') + '</button><a class="df-icon-button" id="df-search" href="#/search" aria-label="Search" title="Search">' + makeIcon('search') + '</a><button class="df-icon-button" id="df-tools" type="button" aria-label="Tools" title="Tools">' + makeIcon('tools') + '</button><button class="df-user-button" id="df-user" type="button" aria-label="Account" title="Account"><span class="df-avatar" id="df-avatar">?</span></button></div></div></header>');
     document.body.appendChild(nav);
     state.nav = nav;
-    nav.querySelector('[data-df-home]').addEventListener('click', (event) => {
-      event.preventDefault();
-      setHash('/home');
+    nav.querySelector('#df-random').addEventListener('click', randomTitle);
+    nav.querySelector('#df-tools').addEventListener('click', function (event) {
+      event.stopPropagation();
+      openToolsMenu(event.currentTarget);
     });
-    nav.querySelector('#df-random-btn').addEventListener('click', randomTitle);
-    nav.querySelector('#df-search-btn').addEventListener('click', () => setHash('/home', { df: 'search' }));
-    nav.querySelector('#df-tools-btn').addEventListener('click', (event) => openToolsMenu(event.currentTarget));
-    nav.querySelector('#df-user-btn').addEventListener('click', (event) => openUserMenu(event.currentTarget));
+    nav.querySelector('#df-user').addEventListener('click', function (event) {
+      event.stopPropagation();
+      openUserMenu(event.currentTarget);
+    });
+    nav.querySelector('#df-nav-more').addEventListener('click', function (event) {
+      event.stopPropagation();
+      openLibrariesMenu(event.currentTarget);
+    });
     return nav;
   }
 
-  function updateNav() {
-    const holder = state.nav?.querySelector('#df-nav-links');
-    if (!holder) {
-      return;
-    }
-    const route = getRoute();
-    const views = [...visibleViews()].sort((a, b) => {
-      const aType = String(a.CollectionType || '').toLowerCase();
-      const bType = String(b.CollectionType || '').toLowerCase();
-      const order = (value) => value === 'movies' ? 0 : value === 'tvshows' ? 1 : 2;
-      return order(aType) - order(bType) || String(a.Name).localeCompare(String(b.Name));
+  function refreshNav() {
+    var nav = buildNav();
+    var primary = nav.querySelector('#df-primary');
+    primary.replaceChildren();
+    var visible = visibleViews();
+    var movies = visible.find(function (view) { return String(view.CollectionType || '').toLowerCase() === 'movies'; });
+    var shows = visible.find(function (view) { return String(view.CollectionType || '').toLowerCase() === 'tvshows'; });
+    var core = [
+      { label: 'Home', icon: 'home', href: '#/home', active: route().type === 'home' },
+      movies ? { label: 'Movies', icon: 'movie', href: nativeLibraryHref(movies), active: false } : null,
+      shows ? { label: 'TV Shows', icon: 'tv', href: nativeLibraryHref(shows), active: false } : null
+    ].filter(Boolean);
+    core.forEach(function (entry) {
+      var link = document.createElement('a');
+      link.className = 'df-primary-link' + (entry.active ? ' is-active' : '');
+      link.href = entry.href;
+      link.innerHTML = makeIcon(entry.icon) + '<span>' + esc(entry.label) + '</span>';
+      primary.appendChild(link);
     });
-    const primary = views.slice(0, 5);
-    const extra = views.slice(5);
-    let html = `<a class="df-nav-link ${route.type === 'home' ? 'df-active' : ''}" data-nav-home href="#/home">Home</a>`;
-    primary.forEach((view) => {
-      const active = (route.type === 'library' || route.type === 'library-native') && route.viewId === view.Id;
-      html += `<a class="df-nav-link ${active ? 'df-active' : ''}" data-nav-view="${esc(view.Id)}" href="${viewHref(view)}">${esc(labelForView(view))}</a>`;
-    });
-    html += `<a class="df-nav-link ${route.type === 'list' ? 'df-active' : ''}" data-nav-list href="#/dinkflix/list">My List</a>`;
-    if (extra.length) {
-      html += '<button class="df-nav-link" id="df-more-libraries" type="button">More</button>';
-    }
-    html += '<a class="df-nav-link df-native-nav" href="#/home?tab=2">Requests</a>';
-    holder.innerHTML = html;
-    holder.querySelector('[data-nav-home]')?.addEventListener('click', (event) => {
-      event.preventDefault();
-      setHash('/home');
-    });
-    holder.querySelector('[data-nav-list]')?.addEventListener('click', (event) => {
-      event.preventDefault();
-      setHash('/home', { df: 'list' });
-    });
-    holder.querySelector('#df-more-libraries')?.addEventListener('click', (event) => openLibrariesMenu(event.currentTarget, extra));
-    holder.querySelectorAll('[data-nav-view]').forEach((link) => {
-      link.addEventListener('click', (event) => {
-        event.preventDefault();
-        const view = views.find((candidate) => candidate.Id === link.dataset.navView);
-        if (view) {
-          navigateToView(view);
-        }
-      });
-    });
-  }
-
-  function navigateToView(view) {
-    if (view?.Id) {
-      setHash('/home', { df: 'library', viewId: view.Id });
+    var extra = visible.filter(function (view) { return view.Id !== (movies && movies.Id) && view.Id !== (shows && shows.Id); });
+    nav.querySelector('#df-nav-more').hidden = extra.length === 0;
+    var avatar = nav.querySelector('#df-avatar');
+    var userName = state.user && state.user.Name ? state.user.Name : '?';
+    if (state.user && state.user.PrimaryImageTag) {
+      avatar.innerHTML = '<img alt="" src="' + esc(apiUrl('/Users/' + encodeURIComponent(state.userId) + '/Images/Primary?maxWidth=72&quality=88&tag=' + encodeURIComponent(state.user.PrimaryImageTag))) + '">';
+    } else {
+      avatar.textContent = userName.trim().charAt(0).toUpperCase() || '?';
     }
   }
 
-  function avatar() {
-    const node = state.nav?.querySelector('#df-avatar');
-    if (!node) {
-      return;
-    }
-    const imageTag = state.user?.PrimaryImageTag;
-    if (!imageTag) {
-      node.textContent = (String(state.user?.Name || '?').trim()[0] || '?').toUpperCase();
-      return;
-    }
-    const params = new URLSearchParams({ tag: imageTag, maxWidth: '72' });
-    const token = accessToken();
-    if (token) {
-      params.set('ApiKey', token);
-    }
-    node.innerHTML = `<img alt="" src="${esc(`${baseUrl()}/Users/${encodeURIComponent(state.userId)}/Images/Primary?${params.toString()}`)}">`;
+  function visibleViews() {
+    return state.views.filter(function (view) {
+      var type = String(view && view.CollectionType || '').toLowerCase();
+      return view && view.Id && !['playlists', 'livetv', 'channels', 'boxsets'].includes(type);
+    });
   }
 
-  function scrollNav() {
-    state.nav?.classList.toggle('df-scrolled', window.scrollY > 16);
+  function nativeLibraryHref(view) {
+    var type = String(view.CollectionType || '').toLowerCase();
+    var collectionType = type || '';
+    return '#/movies?topParentId=' + encodeURIComponent(view.Id) + (collectionType ? '&collectionType=' + encodeURIComponent(collectionType) : '');
   }
 
-  function openLibrariesMenu(anchor, views) {
+  function openLibrariesMenu(anchor) {
     closeMenus();
-    const menu = document.createElement('div');
-    menu.className = 'df-more-menu';
-    views.forEach((view) => menu.appendChild(menuButton(labelForView(view), 'movie', () => navigateToView(view))));
+    var menu = createNode('<div class="df-floating-menu df-library-menu"><div class="df-menu-label">Libraries</div></div>');
+    visibleViews().forEach(function (view) {
+      menu.appendChild(menuItem(view.Name || 'Library', 'movie', function () {
+        nativeHash('/movies', { topParentId: view.Id, collectionType: view.CollectionType || '' });
+      }));
+    });
     ensureMenuRoot().appendChild(menu);
-    positionMenu(menu, anchor);
+    positionFloating(menu, anchor);
   }
 
   function openToolsMenu(anchor) {
     closeMenus();
-    const menu = document.createElement('div');
-    menu.className = 'df-user-menu';
-    menu.appendChild(menuButton('Surprise me', 'dice', randomTitle));
-    menu.appendChild(menuButton('Sync Play', 'plus', () => nativeAction(/sync\s*play/i)));
-    menu.appendChild(menuButton('Cast to device', 'tv', () => nativeAction(/cast|play to/i)));
+    var menu = createNode('<div class="df-floating-menu df-tools-menu"></div>');
+    menu.appendChild(menuItem('Surprise me', 'shuffle', randomTitle));
+    menu.appendChild(menuItem('Sync Play', 'plus', function () { return clickNativeAction(/sync\s*play/i); }));
+    menu.appendChild(menuItem('Cast to device', 'tv', function () { return clickNativeAction(/cast|play to/i); }));
     ensureMenuRoot().appendChild(menu);
-    positionMenu(menu, anchor);
+    positionFloating(menu, anchor);
   }
 
   function openUserMenu(anchor) {
     closeMenus();
-    const menu = document.createElement('div');
-    menu.className = 'df-user-menu';
-    menu.appendChild(menuButton('Profile', 'user', () => nativeHash('/userprofile', { userId: state.userId })));
-    menu.appendChild(menuButton('Preferences', 'tools', () => nativeHash('/mypreferencesmenu')));
+    var menu = createNode('<div class="df-floating-menu df-user-menu"></div>');
+    menu.appendChild(menuItem('Profile', 'user', function () { nativeHash('/userprofile', { userId: state.userId }); }));
+    menu.appendChild(menuItem('Preferences', 'tools', function () { nativeHash('/mypreferencesmenu'); }));
     menu.appendChild(menuSeparator());
-    menu.appendChild(menuButton('Requests', 'plus', () => nativeHash('/home', { tab: 2 })));
-    menu.appendChild(menuButton('Bookmarks', 'list', () => nativeHash('/home', { tab: 3 })));
-    menu.appendChild(menuButton('Calendar', 'list', () => nativeHash('/userpluginsettings.html', { pageUrl: '/JellyfinEnhanced/calendarPage' })));
-    menu.appendChild(menuButton('About DINKFLIX', 'info', () => setHash('/home', { df: 'about' })));
-    if (isAdmin()) {
-      menu.appendChild(menuButton('Dashboard', 'tools', () => nativeHash('/dashboard')));
+    menu.appendChild(menuItem('Requests', 'plus', function () { nativeHash('/home', { tab: 2 }); }));
+    menu.appendChild(menuItem('Bookmarks', 'movie', function () { nativeHash('/home', { tab: 3 }); }));
+    menu.appendChild(menuItem('Calendar', 'movie', function () { nativeHash('/userpluginsettings.html', { pageUrl: '/JellyfinEnhanced/calendarPage' }); }));
+    menu.appendChild(menuItem('About DINKFLIX', 'info', function () { nativeHash('/home', { dinkflix: 'about' }); }));
+    if (state.user && state.user.Policy && state.user.Policy.IsAdministrator) {
+      menu.appendChild(menuItem('Dashboard', 'tools', function () { nativeHash('/dashboard'); }));
     }
     menu.appendChild(menuSeparator());
-    menu.appendChild(menuButton('Quick Connect', 'plus', () => nativeAction(/quick connect/i)));
-    menu.appendChild(menuButton('Sign out', 'close', () => nativeAction(/sign out|logout/i), 'danger'));
+    menu.appendChild(menuItem('Quick Connect', 'plus', function () { return clickNativeAction(/quick connect/i); }));
+    menu.appendChild(menuItem('Sign out', 'close', function () { return clickNativeAction(/sign out|logout/i); }, 'df-menu-danger'));
     ensureMenuRoot().appendChild(menu);
-    positionMenu(menu, anchor);
+    positionFloating(menu, anchor);
   }
 
-  function nativeAction(pattern) {
-    const candidates = [...document.querySelectorAll('button, a, [role="button"]')].filter((element) => !element.closest('#dinkflix-nav, #dinkflix-menu-root'));
-    const target = candidates.find((element) => pattern.test(`${element.textContent || ''} ${element.getAttribute('aria-label') || ''} ${element.getAttribute('title') || ''}`));
+  function clickNativeAction(pattern) {
+    var candidates = Array.from(document.querySelectorAll('button, a, [role="button"]')).filter(function (node) {
+      return !node.closest('#dinkflix-nav, #dinkflix-menu-root, #dinkflix-modal-root');
+    });
+    var target = candidates.find(function (node) {
+      var text = safeText(node.textContent) + ' ' + safeText(node.getAttribute('aria-label')) + ' ' + safeText(node.getAttribute('title'));
+      return pattern.test(text);
+    });
     if (target) {
       target.click();
       return true;
@@ -614,828 +664,918 @@
   async function loadUser() {
     state.userId = currentUserId();
     state.serverId = currentServerId();
+    state.accessToken = accessToken();
     if (!state.userId) {
-      return false;
+      throw new Error('No Jellyfin user session was found.');
     }
-    try {
-      state.user = await apiGet(`/Users/${encodeURIComponent(state.userId)}`);
-      return true;
-    } catch (firstError) {
-      try {
-        const jellyfin = client();
-        if (typeof jellyfin?.getUser === 'function') {
-          const result = await jellyfin.getUser(state.userId);
-          state.user = result?.Items ? result.Items[0] : result;
-          if (state.user) {
-            return true;
-          }
-        }
-      } catch (secondError) {
-        console.error('[DINKFLIX] User lookup failed.', firstError, secondError);
-      }
-      console.error('[DINKFLIX] User lookup failed.', firstError);
-      return false;
-    }
+    state.user = await apiGet('/Users/' + encodeURIComponent(state.userId));
   }
 
   async function loadViews() {
-    if (!state.userId) {
-      return;
-    }
-    try {
-      const result = await apiGet(`/UserViews?UserId=${encodeURIComponent(state.userId)}`);
-      state.views = Array.isArray(result) ? result : (Array.isArray(result?.Items) ? result.Items : []);
-    } catch (error) {
-      state.views = [];
-      console.error('[DINKFLIX] Library view lookup failed.', error);
-    }
+    var result = await apiGet('/UserViews?UserId=' + encodeURIComponent(state.userId) + '&IncludeExternalContent=false');
+    state.views = Array.isArray(result) ? result : (Array.isArray(result && result.Items) ? result.Items : []);
   }
 
-  async function getItems(options = {}) {
-    const defaults = {
+  function fields() {
+    return 'PrimaryImageAspectRatio,Overview,Genres,Tags,People,MediaSources,ProviderIds,UserData,OfficialRating,CommunityRating,ProductionYear,RunTimeTicks,Width,Height,VideoRange,VideoRangeType,DateCreated,DatePlayed,ChildCount,BackdropImageTags,ImageTags,SeriesId,SeriesName,SeriesPrimaryImageTag,ParentIndexNumber,IndexNumber,Studios,RemoteTrailers';
+  }
+
+  async function getItems(options) {
+    var defaults = {
       UserId: state.userId,
       Recursive: true,
       EnableUserData: true,
-      IncludeItemTypes: 'Movie,Series',
+      EnableImages: true,
       EnableImageTypes: 'Primary,Backdrop,Thumb,Logo',
-      Limit: 24,
+      Limit: 50,
       StartIndex: 0,
-      SortBy: 'SortName',
-      SortOrder: 'Ascending',
-      Fields: 'PrimaryImageAspectRatio,Overview,Genres,Tags,People,MediaSources,ProviderIds,UserData,OfficialRating,CommunityRating,ProductionYear,RunTimeTicks,Width,Height,VideoRange,VideoRangeType,DateCreated,DatePlayed,ChildCount,BackdropImageTags,ImageTags'
+      Fields: fields()
     };
-    const params = new URLSearchParams();
-    Object.entries({ ...defaults, ...options }).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        params.set(key, String(value));
+    var params = new URLSearchParams();
+    Object.entries(Object.assign({}, defaults, options || {})).forEach(function (entry) {
+      if (entry[1] !== undefined && entry[1] !== null && entry[1] !== '') {
+        params.set(entry[0], String(entry[1]));
       }
     });
-    try {
-      const result = await apiGet(`/Items?${params.toString()}`);
-      return Array.isArray(result?.Items) ? result.Items : [];
-    } catch (firstError) {
-      try {
-        const jellyfin = client();
-        if (typeof jellyfin?.getItems === 'function') {
-          const result = await jellyfin.getItems(state.userId, Object.fromEntries(params.entries()));
-          return Array.isArray(result) ? result : (Array.isArray(result?.Items) ? result.Items : []);
-        }
-      } catch (secondError) {
-        console.error('[DINKFLIX] Item query failed.', firstError, secondError);
-      }
-      throw firstError;
-    }
+    var result = await apiGet('/Items?' + params.toString());
+    return Array.isArray(result && result.Items) ? result.Items : [];
   }
 
   async function getItem(id) {
-    const fields = 'PrimaryImageAspectRatio,Overview,Genres,Tags,People,MediaSources,ProviderIds,UserData,OfficialRating,CommunityRating,ProductionYear,RunTimeTicks,Width,Height,VideoRange,VideoRangeType,DateCreated,DatePlayed,ChildCount,SortName,BackdropImageTags,ImageTags';
-    return apiGet(`/Items/${encodeURIComponent(id)}?UserId=${encodeURIComponent(state.userId)}&Fields=${encodeURIComponent(fields)}`);
+    return apiGet('/Items/' + encodeURIComponent(id) + '?UserId=' + encodeURIComponent(state.userId) + '&Fields=' + encodeURIComponent(fields()));
   }
 
-  function badgeHtml(item) {
-    const badges = [];
-    const rating = Number(item?.CommunityRating || 0);
-    if (rating) {
-      badges.push(`<span class="df-badge rating">★ ${rating.toFixed(1)}</span>`);
-    }
-    const width = Number(item?.Width || 0);
-    const height = Number(item?.Height || 0);
-    if (height >= 2000 || width >= 3500) {
-      badges.push('<span class="df-badge quality">4K</span>');
-    } else if (height >= 1080 || width >= 1900) {
-      badges.push('<span class="df-badge quality">1080p</span>');
-    }
-    if (item?.VideoRange || /hdr/i.test(item?.VideoRangeType || '')) {
-      badges.push('<span class="df-badge hdr">HDR</span>');
-    }
-    if (item?.OfficialRating) {
-      badges.push(`<span class="df-badge age">${esc(item.OfficialRating)}</span>`);
-    }
-    return badges.join('');
-  }
-
-  function tagHtml(item) {
-    return (item?.Tags || []).slice(0, 2).map((tag) => `<span class="df-badge tag">${esc(tag)}</span>`).join('');
-  }
-
-  function card(item) {
-    const id = item.Id;
-    const title = esc(item.Name || 'Untitled');
-    const playable = ['Movie', 'Episode', 'Video'].includes(item.Type);
-    const meta = [fmtYear(item.ProductionYear || item.PremiereDate || item.DateCreated), humanMinutes(item.RunTimeTicks)].filter(Boolean);
-    const progress = playbackPercent(item);
-    return `<article class="df-card" data-id="${esc(id)}"><div class="df-card-media"><a href="#/dinkflix/item?id=${encodeURIComponent(id)}" class="df-card-link" data-df-item="${esc(id)}" aria-label="Open ${title}"></a><img loading="lazy" src="${esc(imageUrl(item, 'Primary', 900))}" alt="${title}"><button class="df-card-menu-btn" data-df-menu="${esc(id)}" type="button" aria-label="More actions for ${title}" title="More actions">${svg('dots')}</button>${playable ? `<button class="df-card-play-btn" data-df-play="${esc(id)}" type="button" aria-label="Play ${title}" title="Play">${svg('play')}</button>` : ''}${progress > 0 ? `<div class="df-progress"><span style="width:${progress}%"></span></div>` : ''}</div><div class="df-card-content"><div class="df-card-title">${title}</div><div class="df-card-meta">${meta.map((value, index) => `${index ? '<span class="df-meta-dot">•</span>' : ''}<span>${esc(value)}</span>`).join('')}</div><div class="df-card-badges">${badgeHtml(item)}${tagHtml(item)}</div></div></article>`;
-  }
-
-  function section(title, items, href = '') {
-    if (!items?.length) {
-      return '';
-    }
-    return `<section class="df-section"><div class="df-section-head"><h2 class="df-section-title">${esc(title)}</h2>${href ? `<a class="df-section-link" href="${href}">View all →</a>` : ''}</div><div class="df-row">${items.map(card).join('')}</div></section>`;
-  }
-
-  function rememberItems(items) {
-    (items || []).forEach((item) => state.cardData.set(item.Id, item));
-  }
-
-  function bindCardActions(root) {
-    rememberItems([...root.querySelectorAll('.df-card')].map((node) => state.cardData.get(node.dataset.id)).filter(Boolean));
-    root.querySelectorAll('[data-df-item]').forEach((anchor) => {
-      if (anchor.dataset.bound === '1') {
-        return;
+  function remember(items) {
+    (items || []).forEach(function (item) {
+      if (item && item.Id) {
+        state.cardData.set(item.Id, item);
       }
-      anchor.dataset.bound = '1';
-      anchor.addEventListener('click', (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        setHash('/home', { df: 'item', id: anchor.dataset.dfItem });
+    });
+  }
+
+  function cardHtml(item, options) {
+    var opts = options || {};
+    var id = safeText(item && item.Id);
+    var title = item && item.Name ? item.Name : 'Untitled';
+    var year = yearLabel(item);
+    var runtime = minutesLabel(item && item.RunTimeTicks);
+    var meta = [year, runtime].filter(Boolean);
+    var progress = 0;
+    if (item && item.RunTimeTicks && item.UserData && item.UserData.PlaybackPositionTicks) {
+      progress = Math.max(0, Math.min(100, Number(item.UserData.PlaybackPositionTicks) / Number(item.RunTimeTicks) * 100));
+    }
+    var resumeId = item && item.__dinkflixResumeId ? item.__dinkflixResumeId : '';
+    var continueLabel = opts.continueItem ? '<span class="df-card-continue">' + esc(item.__dinkflixContinueLabel || '') + '</span>' : '';
+    var selected = state.selectedIds.has(id);
+    return '<article class="df-card' + (selected ? ' is-selected' : '') + '" data-df-card="' + esc(id) + '" data-resume-id="' + esc(resumeId) + '">' +
+      '<div class="df-card-art">' +
+      '<img loading="lazy" decoding="async" src="' + esc(imageUrl(item, opts.imageType || 'Primary', 1000)) + '" alt="' + esc(title) + '">' +
+      '<div class="df-card-sheen"></div>' +
+      '<button class="df-card-menu" data-df-card-menu="' + esc(id) + '" type="button" aria-label="More actions for ' + esc(title) + '">' + makeIcon('dots') + '</button>' +
+      '<button class="df-card-play" data-df-card-play="' + esc(resumeId || id) + '" type="button" aria-label="Play ' + esc(title) + '">' + makeIcon('play') + '</button>' +
+      (selected ? '<span class="df-card-selected">' + makeIcon('check') + '</span>' : '') +
+      (progress > 0 ? '<div class="df-card-progress"><span style="width:' + progress.toFixed(2) + '%"></span></div>' : '') +
+      '</div>' +
+      '<button class="df-card-body" type="button" data-df-card-open="' + esc(id) + '">' +
+      '<span class="df-card-title" title="' + esc(title) + '">' + esc(title) + '</span>' +
+      '<span class="df-card-meta">' + (meta.length ? meta.map(function (value) { return '<span>' + esc(value) + '</span>'; }).join('<i>•</i>') : '') + '</span>' +
+      '<span class="df-card-badges">' + ratingBadge(item) + qualityBadges(item) + (item && item.OfficialRating ? '<span class="df-badge df-badge-age">' + esc(item.OfficialRating) + '</span>' : '') + '</span>' +
+      continueLabel +
+      '</button>' +
+      '</article>';
+  }
+
+  function bindCards(root) {
+    if (!root) {
+      return;
+    }
+    root.querySelectorAll('[data-df-card-open]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        var id = button.dataset.dfCardOpen;
+        if (state.selectionMode) {
+          toggleSelection(id);
+          return;
+        }
+        openDetails(id);
       });
     });
-    root.querySelectorAll('[data-df-menu]').forEach((button) => {
-      if (button.dataset.bound === '1') {
-        return;
-      }
-      button.dataset.bound = '1';
-      button.addEventListener('click', (event) => {
+    root.querySelectorAll('[data-df-card-menu]').forEach(function (button) {
+      button.addEventListener('click', function (event) {
         event.preventDefault();
         event.stopPropagation();
-        openCardMenu(button, button.dataset.dfMenu);
+        openCardMenu(button, button.dataset.dfCardMenu);
       });
     });
-    root.querySelectorAll('[data-df-play]').forEach((button) => {
-      if (button.dataset.bound === '1') {
-        return;
-      }
-      button.dataset.bound = '1';
-      button.addEventListener('click', (event) => {
+    root.querySelectorAll('[data-df-card-play]').forEach(function (button) {
+      button.addEventListener('click', function (event) {
         event.preventDefault();
         event.stopPropagation();
-        const item = state.cardData.get(button.dataset.dfPlay);
+        var id = button.dataset.dfCardPlay;
+        var item = state.cardData.get(id);
         if (item) {
           playItem(item);
+          return;
         }
+        getItem(id).then(playItem).catch(function () { toast('Unable to start playback.'); });
       });
     });
+  }
+
+  function carouselSection(key, title, items, meta) {
+    var page = state.rowPages[key] || 0;
+    var pageSize = 6;
+    var maxPage = Math.max(0, Math.ceil(items.length / pageSize) - 1);
+    var start = page * pageSize;
+    var slice = items.slice(start, start + pageSize);
+    if (!items.length) {
+      return '';
+    }
+    return '<section class="df-section" data-df-section="' + esc(key) + '">' +
+      '<div class="df-section-header"><div><span class="df-section-kicker">' + esc(meta || '') + '</span><h2>' + esc(title) + '</h2></div><div class="df-section-controls">' +
+      '<button type="button" class="df-round-arrow" data-df-prev="' + esc(key) + '" aria-label="Previous ' + esc(title) + '"' + (page <= 0 ? ' disabled' : '') + '>' + makeIcon('left') + '</button>' +
+      '<button type="button" class="df-round-arrow" data-df-next="' + esc(key) + '" aria-label="Next ' + esc(title) + '"' + (page >= maxPage ? ' disabled' : '') + '>' + makeIcon('right') + '</button></div></div>' +
+      '<div class="df-carousel-grid">' + slice.map(function (item) { return cardHtml(item, { continueItem: key === 'continue' }); }).join('') + '</div>' +
+      '</section>';
+  }
+
+  function bindCarousels(root, sourceMap) {
+    root.querySelectorAll('[data-df-prev]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        var key = button.dataset.dfPrev;
+        state.rowPages[key] = Math.max(0, (state.rowPages[key] || 0) - 1);
+        rerenderHomeRows(sourceMap);
+      });
+    });
+    root.querySelectorAll('[data-df-next]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        var key = button.dataset.dfNext;
+        state.rowPages[key] = (state.rowPages[key] || 0) + 1;
+        rerenderHomeRows(sourceMap);
+      });
+    });
+  }
+
+  function buildHero(items) {
+    if (!items.length) {
+      return '<div class="df-hero df-hero-empty"><div class="df-hero-empty-inner"><span class="df-section-kicker">DINKFLIX</span><h1>Ready when you are.</h1><p>Add some media to your Jellyfin library and DINKFLIX will put your newest titles here.</p></div></div>';
+    }
+    return '<section class="df-hero" id="df-hero"><div class="df-hero-media" id="df-hero-media"></div><div class="df-hero-gradient"></div><div class="df-hero-copy" id="df-hero-copy"></div><div class="df-hero-dots" id="df-hero-dots"></div></section>';
+  }
+
+  function renderHero(index) {
+    var item = state.heroItems[index];
+    var media = document.getElementById('df-hero-media');
+    var copy = document.getElementById('df-hero-copy');
+    var dots = document.getElementById('df-hero-dots');
+    if (!item || !media || !copy || !dots) {
+      return;
+    }
+    var url = backdropUrl(item, 2800);
+    var title = item.Name || 'Recently added';
+    var details = [yearLabel(item), minutesLabel(item.RunTimeTicks), item.Type === 'Series' ? 'Series' : 'Movie'].filter(Boolean);
+    media.style.backgroundImage = 'url("' + url.replaceAll('"', '%22') + '")';
+    copy.innerHTML = '<span class="df-hero-kicker">RECENTLY ADDED</span><h1>' + esc(title) + '</h1><div class="df-hero-meta"><span class="df-hero-rating">' + (item.CommunityRating ? '★ ' + Number(item.CommunityRating).toFixed(1) : '') + '</span>' + details.map(function (value) { return '<span>' + esc(value) + '</span>'; }).join('') + qualityBadges(item) + '</div><p>' + esc(item.Overview || 'A new addition to your DINKFLIX library.') + '</p><div class="df-hero-actions"><button class="df-button df-button-primary" id="df-hero-play">' + makeIcon('play') + '<span>Play</span></button><button class="df-button df-button-ghost" id="df-hero-info">More info</button></div>';
+    dots.innerHTML = state.heroItems.map(function (_, indexValue) { return '<button type="button" data-df-hero-dot="' + indexValue + '" class="' + (indexValue === index ? 'is-active' : '') + '" aria-label="Show featured title ' + (indexValue + 1) + '"></button>'; }).join('');
+    document.getElementById('df-hero-play').addEventListener('click', function () { playItem(item); });
+    document.getElementById('df-hero-info').addEventListener('click', function () { openDetails(item.Id); });
+    dots.querySelectorAll('[data-df-hero-dot]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        showHero(Number(button.dataset.dfHeroDot));
+      });
+    });
+    var hero = document.getElementById('df-hero');
+    hero.onmouseenter = function () { state.heroPaused = true; };
+    hero.onmouseleave = function () { state.heroPaused = false; };
+    state.heroIndex = index;
+  }
+
+  function showHero(index) {
+    if (!state.heroItems.length) {
+      return;
+    }
+    var next = (index + state.heroItems.length) % state.heroItems.length;
+    renderHero(next);
+    if (state.heroTimer) {
+      clearInterval(state.heroTimer);
+    }
+    state.heroTimer = setInterval(function () {
+      if (!document.hidden && !state.heroPaused) {
+        showHero(state.heroIndex + 1);
+      }
+    }, 14000);
+  }
+
+  async function getContinueWatching() {
+    var episodes = await getItems({ IncludeItemTypes: 'Episode', IsResumable: true, SortBy: 'DatePlayed', SortOrder: 'Descending', Limit: 60, Fields: fields() });
+    var movies = await getItems({ IncludeItemTypes: 'Movie', IsResumable: true, SortBy: 'DatePlayed', SortOrder: 'Descending', Limit: 20, Fields: fields() });
+    var groups = new Map();
+    episodes.forEach(function (episode) {
+      var seriesId = episode.SeriesId;
+      if (!seriesId) {
+        return;
+      }
+      if (!groups.has(seriesId)) {
+        groups.set(seriesId, episode);
+      }
+    });
+    var seriesIds = Array.from(groups.keys());
+    var series = seriesIds.length ? await getItems({ Ids: seriesIds.join(','), IncludeItemTypes: 'Series', Limit: seriesIds.length, Fields: fields() }).catch(function () { return []; }) : [];
+    var combined = [];
+    series.forEach(function (show) {
+      var episode = groups.get(show.Id);
+      if (!episode) {
+        return;
+      }
+      var display = Object.assign({}, show);
+      display.__dinkflixResumeId = episode.Id;
+      display.__dinkflixContinueLabel = 'S' + String(episode.ParentIndexNumber || 0).padStart(2, '0') + ' · E' + String(episode.IndexNumber || 0).padStart(2, '0') + ' · ' + remainingLabel(episode);
+      display.UserData = episode.UserData || display.UserData || {};
+      display.RunTimeTicks = episode.RunTimeTicks || display.RunTimeTicks;
+      state.resumeEpisodes.set(show.Id, episode);
+      combined.push(display);
+    });
+    movies.forEach(function (movie) {
+      movie.__dinkflixContinueLabel = remainingLabel(movie) || 'Resume';
+      combined.push(movie);
+    });
+    remember(episodes);
+    remember(movies);
+    remember(series);
+    return combined.slice(0, 40);
+  }
+
+  async function loadHomeData() {
+    var settled = await Promise.allSettled([
+      getContinueWatching(),
+      getItems({ IncludeItemTypes: 'Movie,Series', SortBy: 'DateCreated', SortOrder: 'Descending', Limit: 30, Fields: fields() }),
+      getItems({ IncludeItemTypes: 'Movie,Series', IsPlayed: true, SortBy: 'DatePlayed', SortOrder: 'Descending', Limit: 30, Fields: fields() }),
+      getItems({ IncludeItemTypes: 'Movie,Series', IsFavorite: true, SortBy: 'SortName', SortOrder: 'Ascending', Limit: 30, Fields: fields() }),
+      getItems({ IncludeItemTypes: 'Movie', SortBy: 'DateCreated', SortOrder: 'Descending', Limit: 30, Fields: fields() }),
+      getItems({ IncludeItemTypes: 'Series', SortBy: 'DateCreated', SortOrder: 'Descending', Limit: 30, Fields: fields() })
+    ]);
+    function val(index) {
+      return settled[index].status === 'fulfilled' ? settled[index].value : [];
+    }
+    var continueWatching = val(0);
+    var recent = val(1);
+    var played = val(2);
+    var favorites = val(3);
+    var movies = val(4);
+    var shows = val(5);
+    remember([].concat(continueWatching, recent, played, favorites, movies, shows));
+    state.heroItems = recent.filter(function (item) { return item.BackdropImageTags && item.BackdropImageTags.length; }).slice(0, 8);
+    if (!state.heroItems.length) {
+      state.heroItems = recent.slice(0, 8);
+    }
+    return { continueWatching: continueWatching, recent: recent, played: played, favorites: favorites, movies: movies, shows: shows };
+  }
+
+  function renderHomeRows(data) {
+    var rows = document.getElementById('df-home-rows');
+    if (!rows) {
+      return;
+    }
+    rows.innerHTML = carouselSection('continue', 'Continue Watching', data.continueWatching, 'Pick up where you left off') +
+      carouselSection('played', 'Recently Played', data.played, 'Back in the rotation') +
+      carouselSection('recent', 'Recently Added', data.recent, 'Fresh from the library') +
+      carouselSection('movies', 'Movies', data.movies, 'Feature films') +
+      carouselSection('shows', 'TV Shows', data.shows, 'Series and seasons') +
+      carouselSection('list', 'My List', data.favorites, 'Saved for later');
+    bindCarousels(rows, data);
+    bindCards(rows);
+  }
+
+  function rerenderHomeRows(data) {
+    renderHomeRows(data);
+  }
+
+  async function renderHome() {
+    var root = ensureCustomRoot('df-page-home');
+    root.innerHTML = '<div class="df-home-loading"><div class="df-loading-hero"></div><div class="df-loading-row"></div><div class="df-loading-row"></div></div>';
+    var data = await loadHomeData();
+    root.innerHTML = buildHero(state.heroItems) + '<main class="df-home-body" id="df-home-rows"></main>';
+    renderHomeRows(data);
+    if (state.heroItems.length) {
+      showHero(0);
+    }
+    markCustomReady('DINKFLIX');
+  }
+
+  function ensureCustomRoot(className) {
+    clearDinkflixRoots();
+    var root = document.createElement('main');
+    root.id = 'dinkflix-app';
+    root.className = className || 'df-page';
+    document.body.appendChild(root);
+    state.root = root;
+    state.customRouteActive = true;
+    document.body.classList.add('df-custom-active');
+    return root;
+  }
+
+  function markCustomReady(title) {
+    state.customRouteActive = true;
+    document.body.classList.add('df-custom-active');
+    document.title = title ? title + ' — DINKFLIX' : 'DINKFLIX';
+    hideRouteCover();
+    finishBoot();
+  }
+
+  function markNativeReady() {
+    clearDinkflixRoots();
+    state.customRouteActive = false;
+    document.body.classList.remove('df-custom-active');
+    hideRouteCover();
+    finishBoot();
+  }
+
+  async function openDetails(id) {
+    closeMenus();
+    showRouteCover();
+    nativeHash('/details', { id: id });
+  }
+
+  async function renderDetails(id) {
+    if (!id) {
+      markNativeReady();
+      return;
+    }
+    var root = ensureCustomRoot('df-detail-page');
+    root.innerHTML = '<div class="df-detail-loading"><div></div></div>';
+    var item;
+    try {
+      item = await getItem(id);
+    } catch (error) {
+      console.error('[DINKFLIX] Detail load failed.', error);
+      markNativeReady();
+      toast('DINKFLIX could not load that title.');
+      return;
+    }
+    state.cardData.set(id, item);
+    var details = { item: item, seasons: [], episodes: [], providers: null, similar: [] };
+    if (item.Type === 'Series') {
+      details.seasons = await getItems({ ParentId: item.Id, IncludeItemTypes: 'Season', SortBy: 'IndexNumber', SortOrder: 'Ascending', Limit: 100, Fields: fields() }).catch(function () { return []; });
+    } else if (item.Type === 'Season') {
+      details.episodes = await getItems({ ParentId: item.Id, IncludeItemTypes: 'Episode', SortBy: 'IndexNumber', SortOrder: 'Ascending', Limit: 300, Fields: fields() }).catch(function () { return []; });
+    }
+    if (item.ProviderIds && item.ProviderIds.Tmdb) {
+      var tmdbType = item.Type === 'Series' ? 'tv' : 'movie';
+      details.providers = await apiGet('/DinkFlix/TMDB/WatchProviders/' + encodeURIComponent(item.ProviderIds.Tmdb) + '?type=' + encodeURIComponent(tmdbType) + '&region=AU').catch(function () { return null; });
+    }
+    if (item.Type === 'Movie' || item.Type === 'Series') {
+      var genres = Array.isArray(item.Genres) ? item.Genres.slice(0, 2) : [];
+      if (genres.length) {
+        details.similar = await getItems({ IncludeItemTypes: item.Type === 'Series' ? 'Series' : 'Movie', Genres: genres.join(','), ExcludeItemIds: item.Id, Limit: 12, SortBy: 'Random', SortOrder: 'Ascending', Fields: fields() }).catch(function () { return []; });
+      }
+    }
+    remember(details.seasons);
+    remember(details.episodes);
+    remember(details.similar);
+    root.innerHTML = detailsHtml(details);
+    bindDetail(root, details);
+    markCustomReady(item.Name || 'DINKFLIX');
+  }
+
+  function detailPeople(item) {
+    var people = Array.isArray(item.People) ? item.People : [];
+    return {
+      directors: people.filter(function (person) { return String(person.Type || '').toLowerCase() === 'director'; }).slice(0, 8),
+      writers: people.filter(function (person) { return String(person.Type || '').toLowerCase() === 'writer'; }).slice(0, 8),
+      cast: people.filter(function (person) { return ['actor', 'actress'].includes(String(person.Type || '').toLowerCase()); }).slice(0, 12)
+    };
+  }
+
+  function technicalHtml(item) {
+    var sources = Array.isArray(item.MediaSources) ? item.MediaSources : [];
+    var source = sources[0];
+    if (!source) {
+      return '<div class="df-tech-empty">Technical media information is not available for this title.</div>';
+    }
+    var streams = Array.isArray(source.MediaStreams) ? source.MediaStreams : [];
+    var video = streams.filter(function (stream) { return stream.Type === 'Video'; }).slice(0, 4);
+    var audio = streams.filter(function (stream) { return stream.Type === 'Audio'; }).slice(0, 8);
+    var subs = streams.filter(function (stream) { return stream.Type === 'Subtitle'; }).slice(0, 12);
+    function streamLabel(stream) {
+      var parts = [stream.DisplayTitle || stream.Codec, stream.Language, stream.Width && stream.Height ? stream.Width + '×' + stream.Height : '', stream.AudioChannels ? stream.AudioChannels + 'ch' : '', stream.ChannelLayout || ''];
+      return parts.filter(Boolean).join(' · ');
+    }
+    return '<div class="df-tech-grid"><div><span>Container</span><strong>' + esc(source.Container || '—') + '</strong></div><div><span>Bitrate</span><strong>' + esc(source.Bitrate ? Math.round(source.Bitrate / 1000) + ' kbps' : '—') + '</strong></div><div><span>Video</span><strong>' + esc(video.length ? video.map(streamLabel).join(' / ') : '—') + '</strong></div><div><span>Audio</span><strong>' + esc(audio.length ? audio.map(streamLabel).join(' / ') : '—') + '</strong></div><div><span>Subtitles</span><strong>' + esc(subs.length ? subs.map(streamLabel).join(' / ') : 'None') + '</strong></div><div><span>Path</span><strong>' + esc(source.Path || 'Managed by Jellyfin') + '</strong></div></div>';
+  }
+
+  function providersHtml(providers) {
+    if (!providers) {
+      return '';
+    }
+    var blocks = [];
+    [['streaming', 'Stream'], ['free', 'Free'], ['rental', 'Rent'], ['purchase', 'Buy']].forEach(function (pair) {
+      var values = Array.isArray(providers[pair[0]]) ? providers[pair[0]] : [];
+      if (values.length) {
+        blocks.push('<div class="df-provider-group"><span>' + esc(pair[1]) + '</span><div>' + values.map(function (name) { return '<span class="df-provider-pill">' + esc(name) + '</span>'; }).join('') + '</div></div>');
+      }
+    });
+    if (!blocks.length) {
+      return '';
+    }
+    return '<section class="df-info-section"><div class="df-info-section-head"><span class="df-section-kicker">WHERE TO WATCH</span><h2>Available in Australia</h2></div>' + blocks.join('') + '<p class="df-attribution">' + esc(providers.attribution || 'Availability data by JustWatch via TMDB.') + '</p></section>';
+  }
+
+  function peopleHtml(label, people) {
+    if (!people.length) {
+      return '';
+    }
+    return '<section class="df-info-section"><div class="df-info-section-head"><span class="df-section-kicker">' + esc(label.toUpperCase()) + '</span><h2>' + esc(label) + '</h2></div><div class="df-people-row">' + people.map(function (person) { return '<div class="df-person"><div class="df-person-art">' + (personImageUrl(person, 180) ? '<img loading="lazy" src="' + esc(personImageUrl(person, 180)) + '" alt="' + esc(person.Name || '') + '">' : '<span>' + esc((person.Name || '?').charAt(0)) + '</span>') + '</div><strong>' + esc(person.Name || '') + '</strong><small>' + esc(person.Role || person.Type || '') + '</small></div>'; }).join('') + '</div></section>';
+  }
+
+  function detailEndTime(item) {
+    if (!item.RunTimeTicks) {
+      return '';
+    }
+    var position = Number(item.UserData && item.UserData.PlaybackPositionTicks || 0);
+    return '<span class="df-detail-endtime">' + (position ? 'Resume now · ends around ' : 'Watch now · ends around ') + esc(endTimeLabel(item.RunTimeTicks, position)) + ' local time</span>';
+  }
+
+  function detailMediaBadges(item) {
+    var badges = coreBadges(item);
+    if (item.Genres) {
+      badges += item.Genres.slice(0, 5).map(function (genre) { return '<span class="df-badge df-badge-tag">' + esc(genre) + '</span>'; }).join('');
+    }
+    if (item.Tags) {
+      badges += item.Tags.slice(0, 4).map(function (tag) { return '<span class="df-badge df-badge-tag">' + esc(tag) + '</span>'; }).join('');
+    }
+    return badges;
+  }
+
+  function seasonsHtml(seasons) {
+    if (!seasons.length) {
+      return '<div class="df-inline-empty">No seasons were found.</div>';
+    }
+    return '<div class="df-detail-grid">' + seasons.map(function (season) { return cardHtml(season, { imageType: 'Primary' }); }).join('') + '</div>';
+  }
+
+  function episodesHtml(episodes) {
+    if (!episodes.length) {
+      return '<div class="df-inline-empty">No episodes were found.</div>';
+    }
+    return '<div class="df-episode-grid">' + episodes.map(function (episode) {
+      var progress = Number(episode.RunTimeTicks || 0) ? Number(episode.UserData && episode.UserData.PlaybackPositionTicks || 0) / Number(episode.RunTimeTicks) * 100 : 0;
+      return '<article class="df-episode-card" data-df-episode-card="' + esc(episode.Id) + '"><div class="df-episode-art"><img loading="lazy" src="' + esc(imageUrl(episode, 'Thumb', 900) || imageUrl(episode, 'Primary', 900)) + '" alt="' + esc(episode.Name || '') + '"><span class="df-episode-number">' + esc(String(episode.IndexNumber || '').padStart(2, '0')) + '</span><button type="button" class="df-card-menu" data-df-card-menu="' + esc(episode.Id) + '" aria-label="More actions">' + makeIcon('dots') + '</button><button type="button" class="df-card-play" data-df-card-play="' + esc(episode.Id) + '" aria-label="Play episode">' + makeIcon('play') + '</button>' + (progress > 0 ? '<div class="df-card-progress"><span style="width:' + progress.toFixed(2) + '%"></span></div>' : '') + '</div><div class="df-episode-body"><h3>' + esc(episode.Name || 'Episode') + '</h3><div class="df-episode-meta"><span>' + esc(minutesLabel(episode.RunTimeTicks) || '—') + '</span>' + (episode.PremiereDate ? '<span>•</span><span>' + esc(yearLabel(episode)) + '</span>' : '') + (episode.CommunityRating ? '<span>•</span><span>★ ' + Number(episode.CommunityRating).toFixed(1) + '</span>' : '') + '</div><p>' + esc(episode.Overview || '') + '</p></div></article>';
+    }).join('') + '</div>';
+  }
+
+  function detailExternalLinks(item) {
+    var ids = item.ProviderIds || {};
+    var links = [];
+    if (ids.Imdb) {
+      links.push('<a href="https://www.imdb.com/title/' + encodeURIComponent(ids.Imdb) + '/" target="_blank" rel="noopener noreferrer">IMDb ' + makeIcon('external') + '</a>');
+    }
+    if (ids.Tmdb) {
+      links.push('<a href="https://www.themoviedb.org/' + (item.Type === 'Series' ? 'tv' : 'movie') + '/' + encodeURIComponent(ids.Tmdb) + '" target="_blank" rel="noopener noreferrer">TMDB ' + makeIcon('external') + '</a>');
+    }
+    return links.length ? '<div class="df-detail-links">' + links.join('') + '</div>' : '';
+  }
+
+  function detailsHtml(details) {
+    var item = details.item;
+    var people = detailPeople(item);
+    var kind = item.Type === 'Series' ? 'TV Series' : item.Type === 'Season' ? 'Season ' + String(item.IndexNumber || '') : item.Type === 'Episode' ? 'Episode' : 'Movie';
+    var hero = backdropUrl(item, 2800) || imageUrl(item, 'Primary', 1600);
+    var playLabel = item.UserData && item.UserData.PlaybackPositionTicks ? 'Resume' : 'Play';
+    var children = item.Type === 'Series' ? '<section class="df-info-section"><div class="df-info-section-head"><span class="df-section-kicker">SERIES</span><h2>Seasons</h2></div>' + seasonsHtml(details.seasons) + '</section>' : item.Type === 'Season' ? '<section class="df-info-section"><div class="df-info-section-head"><span class="df-section-kicker">EPISODES</span><h2>Season ' + esc(item.IndexNumber || '') + '</h2></div>' + episodesHtml(details.episodes) + '</section>' : '';
+    var similar = details.similar.length ? '<section class="df-info-section"><div class="df-info-section-head"><span class="df-section-kicker">DISCOVERY</span><h2>More like this</h2></div><div class="df-detail-grid">' + details.similar.map(function (candidate) { return cardHtml(candidate); }).join('') + '</div></section>' : '';
+    return '<main id="df-detail" class="df-detail-view"><div class="df-detail-backdrop" style="background-image:url(\"' + esc(hero) + '\")"></div><div class="df-detail-shade"></div><div class="df-detail-inner"><div class="df-detail-top"><button class="df-back-button" id="df-detail-back">' + makeIcon('left') + '<span>Back</span></button><div class="df-detail-link-wrap">' + detailExternalLinks(item) + '</div></div><div class="df-detail-main"><div class="df-detail-poster"><img src="' + esc(imageUrl(item, 'Primary', 1100)) + '" alt="' + esc(item.Name || '') + '"></div><div class="df-detail-copy"><span class="df-section-kicker">' + esc(kind.toUpperCase()) + '</span><h1>' + esc(item.Name || '') + '</h1><div class="df-detail-meta">' + (item.CommunityRating ? '<span class="df-detail-rating">★ ' + Number(item.CommunityRating).toFixed(1) + '</span>' : '') + (yearLabel(item) ? '<span>' + esc(yearLabel(item)) + '</span>' : '') + (minutesLabel(item.RunTimeTicks) ? '<span>' + esc(minutesLabel(item.RunTimeTicks)) + '</span>' : '') + (item.OfficialRating ? '<span>' + esc(item.OfficialRating) + '</span>' : '') + detailEndTime(item) + '</div><div class="df-detail-badges">' + detailMediaBadges(item) + '</div><p class="df-detail-overview">' + esc(item.Overview || 'No overview is available for this title.') + '</p><div class="df-detail-actions"><button type="button" class="df-button df-button-primary" id="df-detail-play">' + makeIcon('play') + '<span>' + esc(playLabel) + '</span></button><button type="button" class="df-button df-button-secondary" id="df-detail-list">' + (item.UserData && item.UserData.IsFavorite ? makeIcon('check') + '<span>In My List</span>' : makeIcon('plus') + '<span>My List</span>') + '</button><button type="button" class="df-button df-button-secondary" id="df-detail-more">' + makeIcon('dots') + '<span>More</span></button></div></div></div>' + children + peopleHtml('Cast', people.cast) + peopleHtml('Directors', people.directors) + peopleHtml('Writers', people.writers) + providersHtml(details.providers) + '<section class="df-info-section"><div class="df-info-section-head"><span class="df-section-kicker">MEDIA</span><h2>Video, audio & subtitles</h2></div>' + technicalHtml(item) + '</section>' + similar + '</div></main>';
+  }
+
+  function bindDetail(root, details) {
+    var item = details.item;
+    root.querySelector('#df-detail-back').addEventListener('click', function () {
+      if (history.length > 1) {
+        history.back();
+      } else {
+        nativeHash('/home');
+      }
+    });
+    root.querySelector('#df-detail-play').addEventListener('click', function () { playItem(item); });
+    root.querySelector('#df-detail-list').addEventListener('click', function () {
+      toggleFavorite(item).then(function () {
+        renderDetails(item.Id);
+      }).catch(function () { toast('Could not update My List.'); });
+    });
+    root.querySelector('#df-detail-more').addEventListener('click', function (event) {
+      openCardMenu(event.currentTarget, item.Id);
+    });
+    bindCards(root);
+    root.querySelectorAll('[data-df-episode-card]').forEach(function (node) {
+      node.addEventListener('click', function (event) {
+        if (event.target.closest('.df-card-menu, .df-card-play')) {
+          return;
+        }
+        openDetails(node.dataset.dfEpisodeCard);
+      });
+    });
+  }
+
+  async function renderList() {
+    var root = ensureCustomRoot('df-page');
+    root.innerHTML = '<div class="df-page-header"><div><span class="df-section-kicker">YOUR LIBRARY</span><h1>My List</h1><p>Titles you\'ve saved for later.</p></div></div><div id="df-library-grid" class="df-detail-grid"><div class="df-inline-empty">Loading…</div></div>';
+    var items = await getItems({ IncludeItemTypes: 'Movie,Series', IsFavorite: true, Limit: 300, SortBy: 'SortName', SortOrder: 'Ascending', Fields: fields() });
+    remember(items);
+    root.querySelector('#df-library-grid').innerHTML = items.length ? items.map(function (item) { return cardHtml(item); }).join('') : '<div class="df-empty-state">Your list is empty.<span>Add something from the three-dot menu.</span></div>';
+    bindCards(root);
+    markCustomReady('My List');
+  }
+
+  function renderAbout() {
+    var root = ensureCustomRoot('df-page');
+    root.innerHTML = '<div class="df-about-wrap"><div class="df-page-header"><div><span class="df-section-kicker">THE PROJECT</span><h1>About DINKFLIX</h1><p>DINKFLIX started with a simple idea: make a personal Jellyfin server feel like a streaming service that friends and family can sit down and just use.</p></div></div><section class="df-about-card"><div class="df-about-art"><div class="df-about-mark"><span>DINK</span><span>FLIX</span></div><small>Built around Jellyfin. Designed around the people using it.</small></div><div class="df-about-copy"><span class="df-section-kicker">WHY IT EXISTS</span><h2>Fast over flashy. Clear over clever.</h2><p>The goal isn\'t to hide Jellyfin\'s flexibility. It\'s to make the everyday experience feel considered: better discovery, cleaner navigation, useful information and a visual identity that belongs to DINKFLIX.</p><p>DINKFLIX keeps Jellyfin underneath. Playback, accounts, permissions and server management stay where they belong. The web experience gets the polish.</p><div class="df-about-facts"><div><span>Frontend</span><strong>DINKFLIX Web</strong></div><div><span>Backend</span><strong>Jellyfin 12.1</strong></div><div><span>Focus</span><strong>Desktop Web</strong></div></div></div></section></div>';
+    markCustomReady('About DINKFLIX');
   }
 
   async function randomTitle() {
     try {
-      const items = await getItems({ IncludeItemTypes: 'Movie,Series', Limit: 100, SortBy: 'DateCreated', SortOrder: 'Descending' });
+      var items = await getItems({ IncludeItemTypes: 'Movie,Series', Limit: 100, SortBy: 'Random', SortOrder: 'Ascending', Fields: fields() });
       if (items.length) {
-        rememberItems(items);
-        setHash('/home', { df: 'item', id: items[Math.floor(Math.random() * items.length)].Id });
+        remember(items);
+        openDetails(items[Math.floor(Math.random() * items.length)].Id);
       }
-    } catch {
-      toast('Could not choose a random title.');
+    } catch (error) {
+      toast('Could not find a random title.');
     }
   }
 
   async function toggleFavorite(item) {
-    const favorite = !!item?.UserData?.IsFavorite;
-    await apiWrite(`/UserFavoriteItems/${encodeURIComponent(item.Id)}`, favorite ? 'DELETE' : 'POST');
+    var favorite = Boolean(item && item.UserData && item.UserData.IsFavorite);
+    await apiRequest('/UserFavoriteItems/' + encodeURIComponent(item.Id) + '?UserId=' + encodeURIComponent(state.userId), favorite ? 'DELETE' : 'POST');
     item.UserData = item.UserData || {};
     item.UserData.IsFavorite = !favorite;
     state.cardData.set(item.Id, item);
     toast(favorite ? 'Removed from My List.' : 'Added to My List.');
   }
 
+  function playbackManager() {
+    if (window.playbackManager && typeof window.playbackManager.play === 'function') {
+      return window.playbackManager;
+    }
+    return null;
+  }
+
   async function playItem(item) {
-    try {
-      const manager = window.playbackManager;
-      if (manager?.play) {
-        await manager.play({ items: [item], fullscreen: true, enableRemotePlayers: true });
+    closeMenus();
+    closeModals();
+    state.nativeAction = true;
+    if (playbackManager()) {
+      try {
+        await playbackManager().play({ items: [item], fullscreen: true, enableRemotePlayers: true });
+        state.nativeAction = false;
+        hideRouteCover();
         return;
+      } catch (error) {
+        console.warn('[DINKFLIX] playbackManager failed; using native fallback.', error);
       }
-    } catch (error) {
-      console.warn('[DINKFLIX] playbackManager failed.', error);
     }
-    sessionStorage.setItem('dinkflix-autoplay', item.Id);
-    nativeHash('/details', { id: item.Id, serverId: state.serverId, dfnative: 1 });
+    showRouteCover();
+    nativeHash('/details', { id: item.Id });
+    waitForNativePlayButton();
   }
 
-  function autoPlayFallback() {
-    const id = sessionStorage.getItem('dinkflix-autoplay');
-    if (!id) {
-      return;
-    }
-    let attempts = 0;
-    const timer = setInterval(() => {
+  function waitForNativePlayButton() {
+    var attempts = 0;
+    var interval = setInterval(function () {
       attempts += 1;
-      const buttons = [...document.querySelectorAll('button, a, [role="button"]')];
-      const playButton = buttons.find((button) => /^(play|resume)$/i.test(String(button.textContent || '').trim()) || /\bplay\b/i.test(button.getAttribute('aria-label') || ''));
-      if (playButton) {
-        sessionStorage.removeItem('dinkflix-autoplay');
-        clearInterval(timer);
-        playButton.click();
-      }
-      if (attempts > 24) {
-        clearInterval(timer);
-      }
-    }, 400);
-  }
-
-  async function openCardMenu(anchor, id) {
-    closeMenus();
-    const item = state.cardData.get(id) || await getItem(id).catch(() => null);
-    if (!item) {
-      toast('Unable to load that title.');
-      return;
-    }
-    state.cardData.set(item.Id, item);
-    const menu = document.createElement('div');
-    menu.className = 'df-context-menu';
-    menu.appendChild(menuButton('Play', 'play', () => playItem(item)));
-    menu.appendChild(menuButton('Play all from here', 'play', () => playFromHere(item)));
-    menu.appendChild(menuSeparator());
-    menu.appendChild(menuButton(item.UserData?.IsFavorite ? 'Remove from My List' : 'Add to My List', 'plus', () => toggleFavorite(item)));
-    menu.appendChild(menuButton('Add to collection', 'collection', () => chooseCollection(item)));
-    menu.appendChild(menuButton('Add to playlist', 'playlist', () => choosePlaylist(item)));
-    if (['Movie', 'Video', 'Episode'].includes(item.Type)) {
-      menu.appendChild(menuButton('Download', 'download', () => downloadItem(item)));
-      menu.appendChild(menuButton('Copy Stream URL', 'copy', () => copyStreamUrl(item)));
-    }
-    if (isAdmin()) {
-      menu.appendChild(menuButton('Delete media', 'trash', () => deleteMedia(item), 'danger'));
-      menu.appendChild(menuSeparator());
-      menu.appendChild(menuButton('Edit metadata', 'edit', () => nativeHash('/details', { id: item.Id, serverId: state.serverId, dfnative: 1 })));
-      menu.appendChild(menuButton('Edit images', 'image', () => nativeHash('/details', { id: item.Id, serverId: state.serverId, dfnative: 1 })));
-      menu.appendChild(menuButton('Edit subtitles', 'edit', () => nativeHash('/details', { id: item.Id, serverId: state.serverId, dfnative: 1 })));
-      menu.appendChild(menuButton('Identify', 'edit', () => nativeHash('/details', { id: item.Id, serverId: state.serverId, dfnative: 1 })));
-      menu.appendChild(menuButton('Media Info', 'info', () => showMediaInfo(item)));
-      menu.appendChild(menuButton('Refresh metadata', 'refresh', () => refreshMetadata(item)));
-    } else {
-      menu.appendChild(menuSeparator());
-      menu.appendChild(menuButton('Media Info', 'info', () => showMediaInfo(item)));
-    }
-    ensureMenuRoot().appendChild(menu);
-    positionMenu(menu, anchor);
-  }
-
-  function downloadItem(item) {
-    const params = new URLSearchParams();
-    const token = accessToken();
-    if (token) {
-      params.set('ApiKey', token);
-    }
-    window.open(`${baseUrl()}/Items/${encodeURIComponent(item.Id)}/Download${params.toString() ? `?${params.toString()}` : ''}`, '_blank', 'noopener');
-  }
-
-  async function copyStreamUrl(item) {
-    const params = new URLSearchParams({ Static: 'true' });
-    const token = accessToken();
-    if (token) {
-      params.set('ApiKey', token);
-    }
-    const url = `${baseUrl()}/Videos/${encodeURIComponent(item.Id)}/stream?${params.toString()}`;
-    try {
-      await navigator.clipboard.writeText(url);
-      toast('Stream URL copied.');
-    } catch {
-      toast('Could not copy the stream URL.');
-    }
-  }
-
-  async function deleteMedia(item) {
-    if (!confirm(`Delete “${item.Name}” from Jellyfin?\n\nThis removes the media from the server library.`)) {
-      return;
-    }
-    try {
-      await apiWrite(`/Items/${encodeURIComponent(item.Id)}`, 'DELETE');
-      toast('Media deleted.');
-      setTimeout(renderRoute, 250);
-    } catch {
-      toast('Delete failed.');
-    }
-  }
-
-  async function refreshMetadata(item) {
-    try {
-      await apiWrite(`/Items/${encodeURIComponent(item.Id)}/Refresh`, 'POST');
-      toast('Metadata refresh started.');
-    } catch {
-      toast('Could not refresh metadata.');
-    }
-  }
-
-  function showMediaInfo(item) {
-    closeMenus();
-    const backdrop = document.createElement('div');
-    backdrop.className = 'df-modal-backdrop';
-    backdrop.innerHTML = `<section class="df-modal" role="dialog" aria-modal="true"><header class="df-modal-head"><h2 class="df-modal-title">Media Info · ${esc(item.Name)}</h2><button class="df-icon-btn" data-close aria-label="Close">${svg('close')}</button></header><div class="df-modal-body"><table class="df-info-table"><tbody><tr><td>Type</td><td>${esc(item.Type || '—')}</td></tr><tr><td>Resolution</td><td>${item.Width && item.Height ? `${item.Width} × ${item.Height}` : '—'}</td></tr><tr><td>Video</td><td>${esc(item.VideoRange || item.VideoRangeType || '—')}</td></tr><tr><td>Official rating</td><td>${esc(item.OfficialRating || '—')}</td></tr><tr><td>Community rating</td><td>${item.CommunityRating ? Number(item.CommunityRating).toFixed(1) : '—'}</td></tr><tr><td>Genres</td><td>${esc((item.Genres || []).join(', ') || '—')}</td></tr><tr><td>Tags</td><td>${esc((item.Tags || []).join(', ') || '—')}</td></tr></tbody></table></div></section>`;
-    backdrop.querySelector('[data-close]').addEventListener('click', () => backdrop.remove());
-    backdrop.addEventListener('click', (event) => {
-      if (event.target === backdrop) {
-        backdrop.remove();
-      }
-    });
-    ensureMenuRoot().appendChild(backdrop);
-  }
-
-  async function getPickerItems(type) {
-    return getItems({ IncludeItemTypes: type, Recursive: true, Limit: 120, SortBy: 'SortName', SortOrder: 'Ascending' });
-  }
-
-  async function openPicker(title, items, onChoose) {
-    closeMenus();
-    const backdrop = document.createElement('div');
-    backdrop.className = 'df-modal-backdrop';
-    backdrop.innerHTML = `<section class="df-modal df-picker-modal" role="dialog" aria-modal="true"><header class="df-modal-head"><div><h2 class="df-modal-title">${esc(title)}</h2><div class="df-picker-subtitle">Choose a destination.</div></div><button class="df-icon-btn" data-close aria-label="Close">${svg('close')}</button></header><div class="df-modal-body"><div class="df-picker-list" data-picker-list></div></div></section>`;
-    const list = backdrop.querySelector('[data-picker-list]');
-    list.innerHTML = items.length ? items.map((item) => `<button class="df-picker-option" data-picker-id="${esc(item.Id)}" type="button"><span>${esc(item.Name)}</span><span>›</span></button>`).join('') : '<div class="df-empty">Nothing available.</div>';
-    backdrop.querySelector('[data-close]').addEventListener('click', () => backdrop.remove());
-    backdrop.addEventListener('click', (event) => {
-      if (event.target === backdrop) {
-        backdrop.remove();
-      }
-    });
-    list.querySelectorAll('[data-picker-id]').forEach((button) => {
-      button.addEventListener('click', async () => {
-        try {
-          await onChoose(button.dataset.pickerId);
-          backdrop.remove();
-        } catch {
-          toast('That action could not be completed.');
-        }
+      var nodes = Array.from(document.querySelectorAll('button, a, [role="button"]')).filter(function (node) {
+        return !node.closest('#dinkflix-nav, #dinkflix-menu-root, #dinkflix-modal-root');
       });
-    });
-    ensureMenuRoot().appendChild(backdrop);
-  }
-
-  async function chooseCollection(item) {
-    const collections = await getPickerItems('BoxSet').catch(() => []);
-    await openPicker('Add to collection', collections, async (collectionId) => {
-      await apiWrite(`/Collections/${encodeURIComponent(collectionId)}/Items?Ids=${encodeURIComponent(item.Id)}`, 'POST');
-      toast('Added to collection.');
-    });
-  }
-
-  async function choosePlaylist(item) {
-    const playlists = await getPickerItems('Playlist').catch(() => []);
-    await openPicker('Add to playlist', playlists, async (playlistId) => {
-      await apiWrite(`/Playlists/${encodeURIComponent(playlistId)}/Items?Ids=${encodeURIComponent(item.Id)}&UserId=${encodeURIComponent(state.userId)}`, 'POST');
-      toast('Added to playlist.');
-    });
+      var play = nodes.find(function (node) {
+        var text = safeText(node.textContent).trim();
+        var label = safeText(node.getAttribute('aria-label')) + ' ' + safeText(node.getAttribute('title'));
+        return /^(play|resume)$/i.test(text) || /\b(play|resume)\b/i.test(label);
+      });
+      if (play) {
+        clearInterval(interval);
+        state.nativeAction = false;
+        play.click();
+        setTimeout(function () {
+          hideRouteCover();
+        }, 350);
+      }
+      if (attempts >= 30) {
+        clearInterval(interval);
+        state.nativeAction = false;
+        hideRouteCover();
+        toast('Jellyfin did not expose a playable control.');
+      }
+    }, 300);
   }
 
   async function playFromHere(item) {
-    if (item.Type === 'Series') {
-      try {
-        const episodes = await getItems({ ParentId: item.Id, IncludeItemTypes: 'Episode', Limit: 200, SortBy: 'ParentIndexNumber,IndexNumber', SortOrder: 'Ascending', Fields: 'UserData,RunTimeTicks,MediaSources' });
-        rememberItems(episodes);
-        const next = episodes.find((episode) => !episode.UserData?.Played) || episodes[0];
-        if (next) {
-          await playItem(next);
-          return;
-        }
-      } catch {
-        // Fall back to playing the selected item.
+    if (item.Type === 'Series' || item.Type === 'Season') {
+      var parentId = item.Id;
+      var episodes = item.Type === 'Series' ? await getItems({ ParentId: parentId, IncludeItemTypes: 'Episode', SortBy: 'ParentIndexNumber,IndexNumber', SortOrder: 'Ascending', Limit: 500, Fields: fields() }) : await getItems({ ParentId: parentId, IncludeItemTypes: 'Episode', SortBy: 'IndexNumber', SortOrder: 'Ascending', Limit: 500, Fields: fields() });
+      var next = episodes.find(function (episode) { return !(episode.UserData && episode.UserData.Played); }) || episodes[0];
+      if (next) {
+        remember(episodes);
+        await playItem(next);
+        return;
       }
     }
     await playItem(item);
   }
 
-  function markReady() {
-    if (!state.shell || !state.shell.childElementCount) {
-      return;
+  async function copyStreamUrl(item) {
+    var url = apiUrl('/Videos/' + encodeURIComponent(item.Id) + '/stream?Static=true');
+    try {
+      await navigator.clipboard.writeText(url);
+      toast('Stream URL copied.');
+    } catch (error) {
+      toast('Could not copy the stream URL.');
     }
-    state.shell.style.display = 'block';
-    document.body.classList.add('df-df-ready');
   }
 
-  function fallbackToNative(message) {
-    document.body.classList.remove('df-df-ready');
-    document.body.classList.remove('df-df-active');
-    state.custom = false;
-    state.shell?.replaceChildren();
-    if (state.shell) {
-      state.shell.style.display = 'none';
+  async function downloadItem(item) {
+    window.open(apiUrl('/Items/' + encodeURIComponent(item.Id) + '/Download'), '_blank', 'noopener');
+  }
+
+  async function deleteMedia(item) {
+    if (!confirm('Delete “' + item.Name + '” from Jellyfin?\n\nThis removes the media item from the server library.')) {
+      return;
     }
+    await apiRequest('/Items/' + encodeURIComponent(item.Id), 'DELETE');
+    toast('Media deleted.');
+    nativeHash('/home');
+  }
+
+  async function refreshMetadata(item) {
+    await apiRequest('/Items/' + encodeURIComponent(item.Id) + '/Refresh', 'POST');
+    toast('Metadata refresh started.');
+  }
+
+  async function chooseDestination(title, items, callback) {
     closeMenus();
-    if (message) {
-      toast(message);
-    }
-  }
-
-  function setBodyForRoute(route) {
-    const custom = ['home', 'library', 'library-native', 'item', 'search', 'list', 'about'].includes(route.type);
-    const playback = route.type === 'playback';
-    const admin = route.type === 'admin';
-    state.custom = custom;
-    document.body.classList.toggle('df-df-active', custom);
-    document.body.classList.remove('df-df-ready');
-    document.body.classList.toggle('df-df-native-public', !custom && !admin && !playback);
-    document.body.classList.toggle('df-df-native-playback', playback);
-    document.body.classList.toggle('df-df-admin', admin);
-    if (!custom) {
-      state.shell?.replaceChildren();
-    }
-    if (!playback) {
-      document.getElementById('dinkflix-playback-overlay')?.remove();
-    }
-  }
-
-  async function renderHome() {
-    const shell = ensureShell();
-    shell.innerHTML = '<div class="df-home-loading"><div class="df-loading-line"></div><div class="df-loading-line short"></div></div>';
-    try {
-      const results = await Promise.allSettled([
-        getItems({ IncludeItemTypes: 'Movie,Series', SortBy: 'DateCreated', SortOrder: 'Descending', Limit: 24 }),
-        getItems({ IncludeItemTypes: 'Movie,Episode', IsResumable: true, SortBy: 'DatePlayed', SortOrder: 'Descending', Limit: 16 }),
-        getItems({ IncludeItemTypes: 'Movie,Series', IsPlayed: true, SortBy: 'DatePlayed', SortOrder: 'Descending', Limit: 16 }),
-        getItems({ IncludeItemTypes: 'Movie,Series', IsFavorite: true, SortBy: 'SortName', SortOrder: 'Ascending', Limit: 16 }),
-        getItems({ IncludeItemTypes: 'Movie', SortBy: 'DateCreated', SortOrder: 'Descending', Limit: 16 }),
-        getItems({ IncludeItemTypes: 'Series', SortBy: 'DateCreated', SortOrder: 'Descending', Limit: 16 })
-      ]);
-      if (!results.some((result) => result.status === 'fulfilled' && Array.isArray(result.value) && result.value.length)) {
-        throw new Error('No Jellyfin media results were available.');
-      }
-      const value = (index) => results[index].status === 'fulfilled' ? results[index].value : [];
-      const recent = value(0);
-      const resume = value(1);
-      const played = value(2);
-      const favs = value(3);
-      const movies = value(4);
-      const shows = value(5);
-      rememberItems([...recent, ...resume, ...played, ...favs, ...movies, ...shows]);
-      state.heroItems = recent.filter((item) => item.BackdropImageTags?.length || item.ImageTags?.Backdrop || item.ImageTags?.Primary).slice(0, 8);
-      const movieView = visibleViews().find((view) => String(view.CollectionType || '').toLowerCase() === 'movies');
-      const showView = visibleViews().find((view) => String(view.CollectionType || '').toLowerCase() === 'tvshows');
-      shell.innerHTML = `<div class="df-hero" id="df-hero"><div class="df-hero-media" id="df-hero-media"></div><div class="df-hero-overlay"></div><div class="df-hero-content" id="df-hero-content"></div><div class="df-hero-dots" id="df-hero-dots"></div></div><div class="df-page">${section('Continue Watching', resume)}${section('Recently Played', played)}${section('Recently Added', recent)}${section('Movies', movies, movieView ? viewHref(movieView) : '')}${section('TV Shows', shows, showView ? viewHref(showView) : '')}${section('My List', favs, '#/dinkflix/list')}</div>`;
-      bindCardActions(shell);
-      if (state.heroItems.length) {
-        showHero(0);
-      } else {
-        shell.querySelector('#df-hero')?.remove();
-      }
-      markReady();
-    } catch (error) {
-      console.error('[DINKFLIX] Home render failed.', error);
-      fallbackToNative('DINKFLIX could not load the homepage; showing Jellyfin instead.');
-    }
-  }
-
-  function showHero(index) {
-    const item = state.heroItems[index];
-    const hero = document.getElementById('df-hero');
-    const media = document.getElementById('df-hero-media');
-    const content = document.getElementById('df-hero-content');
-    const dots = document.getElementById('df-hero-dots');
-    if (!item || !hero || !media || !content || !dots) {
-      return;
-    }
-    state.heroIndex = index;
-    media.style.backgroundImage = `url("${backdropUrl(item, 2200)}")`;
-    content.innerHTML = `<div class="df-hero-eyebrow">Recently added</div><h1 class="df-hero-title">${esc(item.Name)}</h1><div class="df-hero-meta"><span>${esc(fmtYear(item.ProductionYear || item.PremiereDate || item.DateCreated))}</span><span>•</span><span>${esc(item.Type === 'Series' ? 'TV Series' : 'Movie')}</span>${badgeHtml(item)}</div><p class="df-hero-overview">${esc(item.Overview || '')}</p><div class="df-actions"><button class="df-button df-button-primary" id="df-hero-play" type="button">${svg('play')} Play</button><button class="df-button df-button-secondary" id="df-hero-info" type="button">More info</button><button class="df-button df-button-secondary" id="df-hero-list" type="button">${item.UserData?.IsFavorite ? '✓ In My List' : '＋ My List'}</button></div>`;
-    dots.innerHTML = state.heroItems.map((_, dotIndex) => `<button type="button" class="df-hero-dot ${dotIndex === index ? 'df-current' : ''}" data-hero-index="${dotIndex}" aria-label="Featured title ${dotIndex + 1}"></button>`).join('');
-    content.querySelector('#df-hero-play').addEventListener('click', () => playItem(item));
-    content.querySelector('#df-hero-info').addEventListener('click', () => setHash('/home', { df: 'item', id: item.Id }));
-    content.querySelector('#df-hero-list').addEventListener('click', async () => {
-      try {
-        await toggleFavorite(item);
-        showHero(index);
-      } catch {
-        toast('Could not update My List.');
-      }
+    var root = ensureModalRoot();
+    var overlay = createNode('<div class="df-modal-backdrop"><section class="df-modal"><header><div><span class="df-section-kicker">DINKFLIX</span><h2>' + esc(title) + '</h2></div><button class="df-icon-button" data-close type="button">' + makeIcon('close') + '</button></header><div class="df-modal-body"><div class="df-picker-list" data-picker-list></div></div></section></div>');
+    root.appendChild(overlay);
+    var list = overlay.querySelector('[data-picker-list]');
+    list.innerHTML = items.length ? items.map(function (item) { return '<button class="df-picker-row" data-df-picker="' + esc(item.Id) + '" type="button"><span>' + esc(item.Name || '') + '</span>' + makeIcon('right') + '</button>'; }).join('') : '<div class="df-inline-empty">Nothing is available.</div>';
+    overlay.querySelector('[data-close]').addEventListener('click', function () { overlay.remove(); });
+    overlay.addEventListener('click', function (event) { if (event.target === overlay) { overlay.remove(); } });
+    list.querySelectorAll('[data-df-picker]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        Promise.resolve(callback(button.dataset.dfPicker)).then(function () { overlay.remove(); }).catch(function () { toast('That action failed.'); });
+      });
     });
-    dots.querySelectorAll('[data-hero-index]').forEach((dot) => dot.addEventListener('click', () => {
-      stopHero();
-      showHero(Number(dot.dataset.heroIndex));
-      startHero();
-    }));
-    hero.onmouseenter = () => { state.heroPaused = true; };
-    hero.onmouseleave = () => { state.heroPaused = false; };
-    hero.onfocusin = () => { state.heroPaused = true; };
-    hero.onfocusout = () => { state.heroPaused = false; };
-    hero.classList.add('df-ready');
   }
 
-  function startHero() {
-    stopHero();
-    if (state.heroItems.length < 2) {
-      return;
-    }
-    state.heroTimer = setInterval(() => {
-      if (!state.heroPaused && !document.hidden) {
-        showHero((state.heroIndex + 1) % state.heroItems.length);
-      }
-    }, 14000);
-  }
-
-  function stopHero() {
-    if (state.heroTimer) {
-      clearInterval(state.heroTimer);
-      state.heroTimer = null;
-    }
-  }
-
-  async function renderLibrary(route) {
-    const shell = ensureShell();
-    const view = state.views.find((candidate) => candidate.Id === route.viewId);
-    const title = view ? labelForView(view) : (String(route.collectionType || '').toLowerCase() === 'tvshows' ? 'TV Shows' : 'Movies');
-    shell.innerHTML = `<div class="df-page"><header class="df-page-header"><div><div class="df-kicker">Library</div><h1 class="df-title">${esc(title)}</h1></div></header><div class="df-library-toolbar"><input id="df-lib-search" class="df-input df-grow" type="search" placeholder="Search this library…"><select id="df-lib-sort" class="df-select"><option value="SortName">A–Z</option><option value="DateCreated">Recently added</option><option value="CommunityRating">Rating</option><option value="ProductionYear">Year</option></select><button class="df-chip df-selected" data-filter="all" type="button">All</button><button class="df-chip" data-filter="quality" type="button">4K</button><button class="df-chip" data-filter="hdr" type="button">HDR</button></div><div class="df-grid" id="df-lib-grid"><div class="df-empty" style="grid-column:1/-1">Loading…</div></div></div>`;
-    try {
-      const type = String(view?.CollectionType || route.collectionType || '').toLowerCase();
-      const include = type === 'movies' ? 'Movie' : type === 'tvshows' ? 'Series' : 'Movie,Series,Video,Audio,Book,Photo,MusicAlbum';
-      const items = await getItems({ ParentId: route.viewId, IncludeItemTypes: include, Limit: 300, SortBy: 'SortName', SortOrder: 'Ascending' });
-      rememberItems(items);
-      renderLibraryGrid(items, shell);
-      const search = shell.querySelector('#df-lib-search');
-      const sort = shell.querySelector('#df-lib-sort');
-      search.addEventListener('input', () => renderLibraryGrid(items, shell));
-      sort.addEventListener('change', () => renderLibraryGrid(items, shell));
-      shell.querySelectorAll('[data-filter]').forEach((button) => button.addEventListener('click', () => {
-        shell.querySelectorAll('[data-filter]').forEach((candidate) => candidate.classList.remove('df-selected'));
-        button.classList.add('df-selected');
-        renderLibraryGrid(items, shell, button.dataset.filter);
-      }));
-      markReady();
-    } catch (error) {
-      console.error('[DINKFLIX] Library render failed.', error);
-      fallbackToNative('DINKFLIX could not load this library; showing Jellyfin instead.');
-    }
-  }
-
-  function renderLibraryGrid(items, shell, filter = 'all') {
-    const query = (shell.querySelector('#df-lib-search')?.value || '').trim().toLowerCase();
-    const sort = shell.querySelector('#df-lib-sort')?.value || 'SortName';
-    let filtered = items.filter((item) => !query || [item.Name, ...(item.Genres || []), ...(item.Tags || [])].some((value) => String(value).toLowerCase().includes(query)));
-    if (filter === 'quality') {
-      filtered = filtered.filter((item) => Number(item.Height || 0) >= 2000 || Number(item.Width || 0) >= 3500);
-    }
-    if (filter === 'hdr') {
-      filtered = filtered.filter((item) => item.VideoRange || /hdr/i.test(item.VideoRangeType || ''));
-    }
-    filtered = [...filtered].sort((a, b) => {
-      if (sort === 'CommunityRating') {
-        return Number(b.CommunityRating || 0) - Number(a.CommunityRating || 0);
-      }
-      if (sort === 'ProductionYear') {
-        return Number(b.ProductionYear || 0) - Number(a.ProductionYear || 0);
-      }
-      if (sort === 'DateCreated') {
-        return String(b.DateCreated || '').localeCompare(String(a.DateCreated || ''));
-      }
-      return String(a.SortName || a.Name).localeCompare(String(b.SortName || b.Name));
+  async function chooseCollection(item) {
+    var collections = await getItems({ IncludeItemTypes: 'BoxSet', Recursive: true, Limit: 200, SortBy: 'SortName', SortOrder: 'Ascending' });
+    return chooseDestination('Add to collection', collections, async function (collectionId) {
+      await apiRequest('/Collections/' + encodeURIComponent(collectionId) + '/Items?Ids=' + encodeURIComponent(item.Id), 'POST');
+      toast('Added to collection.');
     });
-    const grid = shell.querySelector('#df-lib-grid');
-    grid.innerHTML = filtered.length ? filtered.map(card).join('') : '<div class="df-empty" style="grid-column:1/-1">Nothing matched.</div>';
-    bindCardActions(grid);
   }
 
-  async function renderItem(id) {
-    const shell = ensureShell();
-    shell.innerHTML = '<div class="df-page"><div class="df-empty">Loading title…</div></div>';
-    let item;
-    try {
-      item = await getItem(id);
-    } catch (error) {
-      console.error('[DINKFLIX] Item lookup failed.', error);
-      fallbackToNative('DINKFLIX could not load that title; showing Jellyfin instead.');
-      return;
+  async function choosePlaylist(item) {
+    var playlists = await getItems({ IncludeItemTypes: 'Playlist', Recursive: false, Limit: 200, SortBy: 'SortName', SortOrder: 'Ascending' });
+    return chooseDestination('Add to playlist', playlists, async function (playlistId) {
+      await apiRequest('/Playlists/' + encodeURIComponent(playlistId) + '/Items?Ids=' + encodeURIComponent(item.Id) + '&UserId=' + encodeURIComponent(state.userId), 'POST');
+      toast('Added to playlist.');
+    });
+  }
+
+  function openNativeEdit(item, pattern) {
+    closeMenus();
+    closeModals();
+    state.nativeAction = true;
+    showRouteCover();
+    location.hash = '#/details?id=' + encodeURIComponent(item.Id);
+    var attempts = 0;
+    var interval = setInterval(function () {
+      attempts += 1;
+      var candidates = Array.from(document.querySelectorAll('button, a, [role="button"]')).filter(function (node) { return !node.closest('#dinkflix-nav, #dinkflix-menu-root, #dinkflix-modal-root'); });
+      var target = candidates.find(function (node) {
+        var text = safeText(node.textContent) + ' ' + safeText(node.getAttribute('aria-label')) + ' ' + safeText(node.getAttribute('title'));
+        return pattern.test(text);
+      });
+      if (target) {
+        clearInterval(interval);
+        target.click();
+        state.nativeAction = false;
+        hideRouteCover();
+      }
+      if (attempts > 35) {
+        clearInterval(interval);
+        state.nativeAction = false;
+        hideRouteCover();
+        toast('Jellyfin did not expose that editor.');
+      }
+    }, 250);
+  }
+
+  function mediaInfo(item) {
+    closeMenus();
+    var root = ensureModalRoot();
+    var overlay = createNode('<div class="df-modal-backdrop"><section class="df-modal df-modal-wide"><header><div><span class="df-section-kicker">MEDIA INFO</span><h2>' + esc(item.Name || '') + '</h2></div><button class="df-icon-button" data-close type="button">' + makeIcon('close') + '</button></header><div class="df-modal-body">' + technicalHtml(item) + '</div></section></div>');
+    root.appendChild(overlay);
+    overlay.querySelector('[data-close]').addEventListener('click', function () { overlay.remove(); });
+    overlay.addEventListener('click', function (event) { if (event.target === overlay) { overlay.remove(); } });
+  }
+
+  async function openCardMenu(anchor, id) {
+    closeMenus();
+    var item = state.cardData.get(id);
+    if (!item) {
+      item = await getItem(id).catch(function () { return null; });
     }
     if (!item) {
-      fallbackToNative('DINKFLIX could not load that title; showing Jellyfin instead.');
+      toast('Unable to load that title.');
       return;
     }
     state.cardData.set(item.Id, item);
-    const kind = item.Type === 'Series' ? 'TV Series' : item.Type === 'Season' ? 'Season' : item.Type === 'Episode' ? 'Episode' : 'Movie';
-    const cast = (item.People || []).filter((person) => person?.PersonId).slice(0, 10);
-    const background = backdropUrl(item, 2400);
-    const poster = imageUrl(item, 'Primary', 900);
-    let childItems = [];
-    if (item.Type === 'Series') {
-      childItems = await getItems({ ParentId: item.Id, IncludeItemTypes: 'Season', Limit: 80, SortBy: 'IndexNumber', SortOrder: 'Ascending', Fields: 'PrimaryImageAspectRatio,Overview,UserData,ProductionYear,PremiereDate,IndexNumber,ChildCount,ImageTags,BackdropImageTags' }).catch(() => []);
+    var menu = createNode('<div class="df-floating-menu df-context-menu"></div>');
+    menu.appendChild(menuItem('Play', 'play', function () { return playItem(item); }));
+    menu.appendChild(menuItem(item.Type === 'Series' || item.Type === 'Season' ? 'Play next episode' : 'Resume', 'play', function () { return playFromHere(item); }));
+    menu.appendChild(menuSeparator());
+    menu.appendChild(menuItem(item.UserData && item.UserData.IsFavorite ? 'Remove from My List' : 'Add to My List', item.UserData && item.UserData.IsFavorite ? 'check' : 'plus', function () { return toggleFavorite(item); }));
+    menu.appendChild(menuItem('Select', 'check', function () { state.selectionMode = true; toggleSelection(item.Id); }));
+    menu.appendChild(menuItem('Add to collection', 'collection', function () { return chooseCollection(item); }));
+    menu.appendChild(menuItem('Add to playlist', 'playlist', function () { return choosePlaylist(item); }));
+    if (['Movie', 'Episode', 'Video'].includes(item.Type)) {
+      menu.appendChild(menuItem('Download', 'download', function () { return downloadItem(item); }));
+      menu.appendChild(menuItem('Copy Stream URL', 'copy', function () { return copyStreamUrl(item); }));
     }
-    if (item.Type === 'Season') {
-      childItems = await getItems({ ParentId: item.Id, IncludeItemTypes: 'Episode', Limit: 200, SortBy: 'IndexNumber', SortOrder: 'Ascending', Fields: 'PrimaryImageAspectRatio,Overview,UserData,ProductionYear,PremiereDate,IndexNumber,ParentIndexNumber,RunTimeTicks,ImageTags,BackdropImageTags,Width,Height,VideoRange,VideoRangeType,CommunityRating,OfficialRating,Tags,Genres' }).catch(() => []);
+    if (state.user && state.user.Policy && state.user.Policy.IsAdministrator) {
+      menu.appendChild(menuItem('Delete media', 'trash', function () { return deleteMedia(item); }, 'df-menu-danger'));
+      menu.appendChild(menuSeparator());
+      menu.appendChild(menuItem('Edit metadata', 'tools', function () { openNativeEdit(item, /edit metadata/i); }));
+      menu.appendChild(menuItem('Edit images', 'movie', function () { openNativeEdit(item, /edit images/i); }));
+      menu.appendChild(menuItem('Edit subtitles', 'movie', function () { openNativeEdit(item, /edit subtitles/i); }));
+      menu.appendChild(menuItem('Identify', 'tools', function () { openNativeEdit(item, /identify/i); }));
+      menu.appendChild(menuItem('Media Info', 'info', function () { mediaInfo(item); }));
+      menu.appendChild(menuItem('Refresh metadata', 'refresh', function () { return refreshMetadata(item); }));
+    } else {
+      menu.appendChild(menuSeparator());
+      menu.appendChild(menuItem('Media Info', 'info', function () { mediaInfo(item); }));
     }
-    rememberItems(childItems);
-    const children = item.Type === 'Season' ? `<section class="df-detail-section"><div class="df-section-head"><h2 class="df-section-title">Episodes</h2></div><div class="df-detail-episodes">${childItems.map((episode) => `<button class="df-episode-row" type="button" data-df-episode="${esc(episode.Id)}"><span class="df-episode-number">${esc(String(episode.IndexNumber ?? '').padStart(2, '0'))}</span><span class="df-episode-copy"><strong>${esc(episode.Name || 'Episode')}</strong><small>${esc(episode.Overview || '')}</small></span><span class="df-episode-time">${esc(humanMinutes(episode.RunTimeTicks))}</span></button>`).join('')}</div></section>` : item.Type === 'Series' ? `<section class="df-detail-section"><div class="df-section-head"><h2 class="df-section-title">Seasons</h2></div><div class="df-row">${childItems.map(card).join('')}</div></section>` : '';
-    shell.innerHTML = `<article class="df-detail"><div class="df-detail-bg" style="background-image:url('${esc(background)}')"></div><div class="df-detail-vignette"></div><div class="df-detail-content"><div class="df-detail-poster"><img loading="eager" src="${esc(poster)}" alt="${esc(item.Name)}"></div><div><div class="df-kicker">${esc(kind)}</div><h1 class="df-detail-title">${esc(item.Name)}</h1><div class="df-detail-meta"><span>${esc(fmtYear(item.ProductionYear || item.PremiereDate || item.DateCreated))}</span>${humanMinutes(item.RunTimeTicks) ? `<span>•</span><span>${humanMinutes(item.RunTimeTicks)}</span>` : ''}${badgeHtml(item)}</div><div class="df-detail-tags">${(item.Genres || []).slice(0, 5).map((genre) => `<span class="df-badge tag">${esc(genre)}</span>`).join('')}${tagHtml(item)}</div><p class="df-detail-overview">${esc(item.Overview || 'No overview available.')}</p><div class="df-actions"><button class="df-button df-button-primary" id="df-detail-play" type="button">${svg('play')} ${item.UserData?.PlaybackPositionTicks ? 'Resume' : 'Play'}</button><button class="df-button df-button-secondary" id="df-detail-list" type="button">${item.UserData?.IsFavorite ? '✓ In My List' : '＋ My List'}</button><button class="df-button df-button-secondary" id="df-detail-more" type="button">${svg('dots')} More</button></div>${children}${cast.length ? `<div class="df-detail-cast"><h3>Cast</h3><div class="df-cast-row">${cast.map((person) => `<div class="df-cast"><img loading="lazy" src="${esc(person.PrimaryImageTag ? `${baseUrl()}/Persons/${encodeURIComponent(person.PersonId)}/Images/Primary?tag=${encodeURIComponent(person.PrimaryImageTag)}&maxWidth=168` : '')}" alt="${esc(person.Name || '')}"><div class="df-cast-name">${esc(person.Name || '')}</div></div>`).join('')}</div></div>` : ''}</div></div></article>`;
-    shell.querySelector('#df-detail-play').addEventListener('click', () => playItem(item));
-    shell.querySelector('#df-detail-list').addEventListener('click', async () => {
-      try {
-        await toggleFavorite(item);
-        renderItem(item.Id);
-      } catch {
-        toast('Could not update My List.');
-      }
+    ensureMenuRoot().appendChild(menu);
+    positionFloating(menu, anchor);
+  }
+
+  function toggleSelection(id) {
+    if (state.selectedIds.has(id)) {
+      state.selectedIds.delete(id);
+    } else {
+      state.selectedIds.add(id);
+    }
+    renderSelectionBar();
+    document.querySelectorAll('[data-df-card]').forEach(function (card) {
+      var selected = state.selectedIds.has(card.dataset.dfCard);
+      card.classList.toggle('is-selected', selected);
     });
-    shell.querySelector('#df-detail-more').addEventListener('click', (event) => openCardMenu(event.currentTarget, item.Id));
-    shell.querySelectorAll('[data-df-episode]').forEach((button) => button.addEventListener('click', () => {
-      const episode = state.cardData.get(button.dataset.dfEpisode);
-      if (episode) {
-        playItem(episode);
-      }
-    }));
-    bindCardActions(shell);
-    markReady();
   }
 
-  async function renderList() {
-    const shell = ensureShell();
-    shell.innerHTML = '<div class="df-page"><header class="df-page-header"><div><div class="df-kicker">Your list</div><h1 class="df-title">My List</h1></div></header><div class="df-grid" id="df-list-grid"><div class="df-empty" style="grid-column:1/-1">Loading…</div></div></div>';
-    try {
-      const items = await getItems({ IncludeItemTypes: 'Movie,Series', IsFavorite: true, Limit: 200, SortBy: 'SortName', SortOrder: 'Ascending' });
-      rememberItems(items);
-      shell.querySelector('#df-list-grid').innerHTML = items.length ? items.map(card).join('') : '<div class="df-empty" style="grid-column:1/-1">Your list is empty.</div>';
-      bindCardActions(shell);
-      markReady();
-    } catch {
-      fallbackToNative('DINKFLIX could not load My List; showing Jellyfin instead.');
+  function renderSelectionBar() {
+    document.getElementById('dinkflix-selection-bar')?.remove();
+    if (!state.selectionMode) {
+      return;
     }
-  }
-
-  async function renderSearch(query) {
-    const shell = ensureShell();
-    shell.innerHTML = `<div class="df-page df-search"><header class="df-page-header"><div><div class="df-kicker">Search</div><h1 class="df-title">Find something to watch</h1></div></header><form class="df-search-bar" id="df-search-form"><input class="df-input df-grow" id="df-search-input" value="${esc(query)}" type="search" placeholder="Title, genre or tag…" autofocus><button class="df-button df-button-primary" type="submit">Search</button></form><p class="df-copy" id="df-search-note"></p><div class="df-grid" id="df-search-grid"></div></div>`;
-    const form = shell.querySelector('#df-search-form');
-    const input = shell.querySelector('#df-search-input');
-    const run = async () => {
-      const term = input.value.trim();
-      if (!term) {
-        shell.querySelector('#df-search-note').textContent = '';
-        shell.querySelector('#df-search-grid').innerHTML = '';
-        return;
-      }
-      try {
-        const items = await getItems({ SearchTerm: term, IncludeItemTypes: 'Movie,Series', Limit: 200, SortBy: 'SortName', SortOrder: 'Ascending' });
-        rememberItems(items);
-        shell.querySelector('#df-search-note').textContent = `${items.length} result${items.length === 1 ? '' : 's'} for “${term}”`;
-        shell.querySelector('#df-search-grid').innerHTML = items.length ? items.map(card).join('') : '<div class="df-empty" style="grid-column:1/-1">No titles matched.</div>';
-        bindCardActions(shell);
-      } catch {
-        shell.querySelector('#df-search-note').textContent = 'Search failed.';
-      }
-    };
-    form.addEventListener('submit', (event) => {
-      event.preventDefault();
-      setHash('/home', { df: 'search', q: input.value.trim() });
+    var bar = createNode('<div id="dinkflix-selection-bar" class="df-selection-bar"><strong>' + state.selectedIds.size + ' selected</strong><span>Select titles to work with them together.</span><button type="button" id="df-selection-cancel" class="df-button df-button-secondary">Cancel</button></div>');
+    document.body.appendChild(bar);
+    bar.querySelector('#df-selection-cancel').addEventListener('click', function () {
+      state.selectionMode = false;
+      state.selectedIds.clear();
+      renderSelectionBar();
+      document.querySelectorAll('.df-card.is-selected').forEach(function (node) { node.classList.remove('is-selected'); });
     });
-    if (query) {
-      await run();
-    }
-    markReady();
   }
 
-  function renderAbout() {
-    const shell = ensureShell();
-    shell.innerHTML = `<div class="df-page"><header class="df-page-header"><div><div class="df-kicker">The project</div><h1 class="df-title">About DINKFLIX</h1><p class="df-copy">DINKFLIX began as a simple idea: make a personal Jellyfin server feel like a streaming service people actually enjoy using.</p></div></header><section class="df-about-grid"><div class="df-about-image"><span>DINKFLIX</span><small>About image / project artwork</small></div><div><h2>Built for friends and family.</h2><p class="df-copy">The goal is not to hide Jellyfin’s power. It is to make that power feel effortless: clearer discovery, better hierarchy, fewer distractions and a visual identity that belongs to DINKFLIX.</p><p class="df-copy">Fast over flashy. Clear over clever. Familiar enough for guests, distinctive enough to feel like home.</p><p class="df-copy">DINKFLIX stays focused on the web experience while Jellyfin continues to handle the hard parts underneath.</p></div></section></div>`;
-    markReady();
-  }
-
-  function migrateLegacyOuterQuery() {
-    const params = new URLSearchParams(location.search);
-    const legacy = params.get('df');
-    if (!legacy) {
-      return;
-    }
-    params.delete('df');
-    const next = `${location.pathname}${params.toString() ? `?${params.toString()}` : ''}${location.hash}`;
-    history.replaceState(history.state, '', next);
-    if (legacy === 'movies') {
-      const view = visibleViews().find((candidate) => String(candidate.CollectionType || '').toLowerCase() === 'movies');
-      if (view) {
-        navigateToView(view);
-      }
-    } else if (legacy === 'shows') {
-      const view = visibleViews().find((candidate) => String(candidate.CollectionType || '').toLowerCase() === 'tvshows');
-      if (view) {
-        navigateToView(view);
-      }
-    } else if (legacy === 'list') {
-      setHash('/home', { df: 'list' });
-    } else if (legacy === 'search') {
-      setHash('/home', { df: 'search' });
-    }
-  }
-
-  function normalizeLegacyHash() {
-    const { path, params } = parseHash();
-    const df = params.get('df');
-    if (path !== '/home' || !df) {
-      return;
-    }
-    const routeMap = {
-      library: '/dinkflix/library',
-      item: '/dinkflix/item',
-      list: '/dinkflix/list',
-      search: '/dinkflix/search',
-      about: '/dinkflix/about'
-    };
-    const target = routeMap[df];
-    if (!target) {
-      return;
-    }
-    params.delete('df');
-    const query = params.toString();
-    history.replaceState(history.state, '', `${location.pathname}${location.search}#${target}${query ? `?${query}` : ''}`);
-  }
-
-  function bindGlobal() {
-    if (!state.scrollBound) {
-      window.addEventListener('scroll', scrollNav, { passive: true });
-      state.scrollBound = true;
-    }
-    if (!state.hashBound) {
-      window.addEventListener('hashchange', () => setTimeout(renderRoute, 10));
-      window.addEventListener('popstate', () => setTimeout(renderRoute, 10));
-      document.addEventListener('pointerdown', (event) => {
-        if (!event.target.closest('#dinkflix-menu-root, #dinkflix-nav')) {
-          closeMenus();
-        }
-      });
-      document.addEventListener('click', (event) => {
-        if (!event.target.closest('#dinkflix-menu-root, #dinkflix-nav')) {
-          closeMenus();
-        }
-      });
-      document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') {
-          closeMenus();
-        }
-      });
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-          state.heroPaused = true;
-        } else {
-          state.heroPaused = false;
-        }
-      });
-      state.hashBound = true;
-    }
+  function nativeRouteReadyDelay() {
+    setTimeout(function () {
+      markNativeReady();
+    }, 220);
   }
 
   async function renderRoute() {
-    const route = getRoute();
-    const key = location.hash;
-    if (state.renderKey === key && state.custom && document.body.classList.contains('df-df-ready') && state.shell?.childElementCount) {
+    var info = route();
+    var key = info.type + ':' + (info.id || '');
+    if (key === state.lastRoute && state.started) {
       return;
     }
-    state.renderKey = key;
-    state.route = route;
-    stopHero();
+    state.lastRoute = key;
+    if (state.heroTimer && info.type !== 'home') {
+      clearInterval(state.heroTimer);
+      state.heroTimer = null;
+    }
     closeMenus();
-    setBodyForRoute(route);
-    buildNav();
-    updateNav();
-    avatar();
-    if (route.type === 'home') {
+    if (info.type === 'home' && !state.nativeAction) {
+      showRouteCover();
+      document.body.classList.add('df-public-page');
+      refreshNav();
       await renderHome();
-      startHero();
-    } else if (route.type === 'library' || route.type === 'library-native') {
-      await renderLibrary(route);
-    } else if (route.type === 'item') {
-      await renderItem(route.id);
-    } else if (route.type === 'list') {
+      return;
+    }
+    if (info.type === 'list' && !state.nativeAction) {
+      showRouteCover();
+      document.body.classList.add('df-public-page');
+      refreshNav();
       await renderList();
-    } else if (route.type === 'search') {
-      await renderSearch(route.q);
-    } else if (route.type === 'about') {
+      return;
+    }
+    if (info.type === 'about' && !state.nativeAction) {
+      showRouteCover();
+      document.body.classList.add('df-public-page');
+      refreshNav();
       renderAbout();
-    } else if (route.type === 'playback') {
-      autoPlayFallback();
+      return;
     }
+    if (info.type === 'details' && !state.nativeAction) {
+      showRouteCover();
+      document.body.classList.add('df-public-page');
+      refreshNav();
+      await renderDetails(info.id);
+      return;
+    }
+    document.body.classList.toggle('df-public-page', shouldHaveNav(info));
+    if (shouldHaveNav(info)) {
+      refreshNav();
+    } else {
+      state.nav?.remove();
+      state.nav = null;
+    }
+    if (info.type === 'playback') {
+      clearDinkflixRoots();
+      document.body.classList.remove('df-custom-active');
+      document.body.classList.add('df-player-page');
+      hideRouteCover();
+      finishBoot();
+    } else {
+      document.body.classList.remove('df-player-page');
+      nativeRouteReadyDelay();
+    }
+    state.nativeAction = false;
   }
 
-  function sessionReady() {
-    return !!client() || !!credentials();
+  function installGlobalListeners() {
+    window.addEventListener('hashchange', function () {
+      showRouteCover();
+      renderRoute().catch(function (error) { console.error('[DINKFLIX] Route render failed.', error); markNativeReady(); });
+    });
+    document.addEventListener('click', function (event) {
+      if (!event.target.closest('#dinkflix-menu-root, #df-tools, #df-user, #df-nav-more, #dinkflix-modal-root')) {
+        closeMenus();
+      }
+    });
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        closeMenus();
+        closeModals();
+        if (state.selectionMode) {
+          state.selectionMode = false;
+          state.selectedIds.clear();
+          renderSelectionBar();
+        }
+      }
+    });
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden && state.heroTimer) {
+        clearInterval(state.heroTimer);
+        state.heroTimer = null;
+      } else if (!document.hidden && state.heroItems.length && route().type === 'home') {
+        showHero(state.heroIndex);
+      }
+    });
   }
 
-  async function waitForJellyfin(timeout = 12000) {
-    const started = Date.now();
-    while (!sessionReady() && Date.now() - started < timeout) {
-      await new Promise((resolve) => setTimeout(resolve, 200));
-    }
-    return sessionReady();
+  function setInitialUiState() {
+    document.documentElement.classList.add('df-dinkflix-runtime');
+    document.body.classList.add('df-dinkflix-page');
+    ensureBoot();
   }
 
   async function boot() {
-    if (document.body.dataset.dinkflixBooted === '1') {
+    if (state.started) {
       return;
     }
-    document.body.dataset.dinkflixBooted = '1';
-    await waitForJellyfin();
-    if (!await loadUser()) {
-      document.body.dataset.dinkflixBooted = '0';
-      setTimeout(boot, 700);
-      return;
-    }
-    await loadViews();
-    migrateLegacyOuterQuery();
-    normalizeLegacyHash();
-    buildNav();
-    bindGlobal();
-    await renderRoute();
-    setInterval(async () => {
+    state.started = true;
+    setInitialUiState();
+    installGlobalListeners();
+    try {
+      await loadUser();
       await loadViews();
-      updateNav();
-    }, 30000);
+      buildNav();
+      refreshNav();
+      await renderRoute();
+    } catch (error) {
+      console.error('[DINKFLIX] Boot failed.', error);
+      clearDinkflixRoots();
+      state.nav?.remove();
+      state.nav = null;
+      document.body.classList.remove('df-custom-active');
+      finishBoot();
+      toast('DINKFLIX could not connect to this Jellyfin session.');
+    }
   }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', boot, { once: true });
   } else {
-    setTimeout(boot, 100);
+    boot();
   }
-})();
+}());

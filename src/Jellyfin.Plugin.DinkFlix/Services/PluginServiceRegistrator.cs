@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Jellyfin.Plugin.DinkFlix.Services;
 
 /// <summary>
-/// Registers DINKFLIX Web services with Jellyfin.
+/// Registers DINKFLIX services with Jellyfin.
 /// </summary>
 public sealed class PluginServiceRegistrator : IPluginServiceRegistrator
 {

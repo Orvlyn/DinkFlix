@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
@@ -14,12 +12,12 @@ namespace Jellyfin.Plugin.DinkFlix;
 public sealed class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 {
     /// <summary>
-    /// Stable DINKFLIX Web plugin identifier.
+    /// Stable DINKFLIX plugin identifier.
     /// </summary>
     public static readonly Guid PluginGuid = Guid.Parse("9b8e4d39-6a4c-4b5d-b6aa-d2b1c4f3c9e8");
 
     /// <summary>
-    /// Gets the active plugin instance.
+    /// Gets the active DINKFLIX plugin instance.
     /// </summary>
     public static Plugin? Instance { get; private set; }
 
