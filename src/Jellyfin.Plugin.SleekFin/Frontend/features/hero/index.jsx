@@ -37,6 +37,13 @@ function prepareLoading() {
   state.loadingTimer = window.setTimeout(finishLoading, 4000);
 }
 
+function withTimeout(promise, milliseconds, fallback) {
+  return Promise.race([
+    promise,
+    new Promise((resolve) => window.setTimeout(() => resolve(fallback), milliseconds)),
+  ]);
+}
+
 function isHomeRoute() {
   const match = window.location.hash.match(/^#\/(?:home)?(?:\?([^#]*))?$/);
   if (!match) return false;
@@ -46,7 +53,8 @@ function isHomeRoute() {
 
 function findHost() {
   if (!isHomeRoute()) return null;
-  return Array.from(document.querySelectorAll('#indexPage #homeTab.is-active .sections')).find(dom.isVisible) || null;
+  const candidates = document.querySelectorAll('#indexPage #homeTab.is-active .sections, #indexPage #homeTab .sections, #indexPage .homePage .sections');
+  return Array.from(candidates).find((element) => dom.isVisible(element)) || null;
 }
 
 function hideMyMedia() {
@@ -96,8 +104,9 @@ function mount(host) {
   const client = window.ApiClient;
   const generation = ++state.generation;
   const root = createRoot(host);
-  loadSettings(client)
-    .catch(() => normalizeSettings({}))
+  const settingsPromise = withTimeout(loadSettings(client).catch(() => normalizeSettings({})), 5000, normalizeSettings({}));
+
+  settingsPromise
     .then((settings) => {
       if (generation !== state.generation || state.mount !== root || !dom.isConnected(root)) return null;
       state.enabled = settings.enabled;
@@ -106,15 +115,22 @@ function mount(host) {
         return null;
       }
       applySettings(root, settings);
-      return loadEntries(client, settings).then((entries) => ({ entries, settings }));
+      return withTimeout(loadEntries(client, settings).catch(() => []), 12000, []).then((entries) => ({ entries, settings }));
     })
     .then((result) => {
       if (!result || generation !== state.generation) return;
-      if (result.entries.length) renderHero(root, result.entries, result.settings);
-      else finishLoading();
+      if (result.entries.length) {
+        renderHero(root, result.entries, result.settings);
+      } else {
+        state.failedHost = host;
+        finishLoading();
+      }
     })
     .catch(() => {
-      if (generation === state.generation) finishLoading();
+      if (generation === state.generation) {
+        state.failedHost = host;
+        finishLoading();
+      }
     });
 }
 
@@ -131,7 +147,7 @@ function reconcile() {
     removeMount();
     return;
   }
-  if (state.mount && dom.isConnected(state.mount)) return;
+  if (state.mount && dom.isConnected(state.mount) && state.mount.nextElementSibling === host) return;
   if (state.failedHost === host) return;
   unmount();
   mount(host);
@@ -152,7 +168,10 @@ function scheduleReconcile() {
 function startDomObserver() {
   if (state.domObserver || typeof MutationObserver === 'undefined' || !document.body) return;
   state.domObserver = new MutationObserver((mutations) => {
-    const relevant = mutations.some((mutation) => !mutation.target.closest?.('.sleekfin-hero'));
+    const relevant = mutations.some((mutation) => {
+      const target = mutation.target;
+      return !target.closest?.('.sleekfin-hero') && !target.closest?.('.dinkflix-hidden-my-media');
+    });
     if (relevant) scheduleReconcile();
   });
   state.domObserver.observe(document.body, { childList: true, subtree: true });
