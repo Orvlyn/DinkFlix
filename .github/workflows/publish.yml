@@ -53,16 +53,52 @@ jobs:
         run: dotnet build src/Jellyfin.Plugin.DinkFlix/Jellyfin.Plugin.DinkFlix.csproj -c Release --no-restore
 
       - name: Package plugin
-        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        shell: python
         run: |
-          set -euo pipefail
-          rm -rf dist && mkdir -p dist/package
-          cp src/Jellyfin.Plugin.DinkFlix/bin/Release/net10.0/Jellyfin.Plugin.DinkFlix.dll dist/package/
-          cd dist/package
-          zip -q -9 "../../DinkFlix_${{ steps.version.outputs.version }}.zip" ./*
-          cd ../..
-          md5sum "DinkFlix_${{ steps.version.outputs.version }}.zip" | cut -d' ' -f1 > dist/checksum.md5
+          import hashlib
+          import json
+          import os
+          import shutil
+          import zipfile
+          from datetime import datetime, timezone
+          from pathlib import Path
 
+          version = os.environ["VERSION"]
+          root = Path('.')
+          shutil.rmtree(root / 'dist', ignore_errors=True)
+          package_root = root / 'dist' / 'package'
+          package_root.mkdir(parents=True)
+
+          dll = root / 'src/Jellyfin.Plugin.DinkFlix/bin/Release/net10.0/Jellyfin.Plugin.DinkFlix.dll'
+          shutil.copy2(dll, package_root / dll.name)
+
+          # Keep the installed plugin updateable. Jellyfin skips update candidates
+          # when the persisted local manifest has autoUpdate=false.
+          meta = {
+              'category': 'General',
+              'changelog': f'DINKFLIX {version}: standalone native Jellyfin theme with always-on enhancements.',
+              'description': 'DINKFLIX is a standalone Jellyfin theme with always-on frontend enhancements.',
+              'guid': 'B4A9D4E6-4E4D-4F42-9E90-9C5B4D4B8D2B',
+              'name': 'DINKFLIX',
+              'overview': 'Standalone DINKFLIX theme for the Jellyfin 12 Web UI.',
+              'owner': 'Orvlyn',
+              'targetAbi': '12.0.0.0',
+              'timestamp': datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z'),
+              'version': version,
+              'autoUpdate': True,
+              'assemblies': [dll.name]
+          }
+          (package_root / 'meta.json').write_text(json.dumps(meta, indent=2) + '\n', encoding='utf-8')
+
+          archive = root / f'DinkFlix_{version}.zip'
+          with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
+              zf.write(package_root / dll.name, dll.name)
+              zf.write(package_root / 'meta.json', 'meta.json')
+
+          md5 = hashlib.md5(archive.read_bytes()).hexdigest()
+          (root / 'dist/checksum.md5').write_text(md5 + '\n', encoding='utf-8')
       - name: Upload build artifact
         uses: actions/upload-artifact@v6
         with:
