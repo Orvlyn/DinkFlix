@@ -1,4 +1,4 @@
-version: "8.0.0.0"
+version: "8.1.0.0"
 name: "DINKFLIX"
 description: "Native Jellyfin 12 theme with always-on frontend enhancements"
 overview: "Standalone DINKFLIX theme for the Jellyfin 12 Web UI."
