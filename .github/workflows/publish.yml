@@ -25,22 +25,18 @@ jobs:
           VERSION=$(python3 - <<'PY'
           import re
           from pathlib import Path
-          text=Path('build.yaml').read_text()
-          m=re.search(r'^version:\s*["\']?([^"\'\s]+)', text, re.M)
+          text = Path('build.yaml').read_text()
+          m = re.search(r'^version:\s*["\']?([^"\'\s]+)', text, re.M)
           if not m:
-              raise SystemExit('version missing from build.yaml')
+              raise SystemExit('version missing')
           print(m.group(1))
           PY
           )
-          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Guard release tag
+      - name: Validate tag when tagged
         if: startsWith(github.ref, 'refs/tags/')
-        shell: bash
-        run: |
-          expected="v${{ steps.version.outputs.version }}"
-          actual="${GITHUB_REF_NAME}"
-          test "$expected" = "$actual" || { echo "Tag $actual does not match $expected"; exit 1; }
+        run: test "$GITHUB_REF_NAME" = "v${{ steps.version.outputs.version }}"
 
       - name: Static checks
         run: |
@@ -50,7 +46,7 @@ jobs:
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: '10.0.100'
+          dotnet-version: '10.0.x'
 
       - name: Restore
         run: dotnet restore src/Jellyfin.Plugin.DinkFlix/Jellyfin.Plugin.DinkFlix.csproj
@@ -62,11 +58,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p dist/package
+          rm -rf dist && mkdir -p dist/package
           cp src/Jellyfin.Plugin.DinkFlix/bin/Release/net10.0/Jellyfin.Plugin.DinkFlix.dll dist/package/
-          if [ -f src/Jellyfin.Plugin.DinkFlix/bin/Release/net10.0/Jellyfin.Plugin.DinkFlix.pdb ]; then
-            cp src/Jellyfin.Plugin.DinkFlix/bin/Release/net10.0/Jellyfin.Plugin.DinkFlix.pdb dist/package/
-          fi
           cd dist/package
           zip -q -9 "../../DinkFlix_${{ steps.version.outputs.version }}.zip" ./*
           cd ../..
@@ -79,34 +72,32 @@ jobs:
           path: DinkFlix_${{ steps.version.outputs.version }}.zip
           if-no-files-found: error
 
-      - name: Generate manifest entry
-        shell: python
+      - name: Build manifest entry
+        if: startsWith(github.ref, 'refs/tags/')
         env:
           VERSION: ${{ steps.version.outputs.version }}
           TAG: ${{ github.ref_name }}
-          SHA: ${{ github.sha }}
+        shell: python
         run: |
           import hashlib, json, os
           from datetime import datetime, timezone
           from pathlib import Path
-
           package = Path(f"DinkFlix_{os.environ['VERSION']}.zip")
           md5 = hashlib.md5(package.read_bytes()).hexdigest()
-          manifest = json.loads(Path("manifest.json").read_text())
+          manifest = json.loads(Path('manifest.json').read_text())
           entry = {
-              "version": os.environ["VERSION"],
-              "changelog": f"DINKFLIX {os.environ['VERSION']}: native Jellyfin 12 theme with lightweight frontend enhancements.",
-              "targetAbi": "12.0.0.0",
-              "sourceUrl": f"https://github.com/Orvlyn/DinkFlix/releases/download/{os.environ['TAG']}/{package.name}",
-              "checksum": md5,
-              "timestamp": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
-              "framework": "net10.0"
+            'version': os.environ['VERSION'],
+            'changelog': f'DINKFLIX {os.environ["VERSION"]}: Jellyfin-native theme and lightweight enhancements.',
+            'targetAbi': '12.0.0.0',
+            'sourceUrl': f'https://github.com/Orvlyn/DinkFlix/releases/download/{os.environ["TAG"]}/{package.name}',
+            'checksum': md5,
+            'timestamp': datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),
+            'framework': 'net10.0'
           }
-          versions = [v for v in manifest.get("versions", []) if v.get("version") != entry["version"]]
-          manifest["versions"] = [entry] + versions
-          Path("dist/manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+          manifest['versions'] = [entry] + [v for v in manifest.get('versions', []) if v.get('version') != entry['version']]
+          Path('dist/manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
 
-      - name: Upload release package
+      - name: Publish release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v3
         with:
@@ -116,7 +107,7 @@ jobs:
             dist/checksum.md5
           generate_release_notes: true
 
-      - name: Publish manifest to repository
+      - name: Publish manifest
         if: startsWith(github.ref, 'refs/tags/')
         shell: bash
         run: |
