@@ -1,6 +1,4 @@
 using System.Text;
-using System.Text.Json;
-using MediaBrowser.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Net.Http.Headers;
@@ -8,16 +6,18 @@ using Microsoft.Net.Http.Headers;
 namespace Jellyfin.Plugin.DinkFlix;
 
 /// <summary>
-/// Adds the tiny DINKFLIX bootstrap script to Jellyfin's existing web index.
-/// It never replaces the web application, routes, player, menus or pages.
+/// Adds the DINKFLIX theme and enhancement script to Jellyfin's existing web index.
+/// The theme is embedded in the plugin DLL, so it does not depend on Custom CSS,
+/// a second theme, or an external CDN.
 /// </summary>
 public sealed class DinkFlixIndexMiddleware
 {
+    private const string ThemeResource = "Jellyfin.Plugin.DinkFlix.Web.dinkflix.css";
     private const string ScriptResource = "Jellyfin.Plugin.DinkFlix.Web.dinkflix.js";
-    private const string Marker = "dinkflix-boot";
-    private const string ThemeUrl = "https://cdn.jsdelivr.net/gh/Orvlyn/DinkFlix@main/dinkflix.css?v=7.0.0.4";
+    private const string Marker = "dinkflix-theme";
 
     private readonly RequestDelegate _next;
+
     public DinkFlixIndexMiddleware(RequestDelegate next)
     {
         _next = next;
@@ -31,8 +31,7 @@ public sealed class DinkFlixIndexMiddleware
             return;
         }
 
-        var plugin = Plugin.Instance;
-        if (plugin is null)
+        if (Plugin.Instance is null)
         {
             await _next(context);
             return;
@@ -40,6 +39,7 @@ public sealed class DinkFlixIndexMiddleware
 
         var originalFeature = context.Features.Get<IHttpResponseBodyFeature>();
         var originalBody = context.Response.Body;
+
         if (originalFeature is null)
         {
             await _next(context);
@@ -53,6 +53,7 @@ public sealed class DinkFlixIndexMiddleware
 
         var hadAcceptEncoding = context.Request.Headers.ContainsKey(HeaderNames.AcceptEncoding);
         var originalAcceptEncoding = context.Request.Headers[HeaderNames.AcceptEncoding].ToString();
+
         context.Request.Headers.Remove(HeaderNames.AcceptEncoding);
         context.Request.Headers.Remove(HeaderNames.IfNoneMatch);
         context.Request.Headers.Remove(HeaderNames.IfModifiedSince);
@@ -63,22 +64,27 @@ public sealed class DinkFlixIndexMiddleware
             await bufferingFeature.CompleteAsync();
 
             buffer.Position = 0;
-            using var reader = new StreamReader(buffer, Encoding.UTF8, true, leaveOpen: true);
-            var html = await reader.ReadToEndAsync();
 
+            using var reader = new StreamReader(
+                buffer,
+                Encoding.UTF8,
+                detectEncodingFromByteOrderMarks: true,
+                leaveOpen: true);
+
+            var html = await reader.ReadToEndAsync();
             var transformed = html;
-            if (context.Response.StatusCode is >= 200 and < 300 &&
-                html.Contains("<head", StringComparison.OrdinalIgnoreCase) &&
-                html.Contains("</head>", StringComparison.OrdinalIgnoreCase) &&
-                !html.Contains(Marker, StringComparison.OrdinalIgnoreCase))
+
+            if (context.Response.StatusCode is >= 200 and < 300
+                && html.Contains("<head", StringComparison.OrdinalIgnoreCase)
+                && html.Contains("</head>", StringComparison.OrdinalIgnoreCase)
+                && !html.Contains(Marker, StringComparison.OrdinalIgnoreCase))
             {
-                var script = await ReadEmbeddedScriptAsync();
-                if (!string.IsNullOrWhiteSpace(script))
+                var theme = await ReadEmbeddedResourceAsync(ThemeResource);
+                var script = await ReadEmbeddedResourceAsync(ScriptResource);
+
+                if (!string.IsNullOrWhiteSpace(theme))
                 {
-                    var configJson = JsonSerializer.Serialize(plugin.Configuration);
-                    var bootstrap = BuildBootstrap(
-                        plugin.Configuration.EnableEnhancements ? script : string.Empty,
-                        configJson);
+                    var bootstrap = BuildBootstrap(theme, script);
                     var headEnd = html.IndexOf("</head>", StringComparison.OrdinalIgnoreCase);
                     transformed = html.Insert(headEnd, bootstrap);
                 }
@@ -130,19 +136,19 @@ public sealed class DinkFlixIndexMiddleware
         }
 
         var path = request.Path.Value ?? string.Empty;
+
         return path.Equals("/web", StringComparison.OrdinalIgnoreCase)
             || path.Equals("/web/", StringComparison.OrdinalIgnoreCase)
             || path.Equals("/web/index.html", StringComparison.OrdinalIgnoreCase);
     }
 
-    private async Task<string?> ReadEmbeddedScriptAsync()
+    private static async Task<string?> ReadEmbeddedResourceAsync(string resourceName)
     {
         try
         {
-            await using var stream = typeof(Plugin).Assembly.GetManifestResourceStream(ScriptResource);
+            await using var stream = typeof(Plugin).Assembly.GetManifestResourceStream(resourceName);
             if (stream is null)
             {
-
                 return null;
             }
 
@@ -155,20 +161,20 @@ public sealed class DinkFlixIndexMiddleware
         }
     }
 
-    private static string BuildBootstrap(string script, string configuration)
+    private static string BuildBootstrap(string theme, string? script)
     {
-        var safeConfig = configuration.Replace("</script>", "<\\/script>", StringComparison.OrdinalIgnoreCase);
-        var safeScript = script.Replace("</script>", "<\\/script>", StringComparison.OrdinalIgnoreCase);
+        var safeTheme = theme.Replace("</style>", "<\\/style>", StringComparison.OrdinalIgnoreCase);
+        var safeScript = script?.Replace("</script>", "<\\/script>", StringComparison.OrdinalIgnoreCase) ?? string.Empty;
 
         var readinessScript =
             "document.documentElement.classList.add('df-booting');"
             + "document.addEventListener('DOMContentLoaded',function(){document.documentElement.classList.remove('df-booting');document.documentElement.classList.add('df-ready');},{once:true});"
             + "window.setTimeout(function(){document.documentElement.classList.remove('df-booting');document.documentElement.classList.add('df-ready');},3000);";
 
-        return "<style id=\"dinkflix-boot\">html.df-booting body{visibility:hidden !important;}html.df-ready body{visibility:visible !important;}</style>"
-            + "<link id=\"dinkflix-theme\" rel=\"stylesheet\" href=\"" + ThemeUrl + "\">"
-            + "<script id=\"dinkflix-config\">window.__DINKFLIX_CONFIG__=" + safeConfig + ";</script>"
-            + "<script id=\"dinkflix-bootstrap\">" + readinessScript + "</script>"
-            + (string.IsNullOrWhiteSpace(safeScript) ? string.Empty : "<script id=\"dinkflix-enhancements\">" + safeScript + "</script>");
+        return "<style id=\"dinkflix-theme\">" + safeTheme + "</style>"
+            + "<script id=\"dinkflix-theme-bootstrap\">" + readinessScript + "</script>"
+            + (string.IsNullOrWhiteSpace(safeScript)
+                ? string.Empty
+                : "<script id=\"dinkflix-enhancements\">" + safeScript + "</script>");
     }
 }
