@@ -8,6 +8,14 @@
     "category": "General",
     "versions": [
       {
+        "version": "5.0.0.0",
+        "changelog": "DINKFLIX Web 5.0.0.0: custom desktop navigation, Recently Added hero, Continue Watching, Recently Played, Movies, TV Shows, My List, search, title details and lightweight premium styling.",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/Orvlyn/DinkFlix/releases/download/v5.0.0.0/DinkFlix.Web_5.0.0.0.zip",
+        "checksum": "14C1BB711C8031921B2799AF26F5CB7C",
+        "timestamp": "2026-09-21T12:47:19Z"
+      },
+      {
         "version": "4.2.0.0",
         "changelog": "DINKFLIX Web 4.2.0.0: custom desktop navigation, Recently Added hero, Continue Watching, Recently Played, Movies, TV Shows, My List, search, title details and lightweight premium styling.",
         "targetAbi": "12.0.0.0",
