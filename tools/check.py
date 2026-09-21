@@ -126,14 +126,16 @@ assert "BasePlugin<PluginConfiguration>" in pl
 assert "IHasWebPages" not in pl
 assert "IApplicationPaths" in pl and "IXmlSerializer" in pl
 
-mw = (ROOT / "src/Jellyfin.Plugin.DinkFlix/DinkFlixIndexMiddleware.cs").read_text()
-assert "cdn.jsdelivr.net" not in mw
-assert "Jellyfin.Plugin.DinkFlix.Web.dinkflix.css" in mw
-assert 'id=\\\"dinkflix-theme\\\"' in mw
-assert "ReadEmbeddedResourceAsync" in mw
-assert 'app.UseMiddleware<DinkFlixIndexMiddleware>()' in (
-    ROOT / "src/Jellyfin.Plugin.DinkFlix/DinkFlixStartupFilter.cs"
-).read_text()
+ft = (ROOT / "src/Jellyfin.Plugin.DinkFlix/FileTransformationRegistrationService.cs").read_text()
+wf = (ROOT / "src/Jellyfin.Plugin.DinkFlix/WebFileTransformation.cs").read_text()
+reg = (ROOT / "src/Jellyfin.Plugin.DinkFlix/DinkFlixServiceRegistrator.cs").read_text()
+assert "RegisterTransformation" in ft
+assert "RemoveTransformation" in ft
+assert "TransformIndexHtml" in wf
+assert "dinkflix.css" in wf and "dinkflix.js" in wf
+assert "AddHostedService<FileTransformationRegistrationService>()" in reg
+assert not (ROOT / "src/Jellyfin.Plugin.DinkFlix/DinkFlixIndexMiddleware.cs").exists()
+assert not (ROOT / "src/Jellyfin.Plugin.DinkFlix/DinkFlixStartupFilter.cs").exists()
 
 csproj = (ROOT / "src/Jellyfin.Plugin.DinkFlix/Jellyfin.Plugin.DinkFlix.csproj").read_text()
 assert 'EmbeddedResource Include="Web/dinkflix.css"' in csproj
