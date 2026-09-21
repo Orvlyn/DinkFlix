@@ -90,12 +90,12 @@ for token in [
     "function renderList",
     "function renderSearch",
     "playbackManager",
-    "#/dinkflix/library",
-    "#/dinkflix/item",
-    "#/dinkflix/list",
-    "path === '/dinkflix/search'",
-    "path === '/dinkflix/about'",
-    "#/home?tab=2",
+    "path === '/details'",
+    "path === '/movies' || path === '/tv' || path === '/tvshows'",
+    "path === '/search'",
+    "df === 'dinkflix-list'",
+    "df === 'about'",
+    "tab: 2",
     "tab: 3",
 ]:
     assert token in root_js, token
