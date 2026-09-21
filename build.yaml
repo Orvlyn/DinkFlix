@@ -1,6 +1,6 @@
-version: "7.0.0.4"
+version: "7.0.0.5"
 name: "DINKFLIX"
-description: "Native Jellyfin 12 theme with lightweight frontend enhancements"
+description: "Native Jellyfin 12 theme with always-on frontend enhancements"
 overview: "Standalone DINKFLIX theme for the Jellyfin 12 Web UI."
 owner: "Orvlyn"
 category: "General"
