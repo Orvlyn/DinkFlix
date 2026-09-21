@@ -6,7 +6,7 @@
   if (window.__DINKFLIX_WEB_810__) {
     return;
   }
-  window.__DINKFLIX_WEB_60__ = true;
+  window.__DINKFLIX_WEB_810__ = true;
 
   var VERSION = '8.1.0.0';
   var PLUGIN_ID = 'B4A9D4E6-4E4D-4F42-9E90-9C5B4D4B8D2B';
@@ -1446,6 +1446,39 @@
     });
   }
 
+  async function decorateNativeLibraryCards() {
+    var parsed = parseHash();
+    if (!['/movies', '/tv', '/tvshows'].includes(parsed.path)) {
+      return;
+    }
+    var cards = Array.from(document.querySelectorAll('.itemsContainer .card[data-id], .itemsContainer .card[data-item-id]'));
+    for (var index = 0; index < cards.length; index++) {
+      var card = cards[index];
+      if (card.closest('#dinkflix-app') || card.querySelector('.df-native-badges')) continue;
+      var id = card.getAttribute('data-id') || card.getAttribute('data-item-id');
+      if (!id) continue;
+      var item = state.cardData.get(id) || await getItem(id).catch(function () { return null; });
+      if (!item) continue;
+      var imageContainer = card.querySelector('.cardImageContainer');
+      if (!imageContainer) continue;
+      var badges = document.createElement('div');
+      badges.className = 'df-native-badges';
+      var html = ratingBadge(item) + qualityBadges(item);
+      if (item.OfficialRating) html += '<span class="df-badge df-badge-age">' + esc(item.OfficialRating) + '</span>';
+      (Array.isArray(item.Genres) ? item.Genres.slice(0, 2) : []).forEach(function (genre) {
+        html += '<span class="df-badge df-badge-tag">' + esc(genre) + '</span>';
+      });
+      (Array.isArray(item.Tags) ? item.Tags.slice(0, 2) : []).forEach(function (tag) {
+        html += '<span class="df-badge df-badge-tag">' + esc(tag) + '</span>';
+      });
+      if (html) {
+        badges.innerHTML = html;
+        imageContainer.style.position = 'relative';
+        imageContainer.appendChild(badges);
+      }
+    }
+  }
+
   function nativeRouteReadyDelay() {
     setTimeout(function () {
       markNativeReady();
@@ -1499,6 +1532,14 @@
       state.nav?.remove();
       state.nav = null;
     }
+    if (['/movies', '/tv', '/tvshows'].includes(parseHash().path)) {
+      setTimeout(function () {
+        decorateNativeLibraryCards().catch(function (error) {
+          console.debug('[DINKFLIX] Native library badge pass failed.', error);
+        });
+      }, 700);
+    }
+
     if (info.type === 'playback') {
       clearDinkflixRoots();
       document.body.classList.remove('df-custom-active');
