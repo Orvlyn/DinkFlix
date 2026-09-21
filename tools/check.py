@@ -63,7 +63,7 @@ assert plugin["name"] == "DINKFLIX"
 build = (ROOT / "build.yaml").read_text(encoding="utf-8")
 version_match = re.search(r'^version:\s*["\']?([^"\'\s]+)', build, re.M)
 assert version_match, "build.yaml version missing"
-assert version_match.group(1) == "8.3.0.0"
+assert version_match.group(1) == "8.4.0.0"
 assert 'targetAbi: "12.0.0.0"' in build
 assert 'framework: "net10.0"' in build
 
@@ -82,8 +82,8 @@ root_js = (ROOT / "dinkflix.js").read_text(encoding="utf-8")
 embedded_js = (ROOT / "src/Jellyfin.Plugin.DinkFlix/Web/dinkflix.js").read_text(encoding="utf-8")
 assert root_js == embedded_js
 for token in [
-    "window.__DINKFLIX_WEB_83__",
-    "VERSION = '8.3.0'",
+    "window.__DINKFLIX_WEB_84__",
+    "VERSION = '8.4.0'",
     "function renderHome",
     "function renderLibrary",
     "function renderItem",
@@ -119,9 +119,9 @@ assert "DinkFlixStartupService" in reg
 assert "AddSingleton<IScheduledTask, DinkFlixStartupService>()" in reg
 
 wf = (ROOT / "src/Jellyfin.Plugin.DinkFlix/WebFileTransformation.cs").read_text(encoding="utf-8")
-assert "DINKFLIX-WEB-83-START" in wf
+assert "DINKFLIX-WEB-84-START" in wf
 assert "DINKFLIX-WEB-82-START" in wf
-assert '8.3.0.0' in wf
+assert '8.4.0.0' in wf
 assert "TransformIndexHtml" in wf
 assert "Newtonsoft.Json.Linq" in wf
 
@@ -129,7 +129,7 @@ csproj = (ROOT / "src/Jellyfin.Plugin.DinkFlix/Jellyfin.Plugin.DinkFlix.csproj")
 assert 'EmbeddedResource Include="Web/dinkflix.css"' in csproj
 assert 'EmbeddedResource Include="Web/dinkflix.js"' in csproj
 assert 'Newtonsoft.Json' in csproj
-assert 'Version>8.3.0.0<' in csproj
+assert 'Version>8.4.0.0<' in csproj
 
 for obsolete in [
     "src/Jellyfin.Plugin.DinkFlix/FileTransformationRegistrationService.cs",
@@ -144,5 +144,5 @@ for path in (ROOT / "src/Jellyfin.Plugin.DinkFlix").rglob("*.cs"):
     balanced(path)
 
 print("DINKFLIX static checks: PASS")
-print("version: 8.3.0.0")
+print("version: 8.4.0.0")
 print("frontend baseline: v5.1")
