@@ -5,12 +5,11 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Jellyfin.Plugin.DinkFlix;
 
 /// <summary>
-/// Registers DINKFLIX with Jellyfin's File Transformation plugin.
+/// DINKFLIX plugin service registration.
 /// </summary>
 public sealed class DinkFlixServiceRegistrator : IPluginServiceRegistrator
 {
     public void RegisterServices(IServiceCollection serviceCollection, IServerApplicationHost applicationHost)
     {
-        serviceCollection.AddHostedService<FileTransformationRegistrationService>();
     }
 }
