@@ -1,7 +1,16 @@
 /* DINKFLIX focused presentation fixes.
    Loaded after sleekfin-media.css. No global page/player/settings rules. */
 
-/* Hide only the library shortcut section marked by the media feature. */
+/* Hide only Jellyfin's My Media shortcut section.
+   Jellyfin renders it as #indexPage .verticalSection.section0 with a
+   direct h2.sectionTitle labelled My Media. The previous selector relied
+   on a homeLibraryButtonContainer that does not exist in this markup. */
+#indexPage #homeTab .verticalSection.section0:has(> h2.sectionTitle.sectionTitle-cards),
+#indexPage .homePage .verticalSection.section0:has(> h2.sectionTitle.sectionTitle-cards),
+#indexPage .verticalSection.section0:has(> h2.sectionTitle) {
+    display: none !important;
+}
+
 #indexPage .dinkflix-hide-my-media {
     display: none !important;
 }
