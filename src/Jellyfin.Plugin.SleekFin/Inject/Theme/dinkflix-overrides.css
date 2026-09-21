@@ -8,146 +8,28 @@
     --dinkflix-muted: #98a4b7;
 }
 
-html, body, .skinBody, .mainAnimatedPage, #indexPage {
-    background: var(--dinkflix-bg) !important;
-}
+html, body, .skinBody, .mainAnimatedPage, #indexPage { background: var(--dinkflix-bg) !important; }
+.skinHeader, .skinHeader-withBackground, .headerTop, .mainHeader { position: sticky !important; top: 0 !important; z-index: 2000 !important; background: linear-gradient(180deg, #101f31 0%, #07101d 100%) !important; border-bottom: 1px solid rgba(0, 255, 198, .30) !important; box-shadow: 0 8px 28px rgba(0, 0, 0, .40), inset 0 -1px 0 rgba(0, 255, 198, .08) !important; backdrop-filter: blur(20px) saturate(150%) !important; }
+.skinHeader .headerButton, .skinHeader .paper-icon-button-light, .skinHeader .navMenuOption, .skinHeader a { border-radius: 10px !important; transition: background .18s ease, color .18s ease !important; }
+.skinHeader .headerButton:hover, .skinHeader .paper-icon-button-light:hover, .skinHeader .navMenuOption:hover, .skinHeader .navMenuOption-selected, .skinHeader a:hover { background: rgba(0, 255, 198, .14) !important; color: var(--dinkflix-mint) !important; }
 
-/* Navbar: visible dark-blue glass with mint edge and hover state. */
-.skinHeader,
-.skinHeader-withBackground,
-.headerTop,
-.mainHeader {
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 2000 !important;
-    background: linear-gradient(180deg, #101f31 0%, #07101d 100%) !important;
-    border-bottom: 1px solid rgba(0, 255, 198, .30) !important;
-    box-shadow: 0 8px 28px rgba(0, 0, 0, .40), inset 0 -1px 0 rgba(0, 255, 198, .08) !important;
-    backdrop-filter: blur(20px) saturate(150%) !important;
-}
+.sleekfin-hero { display: block !important; position: relative !important; visibility: visible !important; opacity: 1 !important; width: 100% !important; height: clamp(600px, 78vh, 880px) !important; min-height: 600px !important; margin: 0 !important; overflow: hidden !important; isolation: isolate !important; background: var(--dinkflix-bg) !important; }
+.sleekfin-hero-slide { display: block !important; position: absolute !important; inset: 0 !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }
+.sleekfin-hero-slide[data-active="true"] { visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; z-index: 5 !important; }
+.sleekfin-hero-backdrop { display: block !important; visibility: visible !important; opacity: 1 !important; z-index: 0 !important; }
+.sleekfin-hero-vignette, .sleekfin-hero-seam { z-index: 1 !important; }
+.sleekfin-hero-content { position: relative !important; z-index: 4 !important; min-height: 100% !important; }
+.sleekfin-hero-pager { z-index: 20 !important; pointer-events: auto !important; }
 
-.skinHeader .headerButton,
-.skinHeader .paper-icon-button-light,
-.skinHeader .navMenuOption,
-.skinHeader a {
-    border-radius: 10px !important;
-    transition: background .18s ease, color .18s ease !important;
-}
+:is(.overflowPortraitCard, .portraitCard) { width: clamp(220px, 16vw, 285px) !important; max-width: 285px !important; flex: 0 0 clamp(220px, 16vw, 285px) !important; }
+:is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) { width: clamp(350px, 32vw, 460px) !important; max-width: 460px !important; flex: 0 0 clamp(350px, 32vw, 460px) !important; }
+.itemProgressBarForeground { background: var(--dinkflix-mint) !important; }
+.itemProgressBar { height: 5px !important; }
+.sectionTitle { font-size: clamp(21px, 1.6vw, 28px) !important; font-weight: 500 !important; margin-top: 30px !important; margin-bottom: 18px !important; }
+.cardBox, .cardScalable { border-radius: 13px !important; }
 
-.skinHeader .headerButton:hover,
-.skinHeader .paper-icon-button-light:hover,
-.skinHeader .navMenuOption:hover,
-.skinHeader .navMenuOption-selected,
-.skinHeader a:hover {
-    background: rgba(0, 255, 198, .14) !important;
-    color: var(--dinkflix-mint) !important;
-}
+/* Hide the native My Media section without removing any library data or Jellyfin functionality. */
+.dinkflix-hidden-my-media { display: none !important; }
 
-/* Hero: do not depend on the html theme class being present. */
-.sleekfin-hero {
-    display: block !important;
-    position: relative !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    width: 100% !important;
-    height: clamp(600px, 78vh, 880px) !important;
-    min-height: 600px !important;
-    margin: 0 !important;
-    overflow: hidden !important;
-    isolation: isolate !important;
-    background: var(--dinkflix-bg) !important;
-}
-
-.sleekfin-hero-slide {
-    display: block !important;
-    position: absolute !important;
-    inset: 0 !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-}
-
-.sleekfin-hero-slide[data-active="true"] {
-    visibility: visible !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
-    z-index: 5 !important;
-}
-
-.sleekfin-hero-backdrop {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    z-index: 0 !important;
-}
-
-.sleekfin-hero-vignette,
-.sleekfin-hero-seam {
-    z-index: 1 !important;
-}
-
-.sleekfin-hero-content {
-    position: relative !important;
-    z-index: 4 !important;
-    min-height: 100% !important;
-}
-
-.sleekfin-hero-pager {
-    z-index: 20 !important;
-    pointer-events: auto !important;
-}
-
-/* Bigger native Jellyfin cards, with room to breathe. */
-:is(.overflowPortraitCard, .portraitCard) {
-    width: clamp(220px, 16vw, 285px) !important;
-    max-width: 285px !important;
-    flex: 0 0 clamp(220px, 16vw, 285px) !important;
-}
-
-:is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) {
-    width: clamp(350px, 32vw, 460px) !important;
-    max-width: 460px !important;
-    flex: 0 0 clamp(350px, 32vw, 460px) !important;
-}
-
-.itemProgressBarForeground {
-    background: var(--dinkflix-mint) !important;
-}
-
-.itemProgressBar {
-    height: 5px !important;
-}
-
-.sectionTitle {
-    font-size: clamp(21px, 1.6vw, 28px) !important;
-    font-weight: 500 !important;
-    margin-top: 30px !important;
-    margin-bottom: 18px !important;
-}
-
-.cardBox, .cardScalable {
-    border-radius: 13px !important;
-}
-
-@media (max-width: 900px) {
-    .sleekfin-hero { height: 650px !important; min-height: 650px !important; }
-    :is(.overflowPortraitCard, .portraitCard) {
-        width: 205px !important;
-        max-width: 205px !important;
-        flex-basis: 205px !important;
-    }
-}
-
-@media (max-width: 650px) {
-    .sleekfin-hero { height: 570px !important; min-height: 570px !important; }
-    :is(.overflowPortraitCard, .portraitCard) {
-        width: 175px !important;
-        max-width: 175px !important;
-        flex-basis: 175px !important;
-    }
-    :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) {
-        width: 290px !important;
-        max-width: 290px !important;
-        flex-basis: 290px !important;
-    }
-}
+@media (max-width: 900px) { .sleekfin-hero { height: 650px !important; min-height: 650px !important; } :is(.overflowPortraitCard, .portraitCard) { width: 205px !important; max-width: 205px !important; flex-basis: 205px !important; } }
+@media (max-width: 650px) { .sleekfin-hero { height: 570px !important; min-height: 570px !important; } :is(.overflowPortraitCard, .portraitCard) { width: 175px !important; max-width: 175px !important; flex-basis: 175px !important; } :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) { width: 290px !important; max-width: 290px !important; flex-basis: 290px !important; } }
