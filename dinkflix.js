@@ -750,10 +750,27 @@
     const playable = ['Movie', 'Episode', 'Video'].includes(item.Type) || Boolean(item.__dfResumeEpisodeId);
     const meta = [fmtYear(item.ProductionYear || item.PremiereDate || item.DateCreated), humanMinutes(item.RunTimeTicks)].filter(Boolean);
     const progress = playbackPercent(item);
-    const continueLabel = item.__dfContinueLabel ? `<div class="df-card-continue">${esc(item.__dfContinueLabel)}</div>` : '';
-    return `<article class="df-card" data-id="${esc(id)}"><div class="df-card-media"><a href="#/details?id=${encodeURIComponent(id)}&df=dinkflix&serverId=${encodeURIComponent(state.serverId || '')}" class="df-card-link" data-df-item="${esc(id)}" aria-label="Open ${title}"></a><img loading="lazy" src="${esc(imageUrl(item, 'Primary', 900))}" alt="${title}"><button class="df-card-menu-btn" data-df-menu="${esc(id)}" type="button" aria-label="More actions for ${title}" title="More actions">${svg('dots')}</button>${playable ? `<button class="df-card-play-btn" data-df-play="${esc(playId)}" type="button" aria-label="Play ${title}" title="Play">${svg('play')}</button>` : ''}${progress > 0 ? `<div class="df-progress"><span style="width:${progress}%"></span></div>` : ''}</div><div class="df-card-content"><div class="df-card-title">${title}</div><div class="df-card-meta">${meta.map((value, index) => `${index ? '<span class="df-meta-dot">•</span>' : ''}<span>${esc(value)}</span>`).join('')}</div><div class="df-card-badges">${badgeHtml(item)}${tagHtml(item)}</div>${continueLabel}</div></article>;
+    const continueLabel = item.__dfContinueLabel ? '<div class="df-card-continue">' + esc(item.__dfContinueLabel) + '</div>' : '';
+    const detailHref = '#/details?id=' + encodeURIComponent(id) + '&df=dinkflix&serverId=' + encodeURIComponent(state.serverId || '');
+    let html = '<article class="df-card" data-id="' + esc(id) + '">';
+    html += '<div class="df-card-media">';
+    html += '<a href="' + esc(detailHref) + '" class="df-card-link" data-df-item="' + esc(id) + '" aria-label="Open ' + title + '"></a>';
+    html += '<img loading="lazy" src="' + esc(imageUrl(item, 'Primary', 900)) + '" alt="' + title + '">';
+    html += '<button class="df-card-menu-btn" data-df-menu="' + esc(id) + '" type="button" aria-label="More actions for ' + title + '" title="More actions">' + svg('dots') + '</button>';
+    if (playable) {
+      html += '<button class="df-card-play-btn" data-df-play="' + esc(playId) + '" type="button" aria-label="Play ' + title + '" title="Play">' + svg('play') + '</button>';
+    }
+    if (progress > 0) {
+      html += '<div class="df-progress"><span style="width:' + progress + '%"></span></div>';
+    }
+    html += '</div><div class="df-card-content">';
+    html += '<div class="df-card-title">' + title + '</div>';
+    html += '<div class="df-card-meta">' + meta.map((value, index) => (index ? '<span class="df-meta-dot">•</span>' : '') + '<span>' + esc(value) + '</span>').join('') + '</div>';
+    html += '<div class="df-card-badges">' + badgeHtml(item) + tagHtml(item) + '</div>';
+    html += continueLabel;
+    html += '</div></article>';
+    return html;
   }
-
   function section(title, items, href = '') {
     if (!items?.length) {
       return '';
