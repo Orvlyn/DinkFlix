@@ -91,7 +91,7 @@ public sealed class DinkFlixIndexMiddleware
             context.Response.ContentLength = output.Length;
             await originalBody.WriteAsync(output);
         }
-        catch (Exception ex)
+        catch
         {
             context.Response.Body = originalBody;
             context.Features.Set(originalFeature);
@@ -146,7 +146,7 @@ public sealed class DinkFlixIndexMiddleware
             using var reader = new StreamReader(stream, Encoding.UTF8);
             return await reader.ReadToEndAsync();
         }
-        catch (Exception ex)
+        catch
         {
             return null;
         }
