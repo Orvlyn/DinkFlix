@@ -1,7 +1,4 @@
-/* DINKFLIX visual layer
- * Based on SleekFin. Original project credit is retained in the repository README.
- * All rules are scoped to the DINKFLIX root so Jellyfin settings, dashboard and player remain native.
- */
+/* DINKFLIX visual layer based on SleekFin. Scoped to DINKFLIX media pages. */
 html.sleekfin-main-ui:root {
     --sleekfin-accent: #00ffc6;
     --sleekfin-accent-soft: rgba(0, 255, 198, 0.14);
@@ -18,23 +15,49 @@ html.sleekfin-main-ui:root {
     --jf-palette-secondary-mainChannel: 0 255 198;
     --jf-palette-starIcon-main: #00ffc6;
 }
-html.sleekfin-main-ui,
-html.sleekfin-main-ui body,
-html.sleekfin-main-ui .skinBody,
-html.sleekfin-main-ui .mainAnimatedPage { background: var(--sleekfin-background) !important; }
-html.sleekfin-main-ui .skinHeader { position: sticky; top: 0; z-index: 1000; background: rgba(5, 8, 16, 0.94); border-bottom: 1px solid rgba(255, 255, 255, 0.07); backdrop-filter: blur(14px) saturate(125%); }
-html.sleekfin-main-ui .cardBox, html.sleekfin-main-ui .cardScalable { border-radius: 10px; }
-html.sleekfin-main-ui .cardBox:hover, html.sleekfin-main-ui .cardBox:focus-within { outline: 1px solid rgba(0, 255, 198, 0.32); outline-offset: 2px; }
-html.sleekfin-main-ui .itemsContainer, html.sleekfin-main-ui .scrollSlider { scrollbar-width: thin; scrollbar-color: rgba(0, 255, 198, 0.45) transparent; }
+
+html.sleekfin-main-ui .skinHeader {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(5, 8, 16, 0.94);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(14px) saturate(125%);
+}
+
+html.sleekfin-main-ui .cardBox,
+html.sleekfin-main-ui .cardScalable { border-radius: 10px; }
+html.sleekfin-main-ui .cardBox:hover,
+html.sleekfin-main-ui .cardBox:focus-within { outline: 1px solid rgba(0, 255, 198, 0.32); outline-offset: 2px; }
+html.sleekfin-main-ui .itemsContainer,
+html.sleekfin-main-ui .scrollSlider { scrollbar-width: thin; scrollbar-color: rgba(0, 255, 198, 0.45) transparent; }
 html.sleekfin-main-ui .sectionTitle { letter-spacing: -0.015em; font-weight: 500; }
-html.sleekfin-main-ui button:focus-visible, html.sleekfin-main-ui a:focus-visible, html.sleekfin-main-ui [tabindex]:focus-visible { outline: 2px solid #00ffc6; outline-offset: 3px; }
-html.sleekfin-main-ui :is(.overflowPortraitCard, .portraitCard) { width: clamp(220px, 16vw, 285px); max-width: 285px; }
-html.sleekfin-main-ui :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) { width: clamp(350px, 32vw, 460px); max-width: 460px; }
-html.sleekfin-main-ui .cardImageContainer, html.sleekfin-main-ui .cardScalable, html.sleekfin-main-ui .cardContent { overflow: hidden; }
+html.sleekfin-main-ui button:focus-visible,
+html.sleekfin-main-ui a:focus-visible,
+html.sleekfin-main-ui [tabindex]:focus-visible { outline: 2px solid #00ffc6; outline-offset: 3px; }
+
+/* Larger cards: target Jellyfin's actual card wrapper so native max-width rules cannot shrink them. */
+html.sleekfin-main-ui.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowPortraitCard, .portraitCard) {
+    flex: 0 0 clamp(250px, 17vw, 300px) !important;
+    width: clamp(250px, 17vw, 300px) !important;
+    max-width: 300px !important;
+}
+html.sleekfin-main-ui.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) {
+    flex: 0 0 clamp(400px, 34vw, 520px) !important;
+    width: clamp(400px, 34vw, 520px) !important;
+    max-width: 520px !important;
+}
+html.sleekfin-main-ui.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardBox {
+    margin-inline-end: 16px !important;
+}
+html.sleekfin-main-ui .cardImageContainer,
+html.sleekfin-main-ui .cardScalable,
+html.sleekfin-main-ui .cardContent { overflow: hidden; }
 html.sleekfin-main-ui .cardContent { transition: transform 220ms ease, border-color 220ms ease; }
 html.sleekfin-main-ui .card:hover .cardContent { transform: translateY(-3px); }
 html.sleekfin-main-ui .itemProgressBarForeground { background: var(--sleekfin-accent) !important; }
 html.sleekfin-main-ui .itemProgressBar { background: rgba(156, 170, 176, 0.28); height: 5px; }
+
 html.sleekfin-main-ui .sleekfin-hero { display: block; position: relative; width: 100%; min-height: 600px; height: clamp(600px, 78vh, 880px); margin: 0; overflow: hidden; isolation: isolate; background: var(--sleekfin-background); }
 html.sleekfin-main-ui .sleekfin-hero-slide { position: absolute; inset: 0; display: block; visibility: hidden; opacity: 0; pointer-events: none; }
 html.sleekfin-main-ui .sleekfin-hero-slide[data-active="true"] { visibility: visible; opacity: 1; pointer-events: auto; z-index: 5; }
@@ -42,9 +65,22 @@ html.sleekfin-main-ui .sleekfin-hero-backdrop { display: block; visibility: visi
 html.sleekfin-main-ui .sleekfin-hero-content { position: relative; z-index: 4; min-height: 100%; }
 html.sleekfin-main-ui .sleekfin-hero-pager { display: flex; align-items: center; gap: 6px; position: absolute; right: clamp(24px, 5vw, 72px); bottom: 28px; z-index: 12; }
 html.sleekfin-main-ui .sleekfin-hero-pager-button { min-width: 34px; height: 28px; padding: 0 10px; border: 1px solid rgba(241, 247, 246, 0.22); border-radius: 999px; background: rgba(5, 8, 16, 0.64); color: var(--sleekfin-muted); cursor: pointer; }
-html.sleekfin-main-ui .sleekfin-hero-pager-button[data-active="true"], html.sleekfin-main-ui .sleekfin-hero-pager-button:hover, html.sleekfin-main-ui .sleekfin-hero-pager-button:focus-visible { background: var(--sleekfin-accent); border-color: var(--sleekfin-accent); color: #04100d; }
+html.sleekfin-main-ui .sleekfin-hero-pager-button[data-active="true"],
+html.sleekfin-main-ui .sleekfin-hero-pager-button:hover,
+html.sleekfin-main-ui .sleekfin-hero-pager-button:focus-visible { background: var(--sleekfin-accent); border-color: var(--sleekfin-accent); color: #04100d; }
 html.sleekfin-main-ui .sleekfin-details-back { position: relative; z-index: 20; pointer-events: auto; }
 html.sleekfin-main-ui .dinkflix-hidden-my-media { display: none !important; }
-@media (max-width: 900px) { html.sleekfin-main-ui :is(.overflowPortraitCard, .portraitCard) { width: 205px; max-width: 205px; } html.sleekfin-main-ui :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) { width: 320px; max-width: 320px; } }
-@media (max-width: 650px) { html.sleekfin-main-ui :is(.overflowPortraitCard, .portraitCard) { width: 175px; max-width: 175px; } html.sleekfin-main-ui :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) { width: 290px; max-width: 290px; } html.sleekfin-main-ui .sleekfin-hero { min-height: 570px; height: 570px; } html.sleekfin-main-ui .sleekfin-hero-pager { right: 20px; bottom: 18px; } }
-@media (prefers-reduced-motion: reduce) { html.sleekfin-main-ui *, html.sleekfin-main-ui *::before, html.sleekfin-main-ui *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; } }
+
+@media (max-width: 900px) {
+    html.sleekfin-main-ui.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowPortraitCard, .portraitCard) { flex-basis: 220px !important; width: 220px !important; max-width: 220px !important; }
+    html.sleekfin-main-ui.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) { flex-basis: 340px !important; width: 340px !important; max-width: 340px !important; }
+}
+@media (max-width: 650px) {
+    html.sleekfin-main-ui.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowPortraitCard, .portraitCard) { flex-basis: 185px !important; width: 185px !important; max-width: 185px !important; }
+    html.sleekfin-main-ui.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) { flex-basis: 290px !important; width: 290px !important; max-width: 290px !important; }
+    html.sleekfin-main-ui .sleekfin-hero { min-height: 570px; height: 570px; }
+    html.sleekfin-main-ui .sleekfin-hero-pager { right: 20px; bottom: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    html.sleekfin-main-ui *, html.sleekfin-main-ui *::before, html.sleekfin-main-ui *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
