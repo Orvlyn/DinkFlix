@@ -1,0 +1,29 @@
+name: Validate DINKFLIX Web
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - "**/*.md"
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - "**/*.md"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore
+        run: dotnet restore src/Jellyfin.Plugin.DinkFlix/Jellyfin.Plugin.DinkFlix.csproj
+
+      - name: Build
+        run: dotnet build src/Jellyfin.Plugin.DinkFlix/Jellyfin.Plugin.DinkFlix.csproj -c Release --no-restore
