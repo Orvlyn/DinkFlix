@@ -12,7 +12,7 @@ const features = (window.SleekFinFeatures = window.SleekFinFeatures || {});
 features.hero?.stop?.();
 
 const state = {
-  enabled: document.documentElement.dataset.sleekfinHeroEnabled !== 'false',
+  enabled: document.documentElement.dataset.sleekfinHeroEnabled === 'true',
   failedHost: null,
   generation: 0,
   loadingTimer: 0,
@@ -45,8 +45,7 @@ function isHomeRoute() {
 
 function findHost() {
   if (!isHomeRoute()) return null;
-  const candidates = document.querySelectorAll('#indexPage #homeTab .sections, #indexPage .homePage .sections');
-  return Array.from(candidates).find((element) => dom.isVisible(element)) || null;
+  return Array.from(document.querySelectorAll('#indexPage #homeTab.is-active .sections')).find(dom.isVisible) || null;
 }
 
 function hideMyMedia() {
