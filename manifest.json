@@ -6,7 +6,16 @@
     "description": "A desktop-first DINKFLIX web experience with a full-width hero, cleaner navigation, richer cards, per-user My List, library browsing, search and custom title pages.",
     "owner": "Orvlyn",
     "category": "General",
-    "versions": [],
+    "versions": [
+      {
+        "version": "5.2.0.0",
+        "changelog": "DINKFLIX Web 5.2.0.0: premium desktop navigation, full-width hero, wider discovery cards, My List, search, richer title pages and native Jellyfin fallbacks.",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/Orvlyn/DinkFlix/releases/download/v5.2.0.0/DinkFlix.Web_5.2.0.0.zip",
+        "checksum": "8609ECDCFD7B37716A93E85DF068269D",
+        "timestamp": "2026-09-21T13:32:09Z"
+      }
+    ],
     "imageUrl": "https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix-banner.svg",
     "repositoryUrl": "https://github.com/Orvlyn/DinkFlix"
   }
