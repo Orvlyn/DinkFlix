@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 
 namespace Jellyfin.Plugin.DinkFlix.Services;
@@ -9,7 +10,7 @@ public static class WebFileTransformation
 {
     private const string StartMarker = "<!-- DINKFLIX-WEB-52-START -->";
     private const string EndMarker = "<!-- DINKFLIX-WEB-52-END -->";
-    private const string FrontendVersion = "5.2.0";
+    private const string FrontendVersion = "5.2.1";
 
     /// <summary>
     /// Transforms Jellyfin Web index.html by embedding the DINKFLIX stylesheet and script.
@@ -87,13 +88,29 @@ public static class WebFileTransformation
     private static string BuildInjection()
     {
         var css = ReadEmbeddedResource("dinkflix.css");
-        var js = ReadEmbeddedResource("dinkflix.js")
-            .Replace("</script>", "<\/script>", StringComparison.OrdinalIgnoreCase);
+        var js = ReadEmbeddedResource("dinkflix.js");
 
-        return $"\n{StartMarker}\n"
-            + $"<style id="dinkflix-css" data-dinkflix-version="{FrontendVersion}">{css}</style>\n"
-            + $"<script id="dinkflix-js" data-dinkflix-version="{FrontendVersion}">{js}</script>\n"
-            + $"{EndMarker}\n";
+        // Break the literal closing script tag so embedded JavaScript cannot terminate the HTML script element early.
+        var safeScriptClose = "<" + (char)92 + "/script>";
+        js = js.Replace("</script>", safeScriptClose, StringComparison.OrdinalIgnoreCase);
+
+        var builder = new StringBuilder();
+        builder.Append('\n');
+        builder.Append(StartMarker);
+        builder.Append('\n');
+        builder.Append("<style id=\"dinkflix-css\" data-dinkflix-version=\"");
+        builder.Append(FrontendVersion);
+        builder.Append("\">");
+        builder.Append(css);
+        builder.Append("</style>\n");
+        builder.Append("<script id=\"dinkflix-js\" data-dinkflix-version=\"");
+        builder.Append(FrontendVersion);
+        builder.Append("\">");
+        builder.Append(js);
+        builder.Append("</script>\n");
+        builder.Append(EndMarker);
+        builder.Append('\n');
+        return builder.ToString();
     }
 
     private static string ReadEmbeddedResource(string fileName)
@@ -109,7 +126,7 @@ public static class WebFileTransformation
 
         using var stream = assembly.GetManifestResourceStream(resourceName)
             ?? throw new InvalidOperationException($"Unable to open embedded DINKFLIX resource: {resourceName}");
-        using var reader = new StreamReader(stream);
+        using var reader = new StreamReader(stream, Encoding.UTF8);
         return reader.ReadToEnd();
     }
 
