@@ -12,7 +12,7 @@ const features = (window.SleekFinFeatures = window.SleekFinFeatures || {});
 features.hero?.stop?.();
 
 const state = {
-  enabled: document.documentElement.dataset.sleekfinHeroEnabled === 'true',
+  enabled: null,
   failedHost: null,
   generation: 0,
   loadingTimer: 0,
@@ -127,7 +127,7 @@ function reconcile() {
   hideMyMedia();
   const host = findHost();
   if (!host) {
-    unmount();
+    if (!isHomeRoute()) unmount();
     return;
   }
   if (state.enabled === false) {
@@ -135,7 +135,7 @@ function reconcile() {
     removeMount();
     return;
   }
-  if (state.mount && dom.isConnected(state.mount) && state.mount.nextElementSibling === host) return;
+  if (state.mount && dom.isConnected(state.mount)) return;
   if (state.failedHost === host) return;
   unmount();
   mount(host);
