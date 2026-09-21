@@ -26,13 +26,17 @@ jobs:
         run: dotnet restore src/Jellyfin.Plugin.DinkFlix/Jellyfin.Plugin.DinkFlix.csproj
 
       - name: Publish
-        run: dotnet publish src/Jellyfin.Plugin.DinkFlix/Jellyfin.Plugin.DinkFlix.csproj -c Release -o artifacts/publish --no-restore
+        shell: bash
+        run: |
+          plugin_version="${GITHUB_REF_NAME#v}"
+          dotnet publish src/Jellyfin.Plugin.DinkFlix/Jellyfin.Plugin.DinkFlix.csproj -c Release -o artifacts/publish --no-restore -p:Version="${plugin_version}"
 
       - name: Package plugin
         id: package
         shell: bash
         run: |
-          zip_name="DinkFlix.Web_12.1.0.zip"
+          plugin_version="${GITHUB_REF_NAME#v}"
+          zip_name="DinkFlix.Web_${plugin_version}.zip"
           (cd artifacts/publish && zip -9 -j "../../${zip_name}" Jellyfin.Plugin.DinkFlix.dll)
           checksum="$(md5sum "${zip_name}" | awk '{print toupper($1)}')"
           echo "zip_name=${zip_name}" >> "$GITHUB_OUTPUT"
@@ -53,12 +57,12 @@ jobs:
           import json, os, datetime
           path = 'manifest.json'
           data = json.load(open(path, encoding='utf-8'))
-          version = '2.0.0.0'
+          version = os.environ['TAG'].lstrip('v')
           version_entry = {
               'version': version,
-              'changelog': 'DINKFLIX Web v2 foundation release for Jellyfin 12.1.',
-              'targetAbi': '12.1.0.0',
-              'sourceUrl': f"https://github.com/{os.environ['REPOSITORY']}/releases/download/{os.environ['TAG']}/DinkFlix.Web_12.1.0.zip",
+              'changelog': 'DINKFLIX Web v2.0.1 compatibility and File Transformation fix for Jellyfin 12.1.',
+              'targetAbi': '12.0.0.0',
+              'sourceUrl': f"https://github.com/{os.environ['REPOSITORY']}/releases/download/{os.environ['TAG']}/DinkFlix.Web_{version}.zip",
               'checksum': os.environ['CHECKSUM'],
               'timestamp': datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z')
           }
