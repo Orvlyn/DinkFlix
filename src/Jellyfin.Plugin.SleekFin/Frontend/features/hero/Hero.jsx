@@ -27,6 +27,11 @@ export function Hero({ entries, root, settings }) {
     return stopRotation;
   }, [entries.length, settings.autoRotateSeconds]);
 
+  function selectSlide(index) {
+    setActiveIndex(index);
+    startRotation();
+  }
+
   function onPointerDown(event) {
     if (event.pointerType !== 'mouse' || event.button === 0) {
       pointerStartX.current = event.clientX;
@@ -65,5 +70,27 @@ export function Hero({ entries, root, settings }) {
     };
   }, [entries.length, root, settings.autoRotateSeconds, settings.swipeEnabled]);
 
-  return entries.map((entry, index) => <HeroSlide key={`${entry.display.Id || index}-${entry.play.Id || index}`} entry={entry} active={index === activeIndex} settings={settings} />);
+  return (
+    <>
+      {entries.map((entry, index) => <HeroSlide key={`${entry.display.Id || index}-${entry.play.Id || index}`} entry={entry} active={index === activeIndex} settings={settings} />)}
+      {entries.length > 1 && (
+        <div class="sleekfin-hero-pager" role="tablist" aria-label="Featured titles">
+          {entries.map((entry, index) => (
+            <button
+              key={`hero-pager-${entry.display.Id || index}`}
+              class="sleekfin-hero-pager-button"
+              data-active={index === activeIndex ? 'true' : 'false'}
+              type="button"
+              role="tab"
+              aria-selected={index === activeIndex ? 'true' : 'false'}
+              aria-label={`Show ${entry.display.Name || `featured title ${index + 1}`}`}
+              onClick={() => selectSlide(index)}
+            >
+              <span>{String(index + 1).padStart(2, '0')}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </>
+  );
 }
