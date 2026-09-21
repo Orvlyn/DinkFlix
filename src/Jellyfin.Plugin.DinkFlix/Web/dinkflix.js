@@ -8,7 +8,7 @@
   }
   window.__DINKFLIX_WEB_810__ = true;
 
-  var VERSION = '8.1.0.1';
+  var VERSION = '8.2.0.0';
   var PLUGIN_ID = 'B4A9D4E6-4E4D-4F42-9E90-9C5B4D4B8D2B';
   var state = {
     user: null,
