@@ -126,14 +126,16 @@ assert "BasePlugin<PluginConfiguration>" in pl
 assert "IHasWebPages" not in pl
 assert "IApplicationPaths" in pl and "IXmlSerializer" in pl
 
-ft = (ROOT / "src/Jellyfin.Plugin.DinkFlix/FileTransformationRegistrationService.cs").read_text()
+startup = (ROOT / "src/Jellyfin.Plugin.DinkFlix/DinkFlixStartupService.cs").read_text()
 wf = (ROOT / "src/Jellyfin.Plugin.DinkFlix/WebFileTransformation.cs").read_text()
-reg = (ROOT / "src/Jellyfin.Plugin.DinkFlix/DinkFlixServiceRegistrator.cs").read_text()
-assert "RegisterTransformation" in ft
-assert "RemoveTransformation" in ft
+assert "RegisterTransformation" in startup
+assert "StartupTrigger" in startup
+assert '"fileNamePattern"] = "index.html"' in startup
+assert "callbackAssembly" in startup and "callbackClass" in startup and "callbackMethod" in startup
 assert "TransformIndexHtml" in wf
 assert "dinkflix.css" in wf and "dinkflix.js" in wf
-assert "AddHostedService<FileTransformationRegistrationService>()" in reg
+assert 'Newtonsoft.Json' in (ROOT / "src/Jellyfin.Plugin.DinkFlix/Jellyfin.Plugin.DinkFlix.csproj").read_text()
+assert not (ROOT / "src/Jellyfin.Plugin.DinkFlix/FileTransformationRegistrationService.cs").exists()
 assert not (ROOT / "src/Jellyfin.Plugin.DinkFlix/DinkFlixIndexMiddleware.cs").exists()
 assert not (ROOT / "src/Jellyfin.Plugin.DinkFlix/DinkFlixStartupFilter.cs").exists()
 
