@@ -12,6 +12,30 @@
  * Target: Jellyfin Web 12.x desktop / responsive web layouts.
  */
 
+/* Jellyfin 12 Modern/Legacy theme tokens.
+   Jellyfin exposes these variables from its base theme; overriding them means
+   the native MUI and legacy components inherit the DINKFLIX palette instead of
+   relying only on selector-by-selector overrides. */
+:root {
+    --jf-palette-background-default: #07090b !important;
+    --jf-palette-background-paper: #101417 !important;
+    --jf-palette-primary-main: #00ffc6 !important;
+    --jf-palette-primary-dark: #00c79a !important;
+    --jf-palette-primary-light: #69ffe1 !important;
+    --jf-palette-primary-contrastText: #03130f !important;
+    --jf-palette-secondary-main: #00ffc6 !important;
+    --jf-palette-secondary-contrastText: #03130f !important;
+    --jf-palette-text-primary: #f3f6f7 !important;
+    --jf-palette-text-secondary: #b4bdc3 !important;
+    --jf-palette-action-hover: rgb(255 255 255 / 0.055) !important;
+    --jf-palette-action-focus: rgb(255 255 255 / 0.08) !important;
+    --jf-palette-divider: rgb(255 255 255 / 0.075) !important;
+    --jf-palette-AppBar-defaultBg: rgb(7 9 11 / 0.88) !important;
+    --jf-palette-AppBar-transparentBg: rgb(7 9 11 / 0.88) !important;
+    --jf-palette-AppBar-gradient: none !important;
+    --jf-card-borderRadius: 12px !important;
+}
+
 :root {
     --df-bg: #07090b;
     --df-bg-2: #0b0f12;

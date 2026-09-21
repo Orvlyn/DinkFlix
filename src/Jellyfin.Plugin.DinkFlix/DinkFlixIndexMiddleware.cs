@@ -4,12 +4,18 @@ using MediaBrowser.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Net.Http.Headers;
+using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.DinkFlix;
 
+/// <summary>
+/// Adds the tiny DINKFLIX bootstrap script to Jellyfin's existing web index.
+/// It never replaces the web application, routes, player, menus or pages.
+/// </summary>
 public sealed class DinkFlixIndexMiddleware
 {
     private const string ScriptResource = "Jellyfin.Plugin.DinkFlix.Web.dinkflix.js";
+    private const string Marker = "dinkflix-boot";
 
     private readonly RequestDelegate _next;
     private readonly ILogger<DinkFlixIndexMiddleware> _logger;
@@ -44,57 +50,54 @@ public sealed class DinkFlixIndexMiddleware
         }
 
         await using var buffer = new MemoryStream();
+        var bufferingFeature = new StreamResponseBodyFeature(buffer);
+        context.Features.Set<IHttpResponseBodyFeature>(bufferingFeature);
         context.Response.Body = buffer;
-        context.Features.Set<IHttpResponseBodyFeature>(new StreamResponseBodyFeature(buffer));
 
         var hadAcceptEncoding = context.Request.Headers.ContainsKey(HeaderNames.AcceptEncoding);
         var originalAcceptEncoding = context.Request.Headers[HeaderNames.AcceptEncoding].ToString();
         context.Request.Headers.Remove(HeaderNames.AcceptEncoding);
+        context.Request.Headers.Remove(HeaderNames.IfNoneMatch);
+        context.Request.Headers.Remove(HeaderNames.IfModifiedSince);
 
         try
         {
             await _next(context);
-            await FlushBufferedFeature(context);
+            await bufferingFeature.CompleteAsync();
 
-            if (context.Response.StatusCode is >= 200 and < 300)
+            buffer.Position = 0;
+            using var reader = new StreamReader(buffer, Encoding.UTF8, true, leaveOpen: true);
+            var html = await reader.ReadToEndAsync();
+
+            var transformed = html;
+            if (context.Response.StatusCode is >= 200 and < 300 &&
+                html.Contains("<head", StringComparison.OrdinalIgnoreCase) &&
+                html.Contains("</head>", StringComparison.OrdinalIgnoreCase) &&
+                !html.Contains(Marker, StringComparison.OrdinalIgnoreCase))
             {
-                buffer.Position = 0;
-                using var reader = new StreamReader(buffer, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, leaveOpen: true);
-                var html = await reader.ReadToEndAsync();
-
-                if (html.Contains("<head", StringComparison.OrdinalIgnoreCase) &&
-                    html.Contains("</head>", StringComparison.OrdinalIgnoreCase) &&
-                    html.Contains("dinkflix-boot", StringComparison.OrdinalIgnoreCase) is false)
+                var script = await ReadEmbeddedScriptAsync();
+                if (!string.IsNullOrWhiteSpace(script))
                 {
-                    var script = await ReadEmbeddedScriptAsync();
-                    if (!string.IsNullOrWhiteSpace(script))
-                    {
-                        var configuration = JsonSerializer.Serialize(plugin.Configuration);
-                        var bootstrap = BuildBootstrap(script, configuration);
-                        var headEnd = html.IndexOf("</head>", StringComparison.OrdinalIgnoreCase);
-                        html = html.Insert(headEnd, bootstrap);
-                    }
+                    var configJson = JsonSerializer.Serialize(plugin.Configuration);
+                    var bootstrap = BuildBootstrap(script, configJson);
+                    var headEnd = html.IndexOf("</head>", StringComparison.OrdinalIgnoreCase);
+                    transformed = html.Insert(headEnd, bootstrap);
                 }
-
-                var output = Encoding.UTF8.GetBytes(html);
-                context.Response.Body = originalBody;
-                context.Features.Set(originalFeature);
-                context.Response.Headers.Remove(HeaderNames.ContentLength);
-                context.Response.Headers.Remove(HeaderNames.ETag);
-                context.Response.Headers.Remove(HeaderNames.LastModified);
-                context.Response.ContentLength = output.Length;
-                await originalBody.WriteAsync(output);
-                return;
             }
 
             context.Response.Body = originalBody;
             context.Features.Set(originalFeature);
-            buffer.Position = 0;
-            await buffer.CopyToAsync(originalBody);
+            context.Response.Headers.Remove(HeaderNames.ContentLength);
+            context.Response.Headers.Remove(HeaderNames.ETag);
+            context.Response.Headers.Remove(HeaderNames.LastModified);
+
+            var output = Encoding.UTF8.GetBytes(transformed);
+            context.Response.ContentLength = output.Length;
+            await originalBody.WriteAsync(output);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "DINKFLIX could not transform Jellyfin Web index; returning the native response.");
+            _logger.LogError(ex, "DINKFLIX failed to transform Jellyfin Web index; returning the native response.");
             context.Response.Body = originalBody;
             context.Features.Set(originalFeature);
 
@@ -129,9 +132,9 @@ public sealed class DinkFlixIndexMiddleware
         }
 
         var path = request.Path.Value ?? string.Empty;
-        return path.Equals("/web", StringComparison.OrdinalIgnoreCase) ||
-               path.Equals("/web/", StringComparison.OrdinalIgnoreCase) ||
-               path.Equals("/web/index.html", StringComparison.OrdinalIgnoreCase);
+        return path.Equals("/web", StringComparison.OrdinalIgnoreCase)
+            || path.Equals("/web/", StringComparison.OrdinalIgnoreCase)
+            || path.Equals("/web/index.html", StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task<string?> ReadEmbeddedScriptAsync()
@@ -141,7 +144,7 @@ public sealed class DinkFlixIndexMiddleware
             await using var stream = typeof(Plugin).Assembly.GetManifestResourceStream(ScriptResource);
             if (stream is null)
             {
-                _logger.LogWarning("DINKFLIX frontend resource {Resource} was not found in the assembly.", ScriptResource);
+                _logger.LogWarning("DINKFLIX resource {Resource} was not found in the assembly.", ScriptResource);
                 return null;
             }
 
@@ -157,19 +160,11 @@ public sealed class DinkFlixIndexMiddleware
 
     private static string BuildBootstrap(string script, string configuration)
     {
-        // Do not use an interpolated raw string here. The embedded CSS contains
-        // literal braces, which can be parsed as interpolation markers by C#
-        // raw-string syntax and cause CS9006 at build time.
-        return "<style id=\"dinkflix-boot\">html.df-booting body{visibility:hidden !important;}html.df-ready body{visibility:visible !important;}</style>" +
-               "<script id=\"dinkflix-config\">window.__DINKFLIX_CONFIG__=" + configuration + ";</script>" +
-               "<script id=\"dinkflix-boot-script\">" + script + "</script>";
-    }
+        var safeConfig = configuration.Replace("</script>", "<\\/script>", StringComparison.OrdinalIgnoreCase);
+        var safeScript = script.Replace("</script>", "<\\/script>", StringComparison.OrdinalIgnoreCase);
 
-    private static async Task FlushBufferedFeature(HttpContext context)
-    {
-        if (context.Features.Get<IHttpResponseBodyFeature>() is { } feature)
-        {
-            await feature.CompleteAsync();
-        }
+        return "<style id=\"dinkflix-boot\">html.df-booting body{visibility:hidden !important;}html.df-ready body{visibility:visible !important;}</style>"
+            + "<script id=\"dinkflix-config\">window.__DINKFLIX_CONFIG__=" + safeConfig + ";</script>"
+            + "<script id=\"dinkflix-boot-script\">document.documentElement.classList.add('df-booting');" + safeScript + "</script>";
     }
 }

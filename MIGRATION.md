@@ -1,17 +1,9 @@
-# DINKFLIX clean replacement
+# DINKFLIX migration
 
-This repository is intended to replace the old DINKFLIX source, not sit beside it.
+1. Replace the old repository contents with this repository tree. Do not merge old C# or old frontend files back in.
+2. Keep the same DINKFLIX GUID: `B4A9D4E6-4E4D-4F42-9E90-9C5B4D4B8D2B`.
+3. In Jellyfin Custom CSS, use exactly the import shown in `README.md`.
+4. Remove any old DINKFLIX JavaScript Injector script. The new plugin injects only its own small enhancement script.
+5. Build/publish the plugin, then restart Jellyfin.
 
-Before building the new plugin, remove the old DINKFLIX source tree and replace it with this repository contents. In particular, do not leave old DINKFLIX `.cs` files or the old custom `dinkflix.js` in the project alongside this build.
-
-Keep the `.git` directory if you are replacing a local clone. Everything else can be replaced by this package.
-
-Jellyfin Custom CSS should contain only:
-
-```css
-@import url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix.css");
-```
-
-Do not enable an old DINKFLIX script through JavaScript Injector.
-
-The new plugin has a new GUID because the old repository manifest/GUID was not available to the build environment. Remove the old disabled DINKFLIX plugin installation once before installing the new release to avoid duplicate plugin identities.
+Do not install another theme as a dependency.

@@ -1,457 +1,206 @@
-/*
- * DINKFLIX lightweight frontend enhancements.
- *
- * This file deliberately does NOT create an application root, replace routes,
- * replace Jellyfin playback, intercept context menus, or render fake pages.
- * It only enhances native Jellyfin DOM that already exists.
+/* DINKFLIX native Jellyfin enhancement layer.
+ * Does not create an application shell, router, player or replacement pages.
  */
 (function () {
     "use strict";
 
-    var config = Object.assign({
+    const config = Object.assign({
         EnableEnhancements: true,
         GroupContinueWatching: true,
         ShowLocalEndTime: true,
         ShowMediaTechnicalDetails: true
     }, window.__DINKFLIX_CONFIG__ || {});
 
-    document.documentElement.classList.add("df-booting");
-
-    var cache = new Map();
-    var pending = new Map();
-    var observerTimer = null;
-    var detailTimer = null;
-    var lastDetailId = null;
-    var running = false;
+    const state = {
+        detailId: null,
+        timer: 0,
+        observer: null,
+        running: false,
+        lastHomeSignature: ""
+    };
 
     function ready() {
         document.documentElement.classList.remove("df-booting");
         document.documentElement.classList.add("df-ready");
     }
 
-    window.addEventListener("load", function () {
-        requestAnimationFrame(function () {
-            requestAnimationFrame(ready);
-        });
-    }, { once: true });
-
-    window.setTimeout(ready, 2500);
+    window.addEventListener("load", () => requestAnimationFrame(ready), { once: true });
+    document.addEventListener("DOMContentLoaded", ready, { once: true });
+    window.setTimeout(ready, 3000);
 
     if (!config.EnableEnhancements) {
+        ready();
         return;
     }
 
-    function currentApiClient() {
-        return window.ApiClient || null;
-    }
-
-    function getCurrentUserId() {
-        var api = currentApiClient();
+    const api = () => window.ApiClient || null;
+    const userId = () => {
         try {
-            return api && typeof api.getCurrentUserId === "function" ? api.getCurrentUserId() : null;
-        } catch (e) {
+            const client = api();
+            return client && typeof client.getCurrentUserId === "function" ? client.getCurrentUserId() : null;
+        } catch (_) {
             return null;
         }
+    };
+
+    const itemCache = new Map();
+    function getItem(id) {
+        if (!id) return Promise.resolve(null);
+        if (itemCache.has(id)) return Promise.resolve(itemCache.get(id));
+        const client = api();
+        const uid = userId();
+        if (!client || !uid || typeof client.getItem !== "function") return Promise.resolve(null);
+        return Promise.resolve(client.getItem(uid, id)).then(item => {
+            if (item) itemCache.set(id, item);
+            return item || null;
+        }).catch(() => null);
     }
 
-    function parseDetailsId() {
-        var hash = window.location.hash || "";
-        var question = hash.indexOf("?");
-        var query = question >= 0 ? hash.slice(question + 1) : "";
-        if (!query) {
-            try {
-                query = new URLSearchParams(window.location.search).toString();
-            } catch (e) {
-                query = "";
-            }
-        }
-
-        if (!query) {
-            return null;
-        }
-
-        try {
-            var params = new URLSearchParams(query);
-            var id = params.get("id");
-            return id && /^[0-9a-f]{20,64}$/i.test(id) ? id : id;
-        } catch (e) {
-            return null;
-        }
+    function cardId(card) {
+        return card?.getAttribute("data-id") || card?.getAttribute("data-item-id") || card?.dataset?.id || card?.dataset?.itemId || "";
     }
 
-    function isDetailsRoute() {
-        return /#\/details(?:\?|$)/i.test(window.location.hash || "");
-    }
-
-    async function getItem(itemId) {
-        if (!itemId) {
-            return null;
-        }
-
-        if (cache.has(itemId)) {
-            return cache.get(itemId);
-        }
-
-        if (pending.has(itemId)) {
-            return pending.get(itemId);
-        }
-
-        var api = currentApiClient();
-        var userId = getCurrentUserId();
-        if (!api || !userId || typeof api.getItem !== "function") {
-            return null;
-        }
-
-        var promise = Promise.resolve()
-            .then(function () {
-                return api.getItem(userId, itemId);
-            })
-            .then(function (item) {
-                if (item) {
-                    cache.set(itemId, item);
-                }
-                return item || null;
-            })
-            .catch(function () {
-                return null;
-            })
-            .finally(function () {
-                pending.delete(itemId);
-            });
-
-        pending.set(itemId, promise);
-        return promise;
-    }
-
-    function getCardItemId(card) {
-        if (!card) {
-            return null;
-        }
-        return card.getAttribute("data-id") ||
-            card.getAttribute("data-item-id") ||
-            card.dataset && (card.dataset.id || card.dataset.itemId) ||
-            null;
-    }
-
-    function getCardTitleNode(card) {
-        return card.querySelector(".cardText-first, .cardText, .cardText-secondary, .name, [class*='cardText']");
-    }
-
-    function getCardImageNode(card) {
-        return card.querySelector("img.cardImage, .cardImageContainer img, img.coveredImage, .coveredImage");
-    }
-
-    function formatDuration(ticks) {
-        if (!ticks || ticks <= 0) {
-            return "";
-        }
-        var totalMinutes = Math.max(1, Math.round(ticks / 600000000));
-        var hours = Math.floor(totalMinutes / 60);
-        var minutes = totalMinutes % 60;
-        return hours > 0 ? hours + "h " + String(minutes).padStart(2, "0") + "m" : minutes + "m";
-    }
-
-    function formatEpisodeMeta(item) {
-        var season = item && Number.isFinite(item.ParentIndexNumber) ? item.ParentIndexNumber : null;
-        var episode = item && Number.isFinite(item.IndexNumber) ? item.IndexNumber : null;
-        var runtime = formatDuration(item && item.RunTimeTicks);
-        var parts = [];
-        if (season !== null && episode !== null) {
-            parts.push("S" + String(season).padStart(2, "0") + " · E" + String(episode).padStart(2, "0"));
-        }
-        if (runtime) {
-            parts.push(runtime);
-        }
-        return parts.join(" · ");
-    }
-
-    function imageUrl(itemId) {
-        return "/Items/" + encodeURIComponent(itemId) + "/Images/Primary?fillWidth=600&quality=92";
+    function sectionIsContinueWatching(section) {
+        const title = section.querySelector(".sectionTitle, .sectionTitle-cards, h2, h3, [class*='sectionTitle']");
+        return /continue\s*watching|resume/i.test(title?.textContent || "");
     }
 
     function findContinueWatchingSections() {
-        var sections = [];
-        var candidates = document.querySelectorAll(".verticalSection, .sectionContainer, section, [class*='verticalSection']");
-
-        for (var i = 0; i < candidates.length; i += 1) {
-            var section = candidates[i];
-            if (!section || section.querySelector(".df-series-grouped-marker")) {
-                continue;
-            }
-
-            var heading = section.querySelector(".sectionTitle, .sectionTitle-cards, h2, h3, [class*='sectionTitle']");
-            var text = heading ? (heading.textContent || "") : "";
-            if (/continue\s*watching|resume/i.test(text)) {
-                sections.push(section);
-            }
-        }
-
-        return sections;
+        return Array.from(document.querySelectorAll(".verticalSection, .sectionContainer, section, [class*='verticalSection']"))
+            .filter(sectionIsContinueWatching);
     }
 
-    function ensureSeriesMarker(card) {
-        var marker = card.querySelector(":scope > .df-series-grouped-marker");
-        if (!marker) {
-            marker = document.createElement("span");
-            marker.className = "df-series-grouped-marker";
-            marker.setAttribute("aria-hidden", "true");
-            marker.style.display = "none";
-            card.appendChild(marker);
-        }
-        return marker;
+    function hideDuplicate(card) {
+        card.classList.add("df-hidden-duplicate");
+        card.setAttribute("aria-hidden", "true");
+        card.style.display = "none";
     }
 
-    async function groupSection(section) {
-        var cards = Array.prototype.slice.call(section.querySelectorAll(".card"))
-            .filter(function (card) { return getCardItemId(card); });
-
-        if (cards.length < 2) {
-            return;
-        }
-
-        section.classList.add("df-series-grouped-marker");
-        var groups = new Map();
-        var seriesCache = new Map();
-
-        for (var i = 0; i < cards.length; i += 1) {
-            var card = cards[i];
-            var itemId = getCardItemId(card);
-            var item = await getItem(itemId);
-            if (!item || item.Type !== "Episode" || !item.SeriesId) {
-                continue;
+    async function groupContinueWatching() {
+        if (!config.GroupContinueWatching) return;
+        for (const section of findContinueWatchingSections()) {
+            const cards = Array.from(section.querySelectorAll(".card")).filter(cardId);
+            if (cards.length < 2) continue;
+            const groups = new Map();
+            for (const card of cards) {
+                const id = cardId(card);
+                const item = await getItem(id);
+                if (!item || item.Type !== "Episode" || !item.SeriesId) continue;
+                if (!groups.has(item.SeriesId)) groups.set(item.SeriesId, { card, episode: item });
+                else hideDuplicate(card);
             }
-
-            var group = groups.get(item.SeriesId);
-            if (!group) {
-                group = { first: card, episode: item, duplicates: [] };
-                groups.set(item.SeriesId, group);
-            } else {
-                group.duplicates.push(card);
-            }
-        }
-
-        if (!groups.size) {
-            return;
-        }
-
-        var iterator = groups.values();
-        var next = iterator.next();
-        while (!next.done) {
-            var groupData = next.value;
-            var episode = groupData.episode;
-            var series = seriesCache.get(episode.SeriesId);
-            if (!series) {
-                series = await getItem(episode.SeriesId);
-                if (series) {
-                    seriesCache.set(episode.SeriesId, series);
+            for (const { card, episode } of groups.values()) {
+                const series = await getItem(episode.SeriesId);
+                if (!series) continue;
+                const titleNode = card.querySelector(".cardText-first, .cardText, .name, [class*='cardText']");
+                if (titleNode && series.Name) titleNode.textContent = series.Name;
+                const img = card.querySelector("img.cardImage, .cardImageContainer img, img.coveredImage, .coveredImage");
+                if (img && series.Id) {
+                    const old = img.getAttribute("src");
+                    const url = `/Items/${encodeURIComponent(series.Id)}/Images/Primary?fillWidth=600&quality=92`;
+                    img.dataset.dfOriginalSrc ||= old || "";
+                    img.src = url;
                 }
-            }
-
-            var card = groupData.first;
-            var titleNode = getCardTitleNode(card);
-            var imageNode = getCardImageNode(card);
-            var title = series && series.Name ? series.Name : episode.SeriesName || episode.SeriesName || episode.Name;
-            var meta = formatEpisodeMeta(episode);
-
-            if (titleNode && title) {
-                titleNode.textContent = title;
-                titleNode.setAttribute("title", title);
-            }
-
-            if (imageNode && series && series.Id) {
-                if (!imageNode.dataset.dfOriginalSrc) {
-                    imageNode.dataset.dfOriginalSrc = imageNode.getAttribute("src") || "";
+                const runtime = episode.RunTimeTicks ? Math.max(1, Math.round(episode.RunTimeTicks / 600000000)) : 0;
+                const minutes = runtime ? `${Math.floor(runtime / 60)}h ${String(runtime % 60).padStart(2, "0")}m` : "";
+                const meta = [
+                    Number.isFinite(episode.ParentIndexNumber) && Number.isFinite(episode.IndexNumber) ? `S${String(episode.ParentIndexNumber).padStart(2, "0")} · E${String(episode.IndexNumber).padStart(2, "0")}` : "",
+                    minutes
+                ].filter(Boolean).join(" · ");
+                let metaNode = card.querySelector(".df-series-meta");
+                if (!metaNode && meta) {
+                    metaNode = document.createElement("div");
+                    metaNode.className = "df-series-meta secondaryText";
+                    (card.querySelector(".cardText") || card).appendChild(metaNode);
                 }
-                imageNode.addEventListener("error", function () {
-                    var original = this.dataset.dfOriginalSrc;
-                    if (original) {
-                        this.setAttribute("src", original);
-                    }
-                }, { once: true });
-                imageNode.setAttribute("src", imageUrl(series.Id));
+                if (metaNode) metaNode.textContent = meta;
             }
-
-            card.setAttribute("aria-label", meta ? title + ", " + meta : title);
-            card.dataset.dfSeriesId = episode.SeriesId;
-            ensureSeriesMarker(card);
-
-            var metaNode = card.querySelector(".df-series-meta");
-            if (!metaNode && meta) {
-                metaNode = document.createElement("div");
-                metaNode.className = "df-series-meta secondaryText";
-                var host = card.querySelector(".cardText, .cardText-first, .cardText-secondary") || card;
-                host.appendChild(metaNode);
-            }
-            if (metaNode) {
-                metaNode.textContent = meta;
-            }
-
-            groupData.duplicates.forEach(function (duplicate) {
-                duplicate.style.display = "none";
-                duplicate.setAttribute("aria-hidden", "true");
-            });
-
-            next = iterator.next();
         }
     }
 
-    function scheduleGrouping() {
-        if (!config.GroupContinueWatching) {
-            return;
-        }
-        window.clearTimeout(observerTimer);
-        observerTimer = window.setTimeout(function () {
-            var sections = findContinueWatchingSections();
-            sections.forEach(function (section) {
-                groupSection(section).catch(function () {});
-            });
-        }, 250);
+    function isDetailsPage() {
+        return /#\/details(?:\?|$)/i.test(window.location.hash || "");
+    }
+
+    function detailsId() {
+        const hash = window.location.hash || "";
+        const q = hash.includes("?") ? hash.slice(hash.indexOf("?") + 1) : "";
+        try { return new URLSearchParams(q).get("id") || null; } catch (_) { return null; }
     }
 
     function localTime(date) {
-        try {
-            return new Intl.DateTimeFormat(undefined, {
-                hour: "numeric",
-                minute: "2-digit"
-            }).format(date);
-        } catch (e) {
-            return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-        }
+        try { return new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(date); }
+        catch (_) { return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); }
     }
 
-    function ensureInfoNode(host, className) {
-        var existing = host.querySelector("." + className);
-        if (existing) {
-            return existing;
-        }
-        var node = document.createElement("div");
-        node.className = className;
-        host.appendChild(node);
+    function ensureNode(host, cls) {
+        let node = host.querySelector(`.${cls}`);
+        if (!node) { node = document.createElement("div"); node.className = cls; host.appendChild(node); }
         return node;
     }
 
-    function makeMediaSummary(item) {
-        var source = item && item.MediaSources && item.MediaSources[0];
-        if (!source || !source.MediaStreams) {
-            return null;
-        }
-
-        var video = source.MediaStreams.find(function (stream) { return stream.Type === "Video"; });
-        var audios = source.MediaStreams.filter(function (stream) { return stream.Type === "Audio"; });
-        var subtitles = source.MediaStreams.filter(function (stream) { return stream.Type === "Subtitle"; });
-        var parts = [];
-
+    function renderTechnical(host, item) {
+        const source = item?.MediaSources?.[0];
+        if (!source?.MediaStreams) return;
+        const video = source.MediaStreams.find(s => s.Type === "Video");
+        const audio = source.MediaStreams.find(s => s.Type === "Audio");
+        const subs = source.MediaStreams.filter(s => s.Type === "Subtitle");
+        const parts = [];
         if (video) {
-            var quality = video.Width >= 3800 ? "4K" : video.Width >= 1900 ? "1080p" : video.Width ? video.Width + "p" : "Video";
-            var hdr = video.VideoRange || video.VideoRangeType || "";
-            parts.push("VIDEO " + quality + (hdr ? " · " + hdr : "") + (video.Codec ? " · " + video.Codec.toUpperCase() : ""));
+            const quality = video.Width >= 3800 ? "4K" : video.Width >= 1900 ? "1080p" : video.Width ? `${video.Width}p` : "VIDEO";
+            parts.push(`VIDEO ${quality}${video.VideoRange ? ` · ${video.VideoRange}` : ""}${video.Codec ? ` · ${video.Codec.toUpperCase()}` : ""}`);
         }
-
-        if (audios.length) {
-            var audio = audios[0];
-            parts.push("AUDIO " + (audio.Codec ? audio.Codec.toUpperCase() : "Audio") + (audio.Channels ? " · " + audio.Channels + "ch" : "") + (audio.Language ? " · " + audio.Language : ""));
-        }
-
-        if (subtitles.length) {
-            var languages = subtitles.map(function (stream) { return stream.Language || stream.DisplayLanguage || stream.Codec; }).filter(Boolean);
-            var unique = Array.from(new Set(languages));
-            parts.push("SUBTITLES " + (unique.length ? unique.join(", ") : subtitles.length));
-        }
-
-        return parts.length ? parts : null;
+        if (audio) parts.push(`AUDIO ${audio.Codec ? audio.Codec.toUpperCase() : "AUDIO"}${audio.Channels ? ` · ${audio.Channels}ch` : ""}${audio.Language ? ` · ${audio.Language}` : ""}`);
+        if (subs.length) parts.push(`SUBTITLES ${[...new Set(subs.map(s => s.Language || s.Codec).filter(Boolean))].join(", ") || subs.length}`);
+        if (!parts.length) return;
+        const node = ensureNode(host, "df-media-technical");
+        node.replaceChildren(...parts.map(text => { const chip = document.createElement("span"); chip.className = "df-media-chip"; chip.textContent = text; return chip; }));
     }
 
-    async function updateDetailPage() {
-        if (!isDetailsRoute()) {
-            lastDetailId = null;
-            return;
-        }
-
-        var itemId = parseDetailsId();
-        if (!itemId || itemId === lastDetailId) {
-            return;
-        }
-        lastDetailId = itemId;
-
-        var item = await getItem(itemId);
-        if (!item) {
-            return;
-        }
-
-        var detailPage = document.querySelector("#itemDetailPage, [data-role='page'][class*='detail'], main");
-        if (!detailPage) {
-            return;
-        }
-
-        var host = detailPage.querySelector(".itemMiscInfo, .infoWrapper, .itemName, h1") || detailPage;
-
+    async function enhanceDetails() {
+        if (!isDetailsPage()) { state.detailId = null; return; }
+        const id = detailsId();
+        if (!id || id === state.detailId) return;
+        state.detailId = id;
+        const item = await getItem(id);
+        if (!item) return;
+        const page = document.querySelector("#itemDetailPage, .itemDetailPage, main");
+        if (!page) return;
+        const host = page.querySelector(".infoWrapper, .itemMiscInfo, .nameContainer, .itemName") || page;
         if (config.ShowLocalEndTime && item.RunTimeTicks) {
-            var remainingTicks = item.RunTimeTicks;
-            var positionTicks = item.UserData && item.UserData.PlaybackPositionTicks ? item.UserData.PlaybackPositionTicks : 0;
-            remainingTicks = Math.max(0, remainingTicks - positionTicks);
-            var remainingMs = Math.round(remainingTicks / 10000);
-            var endDate = new Date(Date.now() + remainingMs);
-            var label = positionTicks > 0 ? "Resume ends around " : "Starting now ends around ";
-            var endNode = ensureInfoNode(host.parentElement || host, "df-local-end-time");
-            endNode.textContent = label + localTime(endDate);
-            endNode.setAttribute("title", "Based on the media runtime and your current resume position.");
+            const pos = Number(item.UserData?.PlaybackPositionTicks || 0);
+            const remainingMs = Math.max(0, (item.RunTimeTicks - pos) / 10000);
+            const label = pos > 0 ? "Resume ends around " : "Starts now · ends around ";
+            const node = ensureNode(host, "df-local-end-time");
+            node.textContent = label + localTime(new Date(Date.now() + remainingMs));
         }
+        if (config.ShowMediaTechnicalDetails) renderTechnical(page.querySelector(".overview, .infoWrapper, .itemMiscInfo") || host, item);
+    }
 
-        if (config.ShowMediaTechnicalDetails) {
-            var mediaParts = makeMediaSummary(item);
-            if (mediaParts) {
-                var techHost = detailPage.querySelector(".overview, .itemMiscInfo, .infoWrapper") || host.parentElement || host;
-                var tech = ensureInfoNode(techHost, "df-media-technical");
-                while (tech.firstChild) {
-                    tech.removeChild(tech.firstChild);
-                }
-                mediaParts.forEach(function (part) {
-                    var chip = document.createElement("span");
-                    chip.className = "df-media-chip";
-                    chip.textContent = part;
-                    tech.appendChild(chip);
-                });
+    function schedule() {
+        window.clearTimeout(state.timer);
+        state.timer = window.setTimeout(async () => {
+            if (state.running) return;
+            state.running = true;
+            try {
+                await groupContinueWatching();
+                await enhanceDetails();
+            } finally {
+                state.running = false;
             }
-        }
+        }, 500);
     }
 
-    function scheduleDetailUpdate() {
-        if (!config.ShowLocalEndTime && !config.ShowMediaTechnicalDetails) {
-            return;
+    const start = () => {
+        if (!document.body) return;
+        if (!state.observer) {
+            state.observer = new MutationObserver(() => schedule());
+            state.observer.observe(document.body, { childList: true, subtree: true });
         }
-        window.clearTimeout(detailTimer);
-        detailTimer = window.setTimeout(function () {
-            updateDetailPage().catch(function () {});
-        }, 300);
-    }
+        schedule();
+    };
 
-    function run() {
-        if (running) {
-            return;
-        }
-        running = true;
-        try {
-            scheduleGrouping();
-            scheduleDetailUpdate();
-        } finally {
-            running = false;
-        }
-    }
-
-    var observer = new MutationObserver(function () {
-        run();
-    });
-
-    function startObserver() {
-        if (!document.body) {
-            window.setTimeout(startObserver, 100);
-            return;
-        }
-        observer.observe(document.body, { childList: true, subtree: true });
-        run();
-    }
-
-    window.addEventListener("hashchange", run, { passive: true });
-    document.addEventListener("DOMContentLoaded", startObserver, { once: true });
-    startObserver();
+    window.addEventListener("hashchange", schedule, { passive: true });
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once: true });
+    else start();
 })();

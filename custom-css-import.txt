@@ -1,1 +1,1 @@
-@import url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix.css");
+@import url("https://cdn.jsdelivr.net/gh/Orvlyn/DinkFlix@main/dinkflix.css?v=7.0.0.2");

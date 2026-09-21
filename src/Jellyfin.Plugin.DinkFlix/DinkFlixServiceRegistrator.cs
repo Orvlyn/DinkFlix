@@ -7,8 +7,8 @@ namespace Jellyfin.Plugin.DinkFlix;
 
 public sealed class DinkFlixServiceRegistrator : IPluginServiceRegistrator
 {
-    public void RegisterServices(IServiceCollection services, IServerApplicationHost applicationHost)
+    public void RegisterServices(IServiceCollection serviceCollection, IServerApplicationHost applicationHost)
     {
-        services.AddTransient<IStartupFilter, DinkFlixStartupFilter>();
+        serviceCollection.AddTransient<IStartupFilter, DinkFlixStartupFilter>();
     }
 }

@@ -1,6 +1,9 @@
 using System.Reflection;
+using Jellyfin.Plugin.DinkFlix.Configuration;
+using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
+using MediaBrowser.Model.Serialization;
 
 namespace Jellyfin.Plugin.DinkFlix;
 
@@ -10,7 +13,8 @@ public sealed class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 
     public static Plugin? Instance { get; private set; }
 
-    public Plugin()
+    public Plugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer)
+        : base(applicationPaths, xmlSerializer)
     {
         Instance = this;
     }
@@ -19,13 +23,17 @@ public sealed class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 
     public override Guid Id => PluginId;
 
-    public override string Description => "A native Jellyfin 12 theme with lightweight DINKFLIX frontend enhancements.";
+    public override string Description =>
+        "DINKFLIX is a native Jellyfin theme with optional lightweight frontend enhancements.";
 
     public IEnumerable<PluginPageInfo> GetPages()
     {
         yield return new PluginPageInfo
         {
             Name = "DinkFlixConfiguration",
+            DisplayName = "DINKFLIX",
+            MenuIcon = "palette",
+            EnableInMainMenu = true,
             EmbeddedResourcePath = "Jellyfin.Plugin.DinkFlix.Configuration.configPage.html"
         };
     }
