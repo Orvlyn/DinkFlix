@@ -1,6 +1,7 @@
 import { normalizeSettings } from './settings.js';
 
 const ITEM_FIELDS = 'Overview,Genres';
+const FALLBACK_CONTENT_ORDER = ['LatestMovies', 'LatestShows', 'ContinueWatching'];
 
 export function loadSettings(client) {
   return client.ajax({
@@ -94,6 +95,6 @@ function prepare(client, item) {
 }
 
 export function loadEntries(client, settings) {
-  if (!settings.contentOrder.length) return Promise.resolve([]);
-  return collect(client, settings).then((items) => Promise.all(items.map((item) => prepare(client, item))));
+  const effectiveSettings = settings.contentOrder.length ? settings : { ...settings, contentOrder: FALLBACK_CONTENT_ORDER };
+  return collect(client, effectiveSettings).then((items) => Promise.all(items.map((item) => prepare(client, item))));
 }
