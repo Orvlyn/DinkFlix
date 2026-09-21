@@ -746,17 +746,42 @@
   function card(item) {
     const id = item.Id;
     const title = esc(item.Name || 'Untitled');
-    const playable = ['Movie', 'Episode', 'Video'].includes(item.Type);
+    const playId = item.__dfResumeEpisodeId || id;
+    const playable = ['Movie', 'Episode', 'Video'].includes(item.Type) || Boolean(item.__dfResumeEpisodeId);
     const meta = [fmtYear(item.ProductionYear || item.PremiereDate || item.DateCreated), humanMinutes(item.RunTimeTicks)].filter(Boolean);
     const progress = playbackPercent(item);
-    return `<article class="df-card" data-id="${esc(id)}"><div class="df-card-media"><a href="#/dinkflix/item?id=${encodeURIComponent(id)}" class="df-card-link" data-df-item="${esc(id)}" aria-label="Open ${title}"></a><img loading="lazy" src="${esc(imageUrl(item, 'Primary', 900))}" alt="${title}"><button class="df-card-menu-btn" data-df-menu="${esc(id)}" type="button" aria-label="More actions for ${title}" title="More actions">${svg('dots')}</button>${playable ? `<button class="df-card-play-btn" data-df-play="${esc(id)}" type="button" aria-label="Play ${title}" title="Play">${svg('play')}</button>` : ''}${progress > 0 ? `<div class="df-progress"><span style="width:${progress}%"></span></div>` : ''}</div><div class="df-card-content"><div class="df-card-title">${title}</div><div class="df-card-meta">${meta.map((value, index) => `${index ? '<span class="df-meta-dot">•</span>' : ''}<span>${esc(value)}</span>`).join('')}</div><div class="df-card-badges">${badgeHtml(item)}${tagHtml(item)}</div></div></article>`;
+    const continueLabel = item.__dfContinueLabel ? `<div class="df-card-continue">${esc(item.__dfContinueLabel)}</div>` : '';
+    return `<article class="df-card" data-id="${esc(id)}"><div class="df-card-media"><a href="#/details?id=${encodeURIComponent(id)}&df=dinkflix&serverId=${encodeURIComponent(state.serverId || '')}" class="df-card-link" data-df-item="${esc(id)}" aria-label="Open ${title}"></a><img loading="lazy" src="${esc(imageUrl(item, 'Primary', 900))}" alt="${title}"><button class="df-card-menu-btn" data-df-menu="${esc(id)}" type="button" aria-label="More actions for ${title}" title="More actions">${svg('dots')}</button>${playable ? `<button class="df-card-play-btn" data-df-play="${esc(playId)}" type="button" aria-label="Play ${title}" title="Play">${svg('play')}</button>` : ''}${progress > 0 ? `<div class="df-progress"><span style="width:${progress}%"></span></div>` : ''}</div><div class="df-card-content"><div class="df-card-title">${title}</div><div class="df-card-meta">${meta.map((value, index) => `${index ? '<span class="df-meta-dot">•</span>' : ''}<span>${esc(value)}</span>`).join('')}</div><div class="df-card-badges">${badgeHtml(item)}${tagHtml(item)}</div>${continueLabel}</div></article>;
   }
 
   function section(title, items, href = '') {
     if (!items?.length) {
       return '';
     }
-    return `<section class="df-section"><div class="df-section-head"><h2 class="df-section-title">${esc(title)}</h2>${href ? `<a class="df-section-link" href="${href}">View all →</a>` : ''}</div><div class="df-row">${items.map(card).join('')}</div></section>`;
+    return `<section class="df-section"><div class="df-section-head"><h2 class="df-section-title">${esc(title)}</h2>${href ? `<a class="df-section-link" href="${href}">View all →</a>` : ''}</div><div class="df-row-shell"><button class="df-row-arrow df-row-prev" type="button" data-df-row-prev aria-label="Previous ${esc(title)}">‹</button><div class="df-row">${items.map(card).join('')}</div><button class="df-row-arrow df-row-next" type="button" data-df-row-next aria-label="Next ${esc(title)}">›</button></div></section>`;
+  }
+
+  function bindSectionArrows(root) {
+    root.querySelectorAll('.df-row-shell').forEach((shell) => {
+      const row = shell.querySelector('.df-row');
+      const prev = shell.querySelector('[data-df-row-prev]');
+      const next = shell.querySelector('[data-df-row-next]');
+      if (!row || !prev || !next || shell.dataset.bound === '1') {
+        return;
+      }
+      shell.dataset.bound = '1';
+      const update = () => {
+        const max = Math.max(0, row.scrollWidth - row.clientWidth);
+        prev.disabled = row.scrollLeft <= 4;
+        next.disabled = row.scrollLeft >= max - 4;
+        shell.classList.toggle('df-has-overflow', max > 4);
+      };
+      prev.addEventListener('click', () => row.scrollBy({ left: -row.clientWidth, behavior: 'smooth' }));
+      next.addEventListener('click', () => row.scrollBy({ left: row.clientWidth, behavior: 'smooth' }));
+      row.addEventListener('scroll', update, { passive: true });
+      window.addEventListener('resize', update, { passive: true });
+      requestAnimationFrame(update);
+    });
   }
 
   function rememberItems(items) {
@@ -1087,6 +1112,7 @@
       const showView = visibleViews().find((view) => String(view.CollectionType || '').toLowerCase() === 'tvshows');
       shell.innerHTML = `<div class="df-hero" id="df-hero"><div class="df-hero-media" id="df-hero-media"></div><div class="df-hero-overlay"></div><div class="df-hero-content" id="df-hero-content"></div><div class="df-hero-dots" id="df-hero-dots"></div></div><div class="df-page">${section('Continue Watching', resume)}${section('Recently Played', played)}${section('Recently Added', recent)}${section('Movies', movies, movieView ? viewHref(movieView) : '')}${section('TV Shows', shows, showView ? viewHref(showView) : '')}${section('My List', favs, '#/dinkflix/list')}</div>`;
       bindCardActions(shell);
+      bindSectionArrows(shell);
       if (state.heroItems.length) {
         showHero(0);
       } else {
