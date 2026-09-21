@@ -1,62 +1,100 @@
-# DinkFlix
+<div align="center">
 
-A premium, dark cyan-accented Jellyfin theme built on the [ElegantFin](https://github.com/lscambo13/ElegantFin) framework by lscambo13.
+<div alt style="text-align: center; transform: scale(.25);">
+	<picture>
+		<source media="(prefers-color-scheme: dark)" srcset="https://github.com/varunaditya-plus/SleekFin/raw/main/assets/logo_dark.png" />
+		<img alt="SleekFin Logo" src="https://github.com/varunaditya-plus/SleekFin/raw/main/assets/logo_light.png" style="width: 170px;" />
+	</picture>
+</div>
 
-- **Background:** `#050810` (near-black obsidian)
-- **Accent:** `#00FFC6` (cyan)
-- Full desktop, mobile, and TV layout support (inherited from ElegantFin)
-- Custom forced header logo, cyan buttons/progress bars/focus rings/scrollbars
-- Single self-contained CSS file — no JavaScript required
+# SleekFin
+![GitHub License](https://www.shieldcn.dev/github/license/varunaditya-plus/SleekFin.svg?variant=outline&size=sm)
+[![GitHub Downloads (all assets, all releases)](https://shieldcn.dev/github/downloads/varunaditya-plus/SleekFin.svg?variant=outline&size=sm)](https://github.com/varunaditya-plus/SleekFin/releases/latest)
+[![GitHub Release](https://shieldcn.dev/github/release/varunaditya-plus/SleekFin.svg?size=sm)](https://github.com/varunaditya-plus/SleekFin/releases/latest)
+![Please star this repo](https://shieldcn.dev/badge/★%20please%20star-22c55e.svg?theme=amber&color=eab308&size=sm&variant=outline)
 
-## Files
+The ultimate customisation plugin for Jellyfin, which fully reskins Jellyfin to give it a modern, refreshed look. This plugin is like a superpowered theme, with precise customisation, letting you tweak the plugin as you'd like.
 
-- [`dinkflix.css`](./dinkflix.css) — the complete theme. This is the only file you need.
+</div>
+
+<!-- <div align="center" style="width:100%;">
+  <video src="..."></video>
+</div> -->
+
+---
+
+## Features
+
+- **Complete reskin:** Applies a fully black interface with dark surfaces, red accents, and uses Inter across the main UI, dialogs, lists, and cards.
+- **Floating header:** Turns Jellyfin's modern and legacy desktop/mobile headers into a custom compact navigation bar which can be customized in the plugin's UI Builder.
+- **Configurable home hero:** Adds a full-width hero section above rows on the home page to display your library's content more nicely.
+- **Redesigned home and library pages:** Restyles the carousels and library pages to show content more clearly with consistent spacing and concise info under posters.
+- **Updated detail pages:** Redesigns Jellyfin's Movie, Series, Season, and Episode pages with full-page backdrop heroes, title art, and richer metadata. Disable the replacement in plugin settings to keep Jellyfin's native detail pages.
+- **Upgraded cast and recommendations:** Restyles cast into a clean horizontal row and turns similar titles into a dedicated **You may like** section with backdrop/poster imagery, ratings, years, and media types.
+- **Responsive layouts:** Adapts the header, hero, media rows, detail pages, controls, typography, and spacing across mobile, tablet, desktop, and ultrawide browser sizes.
 
 ## Installation
 
-### Option A — Load from GitHub (recommended, auto-updates)
+### First make sure you have these prerequisites:
+- A running Jellyfin **12.0** instance
+- [File Transformation](https://www.iamparadox.dev/jellyfin/plugins/manifest.json) plugin
 
-1. Push this repo to `https://github.com/Orvlyn/DinkFlix`.
-2. In Jellyfin, go to **Dashboard → General → Branding**.
-3. Paste the following into the **Custom CSS** box:
-
-   ```css
-   @import url("https://cdn.jsdelivr.net/gh/Orvlyn/DinkFlix@main/dinkflix.css");
-   ```
-
-4. Click **Save**, then hard-refresh your browser (Ctrl+Shift+R).
-
-> jsDelivr caches the file for a few hours. If you push an update and don't see it, append `@main/dinkflix.css?v=2` (bump the number) to bust the cache, or wait for the CDN to refresh.
-
-### Option B — Self-hosted / offline
-
-1. Copy `dinkflix.css` to your Jellyfin server (e.g. next to your other custom assets).
-2. Serve it via a static path reachable by your browser, or paste its full contents directly into **Dashboard → Branding → Custom CSS**.
-
-## Replacing the logo
-
-The header logo is forced via CSS to:
-
+### Install from plugin catalog
+1. Open **Dashboard → Plugins → Manage Repositories**.
+2. Click **New Repository** and paste this repository URL:
 ```
-https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dnk.png
+https://raw.githubusercontent.com/varunaditya-plus/SleekFin/main/manifest.json
 ```
+3. Now, in the sidebar, go to **Plugins**, select **All** in the filters above the plugins, click SleekFin, and click **Install**.
+4. Now you have to restart your Jellyfin instance. Go to **Dashboard** and click the **Restart** button. You're done!
 
-To use your own image, replace the `background-image` URL in the **"DinkFlix forced header logo"** section near the top of `dinkflix.css`, or upload your own `dnk.png` to the repo root.
+### Configuration
+After installation, go to **Dashboard → SleekFin**. The **Overview** tab contains the plugin's main settings, letting you decide which features you want to enable or disable. Our **UI Builder** gives you live editors for the elements we reskin, letting you tweak them to your liking.
 
-## Customization
+## Screenshots
+<table>
+  <tr>
+    <td><img width="1720" height="720" alt="Home screen" src="https://github.com/user-attachments/assets/db8e2443-35f1-47d0-a734-c36cd41fd587" /></td>
+  </tr>
+  <tr>
+	  <td><img width="1720" height="720" alt="Movie page" src="https://github.com/user-attachments/assets/c4fb2cef-969e-47f2-93cd-2db019179ddc" /></td>
+  </tr>
+  <tr>
+    <td><img width="1720" height="720" alt="Series page" src="https://github.com/user-attachments/assets/28a00655-4b2a-46ef-99a0-6d8b8e111b22" /></td>
+    <!-- <td><img width="1720" height="720" alt="Configuration page" src="" /></td> -->
+  </tr>
+</table>
 
-All colors are driven by CSS variables defined in `:root` at the top of `dinkflix.css`:
+## Downloads
 
-| Variable | Purpose |
-|---|---|
-| `--accentColor` | Primary cyan accent (buttons, focus rings, progress bars, hover states) |
-| `--accentHoverColor` | Lighter cyan used on hover |
-| `--darkerGradientPoint` / `--lighterGradientPoint` | Background gradient stops |
-| `--osdSeekBarPlayedColor` / `--cardResumeProgressColor` | Progress bar fill colors |
+<p align="center">
+  <a href="https://downloadhistory.varunaditya.xyz/#varunaditya-plus/SleekFin&Date">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://downloadhistory.varunaditya.xyz/svg?repos=varunaditya-plus/SleekFin&type=Date&title=&theme=dark" />
+      <source media="(prefers-color-scheme: light)" srcset="https://downloadhistory.varunaditya.xyz/svg?repos=varunaditya-plus/SleekFin&type=Date&title=" />
+      <img alt="Download History Chart" src="https://downloadhistory.varunaditya.xyz/svg?repos=varunaditya-plus/SleekFin&type=Date&title=" width=600 />
+    </picture>
+  </a>
+</p>
 
-Change `--accentColor` and `--accentHoverColor` to retint the whole theme without touching anything else.
+<!-- ## FAQ
+
+<details><summary><b>Question</b></summary>
+
+Answer
+
+</details> -->
+
+
+## Contributing & Support
+If you have suggestions or features you'd like to be implemented into SleekFin, please open a pull request. For feature requests, suggestions, and bug reports, open an issue. Include your Jellyfin version and a screenshot if relevant.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for testing expectations, commit format, versioning, and PR guidelines.
+
+Use [AGENTS.md](AGENTS.md) with your AI of choice to give it context on this codebase and how code should be written in PRs.
 
 ## Credits
-
-- Built on [ElegantFin](https://github.com/lscambo13/ElegantFin) by lscambo13 (MIT-style license terms carried over).
-- DinkFlix modifications and branding by [Orvlyn](https://github.com/Orvlyn).
+- [Preact](https://preactjs.com/) by the Preact authors, licensed under MIT.
+- [Inter](https://rsms.me/inter/) by Rasmus Andersson and the Inter Project Authors, under the SIL Open Font License 1.1.
+- Interface icons adapted from [Lucide](https://lucide.dev/), licensed under ISC.
+- Uses [File Transformation](https://github.com/IAmParadox27/jellyfin-plugin-file-transformation) by IAmParadox27.
