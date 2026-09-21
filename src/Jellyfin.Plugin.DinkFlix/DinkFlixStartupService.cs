@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Runtime.Loader;
 using MediaBrowser.Model.Tasks;
 using Microsoft.Extensions.Logging;
