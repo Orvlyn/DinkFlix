@@ -1,0 +1,13 @@
+DINKFLIX — JavaScript lint-clean frontend replacement
+
+The warning you saw in JavaScript Injector is JSHint's live linting. This file has an explicit JSHint configuration and explicit semicolon style. The JSHint options also cover last statements inside one-line blocks.
+
+IMPORTANT: DINKFLIX is intended to run as the regular DINKFLIX Web Jellyfin plugin. You do NOT need to paste this into JavaScript Injector when the plugin is installed. JavaScript Injector may remain installed for other scripts.
+
+For your GitHub repository, replace only:
+  dinkflix.js
+  dinkflix.css
+  src/Jellyfin.Plugin.DinkFlix/Web/dinkflix.js
+  src/Jellyfin.Plugin.DinkFlix/Web/dinkflix.css
+
+Do not delete the repository and do not change .github for this code-quality-only update.
