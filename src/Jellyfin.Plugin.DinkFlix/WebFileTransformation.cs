@@ -3,9 +3,6 @@ using System.Text.Json;
 
 namespace Jellyfin.Plugin.DinkFlix;
 
-/// <summary>
-/// Injects the DINKFLIX CSS and JavaScript into Jellyfin Web's index.html through File Transformation.
-/// </summary>
 public static class WebFileTransformation
 {
     private const string StartMarker = "<!-- DINKFLIX-WEB-81-START -->";
@@ -84,21 +81,21 @@ public static class WebFileTransformation
     {
         var css = ReadEmbeddedResource("dinkflix.css");
         var js = ReadEmbeddedResource("dinkflix.js")
-            .Replace("</script>", "<\/script>", StringComparison.OrdinalIgnoreCase);
+            .Replace("</script>", "<\\/script>", StringComparison.OrdinalIgnoreCase);
 
         var builder = new StringBuilder();
         builder.AppendLine();
         builder.Append(StartMarker);
         builder.AppendLine();
-        builder.Append("<style id="dinkflix-css" data-dinkflix-version="");
+        builder.Append("<style id=\"dinkflix-css\" data-dinkflix-version=\"");
         builder.Append(FrontendVersion);
-        builder.Append("">");
+        builder.Append("\">");
         builder.Append(css);
         builder.Append("</style>");
         builder.AppendLine();
-        builder.Append("<script id="dinkflix-js" data-dinkflix-version="");
+        builder.Append("<script id=\"dinkflix-js\" data-dinkflix-version=\"");
         builder.Append(FrontendVersion);
-        builder.Append("">");
+        builder.Append("\">");
         builder.Append(js);
         builder.Append("</script>");
         builder.AppendLine();
@@ -129,6 +126,7 @@ public static class WebFileTransformation
         var markerPairs = new[]
         {
             (StartMarker, EndMarker),
+            ("<!-- DINKFLIX-WEB-81-START -->", "<!-- DINKFLIX-WEB-81-END -->"),
             ("<!-- DINKFLIX-WEB-80-START -->", "<!-- DINKFLIX-WEB-80-END -->"),
             ("<!-- DINKFLIX-WEB-60-START -->", "<!-- DINKFLIX-WEB-60-END -->"),
             ("<!-- DINKFLIX-WEB-52-START -->", "<!-- DINKFLIX-WEB-52-END -->"),
