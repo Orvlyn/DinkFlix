@@ -1,100 +1,69 @@
 <div align="center">
 
-<div alt style="text-align: center; transform: scale(.25);">
-	<picture>
-		<source media="(prefers-color-scheme: dark)" srcset="https://github.com/varunaditya-plus/SleekFin/raw/main/assets/logo_dark.png" />
-		<img alt="SleekFin Logo" src="https://github.com/varunaditya-plus/SleekFin/raw/main/assets/logo_light.png" style="width: 170px;" />
-	</picture>
-</div>
+<img src="https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/assets/logo_dark.png" alt="DINKFLIX" width="220" />
 
-# SleekFin
-![GitHub License](https://www.shieldcn.dev/github/license/varunaditya-plus/SleekFin.svg?variant=outline&size=sm)
-[![GitHub Downloads (all assets, all releases)](https://shieldcn.dev/github/downloads/varunaditya-plus/SleekFin.svg?variant=outline&size=sm)](https://github.com/varunaditya-plus/SleekFin/releases/latest)
-[![GitHub Release](https://shieldcn.dev/github/release/varunaditya-plus/SleekFin.svg?size=sm)](https://github.com/varunaditya-plus/SleekFin/releases/latest)
-![Please star this repo](https://shieldcn.dev/badge/★%20please%20star-22c55e.svg?theme=amber&color=eab308&size=sm&variant=outline)
+# DINKFLIX
 
-The ultimate customisation plugin for Jellyfin, which fully reskins Jellyfin to give it a modern, refreshed look. This plugin is like a superpowered theme, with precise customisation, letting you tweak the plugin as you'd like.
+**A custom, premium Jellyfin experience by Orvlyn.**
+
+[![Jellyfin](https://img.shields.io/badge/Jellyfin-12.x-00ffc6?style=flat-square&logo=jellyfin&logoColor=111111)](https://jellyfin.org/)
+[![License](https://img.shields.io/github/license/Orvlyn/DinkFlix?style=flat-square)](LICENSE)
+[![Build](https://img.shields.io/github/actions/workflow/status/Orvlyn/DinkFlix/release.yml?style=flat-square&label=build)](https://github.com/Orvlyn/DinkFlix/actions)
 
 </div>
-
-<!-- <div align="center" style="width:100%;">
-  <video src="..."></video>
-</div> -->
 
 ---
 
-## Features
+## About
 
-- **Complete reskin:** Applies a fully black interface with dark surfaces, red accents, and uses Inter across the main UI, dialogs, lists, and cards.
-- **Floating header:** Turns Jellyfin's modern and legacy desktop/mobile headers into a custom compact navigation bar which can be customized in the plugin's UI Builder.
-- **Configurable home hero:** Adds a full-width hero section above rows on the home page to display your library's content more nicely.
-- **Redesigned home and library pages:** Restyles the carousels and library pages to show content more clearly with consistent spacing and concise info under posters.
-- **Updated detail pages:** Redesigns Jellyfin's Movie, Series, Season, and Episode pages with full-page backdrop heroes, title art, and richer metadata. Disable the replacement in plugin settings to keep Jellyfin's native detail pages.
-- **Upgraded cast and recommendations:** Restyles cast into a clean horizontal row and turns similar titles into a dedicated **You may like** section with backdrop/poster imagery, ratings, years, and media types.
-- **Responsive layouts:** Adapts the header, hero, media rows, detail pages, controls, typography, and spacing across mobile, tablet, desktop, and ultrawide browser sizes.
+DINKFLIX is a personal rebrand and ongoing redesign of the SleekFin Jellyfin customization project. It keeps the original project's approach of enhancing Jellyfin's native web interface while introducing the DINKFLIX visual identity: a dark, spacious, modern interface with the signature mint accent `#00ffc6`.
+
+This is intended to grow into a complete DINKFLIX experience over time. The current codebase is the foundation; future work will refine the interface, improve consistency, and expand the experience without replacing Jellyfin with a separate application.
+
+## Current direction
+
+- DINKFLIX branding and metadata
+- Dark premium visual system
+- Mint accent: `#00ffc6`
+- Spacious layouts and restrained typography
+- Custom header, hero, media, and detail-page styling
+- Responsive desktop and mobile behavior
+- Compatibility with Jellyfin's native navigation and supported plugins
+- Configuration controls inherited from the original SleekFin foundation
 
 ## Installation
 
-### First make sure you have these prerequisites:
-- A running Jellyfin **12.0** instance
-- [File Transformation](https://www.iamparadox.dev/jellyfin/plugins/manifest.json) plugin
+> **Build status:** This repository is under active development. Installable releases should be treated as testing builds until the GitHub Actions build and a real Jellyfin installation have both been verified.
 
-### Install from plugin catalog
-1. Open **Dashboard → Plugins → Manage Repositories**.
-2. Click **New Repository** and paste this repository URL:
-```
-https://raw.githubusercontent.com/varunaditya-plus/SleekFin/main/manifest.json
-```
-3. Now, in the sidebar, go to **Plugins**, select **All** in the filters above the plugins, click SleekFin, and click **Install**.
-4. Now you have to restart your Jellyfin instance. Go to **Dashboard** and click the **Restart** button. You're done!
+1. Open the repository's **Releases** page.
+2. Download the latest DINKFLIX plugin package when a release is available.
+3. In Jellyfin, open **Dashboard → Plugins → Repositories** and add the DINKFLIX manifest URL when published.
+4. Install the plugin and restart Jellyfin.
 
-### Configuration
-After installation, go to **Dashboard → SleekFin**. The **Overview** tab contains the plugin's main settings, letting you decide which features you want to enable or disable. Our **UI Builder** gives you live editors for the elements we reskin, letting you tweak them to your liking.
+Repository: https://github.com/Orvlyn/DinkFlix
 
-## Screenshots
-<table>
-  <tr>
-    <td><img width="1720" height="720" alt="Home screen" src="https://github.com/user-attachments/assets/db8e2443-35f1-47d0-a734-c36cd41fd587" /></td>
-  </tr>
-  <tr>
-	  <td><img width="1720" height="720" alt="Movie page" src="https://github.com/user-attachments/assets/c4fb2cef-969e-47f2-93cd-2db019179ddc" /></td>
-  </tr>
-  <tr>
-    <td><img width="1720" height="720" alt="Series page" src="https://github.com/user-attachments/assets/28a00655-4b2a-46ef-99a0-6d8b8e111b22" /></td>
-    <!-- <td><img width="1720" height="720" alt="Configuration page" src="" /></td> -->
-  </tr>
-</table>
+## Project structure
 
-## Downloads
+- `src/Jellyfin.Plugin.SleekFin/` — plugin and embedded frontend foundation
+- `src/Jellyfin.Plugin.SleekFin/Inject/` — injected theme, components, and frontend assets
+- `src/Jellyfin.Plugin.SleekFin/Frontend/` — frontend source code
+- `manifest.json` and `meta.json` — plugin distribution metadata
+- `.github/workflows/` — automated build and release workflow
 
-<p align="center">
-  <a href="https://downloadhistory.varunaditya.xyz/#varunaditya-plus/SleekFin&Date">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://downloadhistory.varunaditya.xyz/svg?repos=varunaditya-plus/SleekFin&type=Date&title=&theme=dark" />
-      <source media="(prefers-color-scheme: light)" srcset="https://downloadhistory.varunaditya.xyz/svg?repos=varunaditya-plus/SleekFin&type=Date&title=" />
-      <img alt="Download History Chart" src="https://downloadhistory.varunaditya.xyz/svg?repos=varunaditya-plus/SleekFin&type=Date&title=" width=600 />
-    </picture>
-  </a>
-</p>
+The internal SleekFin namespace and folder names are being migrated carefully to avoid breaking embedded-resource paths, configuration compatibility, and Jellyfin integration points.
 
-<!-- ## FAQ
+## Credits and attribution
 
-<details><summary><b>Question</b></summary>
+DINKFLIX is maintained and developed by **Orvlyn**.
 
-Answer
+The project is based on **[SleekFin](https://github.com/varunaditya-plus/SleekFin)** by its original author and contributors. SleekFin's original design concepts, implementation, and applicable licensing remain credited to that project. DINKFLIX is a separate rebrand and modification, not a claim that the original SleekFin work was created by Orvlyn.
 
-</details> -->
+Additional project dependencies and acknowledgements remain documented in the source and applicable license files, including Preact, Inter, Lucide-derived icons, and File Transformation.
 
+## License
 
-## Contributing & Support
-If you have suggestions or features you'd like to be implemented into SleekFin, please open a pull request. For feature requests, suggestions, and bug reports, open an issue. Include your Jellyfin version and a screenshot if relevant.
+See [LICENSE](LICENSE) for the repository license and review the upstream SleekFin project for its original licensing terms and attribution requirements.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for testing expectations, commit format, versioning, and PR guidelines.
+## Development
 
-Use [AGENTS.md](AGENTS.md) with your AI of choice to give it context on this codebase and how code should be written in PRs.
-
-## Credits
-- [Preact](https://preactjs.com/) by the Preact authors, licensed under MIT.
-- [Inter](https://rsms.me/inter/) by Rasmus Andersson and the Inter Project Authors, under the SIL Open Font License 1.1.
-- Interface icons adapted from [Lucide](https://lucide.dev/), licensed under ISC.
-- Uses [File Transformation](https://github.com/IAmParadox27/jellyfin-plugin-file-transformation) by IAmParadox27.
+DINKFLIX is being rebuilt in stages. Changes should preserve Jellyfin's native functionality, avoid destructive changes to user libraries or settings, and be tested against the target Jellyfin version before being considered release-ready.
