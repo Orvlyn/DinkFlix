@@ -1,0 +1,66 @@
+<div data-role="page" class="page type-interior pluginConfigurationPage">
+  <div data-role="content" class="content-primary">
+    <div class="dinkflix-config-wrap">
+      <div class="dinkflix-config-kicker">DINKFLIX Web</div>
+      <h1 class="dinkflix-config-title">Desktop streaming, redesigned.</h1>
+      <p class="dinkflix-config-copy">DINKFLIX is a desktop-first Jellyfin Web experience built for easy browsing, recently added discovery, rich title information and a simple My List.</p>
+
+      <div class="dinkflix-config-panel">
+        <div class="dinkflix-config-status"><span class="dinkflix-dot"></span><span>DINKFLIX Web is installed.</span></div>
+        <p class="dinkflix-config-hint">The redesigned web interface is injected by File Transformation. After installing or updating DINKFLIX, refresh the browser with Ctrl+Shift+R.</p>
+
+        <div class="dinkflix-config-section">
+          <h2>Appearance</h2>
+          <div class="inputContainer">
+            <input class="emby-input" id="AccentColor" type="text" label="Accent colour" value="#00FFC6" />
+            <div class="fieldDescription">The DINKFLIX accent used for active states and primary actions.</div>
+          </div>
+          <div class="inputContainer">
+            <input class="emby-input" id="HeroRotationSeconds" type="number" min="8" max="120" label="Hero rotation (seconds)" value="15" />
+            <div class="fieldDescription">How long each recently-added hero title remains visible.</div>
+          </div>
+        </div>
+
+        <div class="dinkflix-config-section">
+          <h2>Display</h2>
+          <label class="checkboxContainer"><input id="ShowRatings" type="checkbox" checked><span>Show ratings</span></label>
+          <label class="checkboxContainer"><input id="ShowMediaBadges" type="checkbox" checked><span>Show media badges</span></label>
+          <label class="checkboxContainer"><input id="ShowMyList" type="checkbox" checked><span>Show My List</span></label>
+        </div>
+
+        <button type="button" class="raised button-submit submit-button block" id="Save">
+          <span>Save</span>
+        </button>
+        <div class="dinkflix-save-status" id="SaveStatus" aria-live="polite"></div>
+      </div>
+
+      <div class="dinkflix-config-panel dinkflix-help-panel">
+        <h2>Compatibility</h2>
+        <p>DINKFLIX Web targets Jellyfin 12.x desktop Web. File Transformation is required. Jellyfin Enhanced, Intro Skipper and other plugins can remain installed; DINKFLIX does not require Home Screen Sections.</p>
+        <p>For troubleshooting, check the Jellyfin log for <code>DINKFLIX Web File Transformation registered successfully</code>.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+.dinkflix-config-wrap{max-width:900px;padding:2rem 2rem 4rem}.dinkflix-config-kicker{text-transform:uppercase;letter-spacing:.14em;font-size:.75rem;font-weight:700;color:#00ffc6;margin-bottom:.5rem}.dinkflix-config-title{font-size:2.2rem;line-height:1.1;margin:0 0 .75rem;font-weight:700}.dinkflix-config-copy{max-width:760px;line-height:1.6;opacity:.78}.dinkflix-config-panel{margin-top:1.5rem;padding:1.4rem 1.5rem;border-radius:18px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08)}.dinkflix-config-status{display:flex;align-items:center;gap:.55rem;font-weight:650}.dinkflix-dot{width:.55rem;height:.55rem;border-radius:50%;background:#00ffc6;box-shadow:0 0 14px rgba(0,255,198,.3)}.dinkflix-config-hint,.dinkflix-help-panel p,.fieldDescription{opacity:.68;line-height:1.55}.dinkflix-config-section{padding-top:1rem;margin-top:1rem;border-top:1px solid rgba(255,255,255,.07)}.dinkflix-config-section h2,.dinkflix-help-panel h2{margin:0 0 .8rem;font-size:1rem}.dinkflix-save-status{min-height:1.2rem;margin-top:.8rem;color:#00ffc6}.dinkflix-help-panel code{font-size:.85em}
+</style>
+<script>
+(function(){
+  const id='9b8e4d39-6a4c-4b5d-b6aa-d2b1c4f3c9e8';
+  const fields={AccentColor:document.getElementById('AccentColor'),HeroRotationSeconds:document.getElementById('HeroRotationSeconds'),ShowRatings:document.getElementById('ShowRatings'),ShowMediaBadges:document.getElementById('ShowMediaBadges'),ShowMyList:document.getElementById('ShowMyList')};
+  const status=document.getElementById('SaveStatus');
+  const load=async()=>{
+    const cfg=await ApiClient.getPluginConfiguration(id);
+    Object.keys(fields).forEach(k=>{if(typeof fields[k].checked==='boolean') fields[k].checked=Boolean(cfg[k]); else if(cfg[k]!==undefined&&cfg[k]!==null) fields[k].value=cfg[k];});
+  };
+  document.getElementById('Save').addEventListener('click',async()=>{
+    try{
+      const cfg={AccentColor:(fields.AccentColor.value||'#00FFC6').trim(),HeroRotationSeconds:Math.max(8,Math.min(120,Number(fields.HeroRotationSeconds.value)||15)),ShowRatings:fields.ShowRatings.checked,ShowMediaBadges:fields.ShowMediaBadges.checked,ShowMyList:fields.ShowMyList.checked};
+      await ApiClient.updatePluginConfiguration(id,cfg);
+      status.textContent='Saved. Refresh Jellyfin Web to apply changes.';
+    }catch(e){status.textContent='Could not save settings. Check the Jellyfin log.';console.error(e);}
+  });
+  load().catch(e=>console.error('[DINKFLIX] Could not load configuration',e));
+})();
+</script>

@@ -1,0 +1,19 @@
+DINKFLIX Web 2.2.0.0 — surgical replacement package
+
+GitHub website only:
+1. Extract this ZIP.
+2. Open https://github.com/Orvlyn/DinkFlix
+3. Add file -> Upload files.
+4. Drag the CONTENTS of this extracted folder into GitHub (not the ZIP itself).
+5. Commit changes.
+6. Wait for Validate DINKFLIX Web to turn green.
+7. Create a new release/tag: v2.2.0.0
+8. Do not delete v2.1.0.0.
+
+The important runtime changes are:
+- embeds CSS/JS directly into Jellyfin index.html via File Transformation (no custom asset URL/controller dependency)
+- removes the hard dependency on window.ApiClient and uses Jellyfin's stored credentials + REST API
+- fixes the plugin configuration page to a Jellyfin-compatible page fragment
+- fixes old broken route references
+- targets Jellyfin's current 12.x plugin ABI (12.0.0.0)
+- makes release publishing safe when a tag/release already exists
