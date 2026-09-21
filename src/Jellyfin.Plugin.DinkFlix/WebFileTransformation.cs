@@ -10,7 +10,7 @@ public static class WebFileTransformation
 {
     private const string StartMarker = "<!-- DINKFLIX-WEB-81-START -->";
     private const string EndMarker = "<!-- DINKFLIX-WEB-81-END -->";
-    private const string FrontendVersion = "8.1.0.0";
+    private const string FrontendVersion = "8.1.0.1";
 
     public static string TransformIndexHtml(object? input)
     {
