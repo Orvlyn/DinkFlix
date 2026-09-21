@@ -14,6 +14,7 @@ const state = {
   inFlight: new Set(),
   stopped: true,
   stopWatching: null,
+  mediaObserver: null,
   timer: 0,
   userId: '',
 };
@@ -41,6 +42,32 @@ function syncUser() {
     state.userId = userId;
   }
   return userId;
+}
+
+function hideMyMedia() {
+  const indexPage = document.querySelector('#indexPage');
+  if (!indexPage) return;
+
+  indexPage.querySelectorAll('.homeLibraryButtonContainer').forEach((libraryContainer) => {
+    const section = libraryContainer.closest('section, .verticalSection, .sectionContainer')
+      || libraryContainer.parentElement;
+    if (section && section !== indexPage) {
+      section.classList.add('dinkflix-hide-my-media');
+    }
+  });
+}
+
+function startMyMediaHider() {
+  hideMyMedia();
+  state.mediaObserver = new MutationObserver(() => {
+    hideMyMedia();
+  });
+  state.mediaObserver.observe(document.body, { childList: true, subtree: true });
+}
+
+function stopMyMediaHider() {
+  state.mediaObserver?.disconnect();
+  state.mediaObserver = null;
 }
 
 function load(ids) {
@@ -85,6 +112,7 @@ function reconcile() {
   state.timer = 0;
   if (state.stopped || !document.documentElement.classList.contains(ROOT_CLASS)) return;
 
+  hideMyMedia();
   syncUser();
   const activeCards = new Set();
   const missing = [];
@@ -134,6 +162,7 @@ function start() {
 
   state.stopped = false;
   state.stopWatching = dom.watchSpa(schedule, { events: ['hashchange'] });
+  startMyMediaHider();
   schedule();
 }
 
@@ -143,6 +172,7 @@ function stop() {
   state.stopped = true;
   state.stopWatching?.();
   state.stopWatching = null;
+  stopMyMediaHider();
   deactivate();
 }
 
