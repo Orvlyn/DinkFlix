@@ -1,7 +1,11 @@
 /* DINKFLIX focused presentation fixes.
    Loaded after sleekfin-media.css. No global page/player/settings rules. */
 
-/* Hide only the library shortcut section labelled My Media. */
+/* Hide only the library shortcut section marked by the media feature. */
+#indexPage .dinkflix-hide-my-media {
+    display: none !important;
+}
+
 html.sleekfin-media-mounted #indexPage .verticalSection:has(.homeLibraryButtonContainer),
 html.sleekfin-media-mounted #indexPage .sectionContainer:has(.homeLibraryButtonContainer),
 html.sleekfin-media-mounted #indexPage .sections > :is(div, section):has(.homeLibraryButtonContainer) {
@@ -50,7 +54,6 @@ html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecomm
         flex-basis: 340px !important;
         width: 340px !important;
         max-width: 340px !important;
-        min-width: 340px !important;
     }
 }
 
@@ -68,6 +71,5 @@ html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecomm
         flex-basis: 280px !important;
         width: 280px !important;
         max-width: 280px !important;
-        min-width: 280px !important;
     }
 }
