@@ -1,44 +1,70 @@
-# DINKFLIX Web 6.0.0
+# DINKFLIX — Stage 2 Theme Foundation
 
-Desktop-first Jellyfin Web redesign for Jellyfin 12.1.
+## How DINKFLIX is installed
 
-## What this release fixes
+DINKFLIX is hosted in the GitHub repository and loaded by Jellyfin through one `@import` line.
 
-- No custom `?df=...#/home` routes.
-- Movie and TV cards open the real Jellyfin `#/details?id=...` route, so the browser no longer lands on `Page not found`.
-- Continue Watching collapses resumed TV episodes into one card per series and keeps the actual episode ID for Resume/Play.
-- Home rows show six cards per page with previous/next controls instead of clipping a long row.
-- The DINKFLIX navbar is fixed at the top of the browser viewport.
-- Requests, Bookmarks, Search, Profile, Preferences and Dashboard use Jellyfin's real routes and are no longer hidden by the custom home shell.
-- Playback uses Jellyfin's playback manager when available and falls back to the native Details Play/Resume control.
-- Native player remains the playback engine; DINKFLIX only skins it lightly.
-- Three-dot menu actions use Jellyfin APIs for user list, collection, playlist, download, delete, refresh and stream URL operations. Admin editor actions open the native Jellyfin editor so the real dialogs are used.
-- Movie/series details include cast, directors, writers, genres, tags, ratings, quality, HDR, technical video/audio/subtitle information, external provider links, and optional streaming-provider availability.
-- Series pages show season cards. Season pages show episode cards with thumbnail, episode number, runtime, rating, overview and play/menu controls.
-- Movie/episode details show an estimated local end time based on the user's current browser clock and resume position.
-- A server-side optional TMDB integration is included for watch-provider data. Provider availability is from TMDB/JustWatch and is only shown when a TMDB Read Access Token is configured in the DINKFLIX plugin settings.
-- No ElegantFin import and no external runtime framework.
+In Jellyfin go to:
 
-## Jellyfin dependencies
+**Dashboard → General → Branding → Custom CSS**
 
-- Jellyfin 12.1 server/web.
-- File Transformation 3.x.
+Paste only this:
 
-JavaScript Injector is not required by DINKFLIX itself. Home Screen Sections is not required.
+```css
+@import url("https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix.css");
+```
 
-## GitHub upload
+Save, then hard-refresh the browser with **Ctrl + F5**.
 
-This package is intentionally a source replacement package for an existing DINKFLIX repository. Upload the contents to the repository root and commit them. Do not upload the ZIP itself and do not delete the repository first.
+You do **not** paste the full stylesheet into Jellyfin.
 
-If the GitHub browser does not upload `.github`, do not touch the existing workflow. The package contains all source files required by the existing build workflow.
+## Stage 2 architecture
 
-## Plugin settings
+This stage is a native Jellyfin theme foundation.
 
-The DINKFLIX plugin settings page exposes:
+`dinkflix.css` styles Jellyfin's existing UI instead of creating a second application layer.
 
-- accent colour
-- hero rotation interval
-- optional TMDB Read Access Token
-- TMDB watch-provider region (default AU)
+It deliberately does **not**:
 
-The TMDB token is stored server-side in the DINKFLIX plugin configuration and is never embedded into the frontend JavaScript.
+- create a custom application root
+- replace Jellyfin routing
+- replace the Jellyfin player
+- recreate Jellyfin menus
+- recreate search
+- recreate profile/preferences
+- recreate Requests/Seerr
+- add an external theme dependency
+- require external fonts
+- require an API key
+
+## Current visual scope
+
+- DINKFLIX graphite/obsidian palette
+- `#00ffc6` accent system
+- native Jellyfin navigation/app-bar styling
+- navigation drawer styling
+- spacious content width
+- larger desktop cards
+- native horizontal scrollers
+- card hover/focus treatment
+- badges and progress styling
+- detail-page presentation
+- season/episode presentation
+- buttons, inputs, dialogs and menus
+- player surroundings without replacing playback
+- responsive sizing
+- reduced-motion support
+
+## Repository file
+
+The live stylesheet is:
+
+`https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix.css`
+
+That means future theme changes can be made in GitHub without repeatedly pasting a large CSS file into Jellyfin.
+
+## Important testing rule
+
+For this stage, do **not** enable the old DINKFLIX JavaScript/frontend injector at the same time. We are testing the theme layer independently so native Jellyfin behaviour remains isolated and testable.
+
+The DINKFLIX plugin will be rebuilt separately for functionality that CSS cannot provide.
