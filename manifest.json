@@ -10,6 +10,15 @@
     "repositoryUrl": "https://github.com/Orvlyn/DinkFlix",
     "versions": [
       {
+        "version": "10.8.1.0",
+        "changelog": "DINKFLIX release",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/Orvlyn/DinkFlix/releases/download/10.8.1.0/Jellyfin.Plugin.DINKFLIX_12.0.zip",
+        "checksum": "DCF8A4346A86B9544294818D4B56B656",
+        "timestamp": "2026-09-21T20:31:50.0000000Z",
+        "dependencies": []
+      },
+      {
         "version": "10.7.0.0",
         "changelog": "DINKFLIX release",
         "targetAbi": "12.0.0.0",
