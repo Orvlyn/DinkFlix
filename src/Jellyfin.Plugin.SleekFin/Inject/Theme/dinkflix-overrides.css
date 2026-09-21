@@ -5,12 +5,12 @@
 html.sleekfin-main-ui:root {
     --sleekfin-accent: #00ffc6;
     --sleekfin-accent-soft: rgba(0, 255, 198, 0.14);
-    --sleekfin-background: #080a0b;
-    --sleekfin-surface: #101416;
-    --sleekfin-surface-raised: #171c1e;
-    --sleekfin-border: #283033;
+    --sleekfin-background: #050810;
+    --sleekfin-surface: #0b111d;
+    --sleekfin-surface-raised: #101827;
+    --sleekfin-border: rgba(255, 255, 255, 0.09);
     --sleekfin-border-hover: rgba(0, 255, 198, 0.42);
-    --sleekfin-muted: #a1abad;
+    --sleekfin-muted: #98a4b7;
     --sleekfin-text: #f2f7f6;
     --jf-palette-primary-main: #00ffc6;
     --jf-palette-primary-mainChannel: 0 255 198;
@@ -26,7 +26,7 @@ html.sleekfin-main-ui .skinHeader {
     position: sticky;
     top: 0;
     z-index: 1000;
-    background: rgba(8, 10, 11, 0.94);
+    background: rgba(5, 8, 16, 0.94);
     border-bottom: 1px solid rgba(255, 255, 255, 0.07);
     backdrop-filter: blur(14px) saturate(125%);
 }
@@ -43,7 +43,7 @@ html.sleekfin-main-ui .cardBox:focus-within {
     outline-offset: 2px;
 }
 
-/* Prevent long rows from becoming an awkward clipped wall of posters. */
+/* Use Jellyfin's native horizontal scrollers; only tune the visual treatment. */
 html.sleekfin-main-ui .itemsContainer,
 html.sleekfin-main-ui .scrollSlider {
     scrollbar-width: thin;
@@ -60,6 +60,33 @@ html.sleekfin-main-ui a:focus-visible,
 html.sleekfin-main-ui [tabindex]:focus-visible {
     outline: 2px solid #00ffc6;
     outline-offset: 3px;
+}
+
+/* Larger native poster cards without forcing a new grid or breaking Jellyfin sizing. */
+html.sleekfin-main-ui :is(.overflowPortraitCard, .portraitCard) {
+    width: 230px;
+    max-width: 230px;
+}
+
+html.sleekfin-main-ui :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) {
+    max-width: 360px;
+}
+
+/* Keep the hero visually joined to the DINKFLIX page background. */
+html.sleekfin-main-ui .sleekfin-hero,
+html.sleekfin-main-ui .sleekfin-hero-slide {
+    background: var(--sleekfin-background);
+}
+
+@media (max-width: 650px) {
+    html.sleekfin-main-ui :is(.overflowPortraitCard, .portraitCard) {
+        width: 165px;
+        max-width: 165px;
+    }
+
+    html.sleekfin-main-ui :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) {
+        max-width: 280px;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
