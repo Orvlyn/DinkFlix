@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>DINKFLIX</title>
+</head>
+<body>
+<div data-role="page" class="page type-interior pluginConfigurationPage">
+    <div class="content-primary">
+        <div class="sectionTitleContainer flex align-items-center">
+            <h2 class="sectionTitle">DINKFLIX</h2>
+        </div>
+
+        <form id="DinkFlixConfigForm">
+            <div class="paperList" style="padding:1rem;border-radius:12px;">
+                <label class="checkboxContainer" style="display:block;margin:0 0 1rem;">
+                    <input type="checkbox" is="emby-checkbox" id="EnableEnhancements">
+                    <span>Enable DINKFLIX frontend enhancements</span>
+                </label>
+                <label class="checkboxContainer" style="display:block;margin:0 0 1rem;">
+                    <input type="checkbox" is="emby-checkbox" id="GroupContinueWatching">
+                    <span>Group Continue Watching by TV series</span>
+                </label>
+                <label class="checkboxContainer" style="display:block;margin:0 0 1rem;">
+                    <input type="checkbox" is="emby-checkbox" id="ShowLocalEndTime">
+                    <span>Show local estimated end time on detail pages</span>
+                </label>
+                <label class="checkboxContainer" style="display:block;">
+                    <input type="checkbox" is="emby-checkbox" id="ShowMediaTechnicalDetails">
+                    <span>Show video, audio and subtitle summary on detail pages</span>
+                </label>
+            </div>
+
+            <div style="margin-top:1rem;color:var(--secondaryTextColor,#9aa4ad);">
+                The DINKFLIX theme itself is loaded through Jellyfin Custom CSS using the GitHub @import. This plugin only adds the small features that CSS cannot provide. It does not replace Jellyfin routing, playback, menus, profile, preferences, Requests or administration.
+            </div>
+
+            <div style="margin-top:1.25rem;display:flex;align-items:center;gap:1rem;">
+                <button is="emby-button" type="submit" class="raised button-submit">Save</button>
+                <span id="DinkFlixSaveStatus" aria-live="polite"></span>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+(function () {
+    "use strict";
+
+    var form = document.getElementById("DinkFlixConfigForm");
+    var status = document.getElementById("DinkFlixSaveStatus");
+
+    async function getPluginId() {
+        var plugins = await ApiClient.getPlugins();
+        var plugin = plugins.find(function (entry) { return entry.Name === "DINKFLIX"; });
+        if (!plugin) {
+            throw new Error("DINKFLIX plugin was not found.");
+        }
+        return plugin.Id;
+    }
+
+    async function load() {
+        try {
+            var id = await getPluginId();
+            var config = await ApiClient.getPluginConfiguration(id);
+            document.getElementById("EnableEnhancements").checked = config.EnableEnhancements !== false;
+            document.getElementById("GroupContinueWatching").checked = config.GroupContinueWatching !== false;
+            document.getElementById("ShowLocalEndTime").checked = config.ShowLocalEndTime !== false;
+            document.getElementById("ShowMediaTechnicalDetails").checked = config.ShowMediaTechnicalDetails !== false;
+        } catch (error) {
+            status.textContent = "Could not load configuration.";
+            status.style.color = "#ff7b87";
+            console.error(error);
+        }
+    }
+
+    form.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        status.textContent = "Saving…";
+        status.style.color = "";
+
+        try {
+            var id = await getPluginId();
+            var config = await ApiClient.getPluginConfiguration(id);
+            config.EnableEnhancements = document.getElementById("EnableEnhancements").checked;
+            config.GroupContinueWatching = document.getElementById("GroupContinueWatching").checked;
+            config.ShowLocalEndTime = document.getElementById("ShowLocalEndTime").checked;
+            config.ShowMediaTechnicalDetails = document.getElementById("ShowMediaTechnicalDetails").checked;
+            await ApiClient.updatePluginConfiguration(id, config);
+            status.textContent = "Saved.";
+            status.style.color = "var(--theme-accent-color,#00ffc6)";
+        } catch (error) {
+            status.textContent = "Save failed.";
+            status.style.color = "#ff7b87";
+            console.error(error);
+        }
+    });
+
+    load();
+}());
+</script>
+</body>
+</html>

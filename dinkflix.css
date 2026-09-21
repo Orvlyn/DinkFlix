@@ -1,0 +1,1041 @@
+/*
+ * DINKFLIX Theme — Jellyfin 12 native visual system
+ *
+ * Native Jellyfin theme only.
+ * This stylesheet deliberately does NOT:
+ *   - create a second application root
+ *   - replace Jellyfin routing
+ *   - hide Jellyfin's application surface behind a custom shell
+ *   - recreate playback, menus, dialogs, search, profile or preferences
+ *   - depend on external fonts, CDNs or another theme
+ *
+ * Target: Jellyfin Web 12.x desktop / responsive web layouts.
+ */
+
+:root {
+    --df-bg: #07090b;
+    --df-bg-2: #0b0f12;
+    --df-surface: #101417;
+    --df-surface-2: #151a1e;
+    --df-surface-3: #1b2227;
+    --df-border: rgba(255, 255, 255, 0.075);
+    --df-border-strong: rgba(255, 255, 255, 0.13);
+    --df-text: #f3f6f7;
+    --df-text-2: #b4bdc3;
+    --df-text-3: #7f8a91;
+    --df-accent: #00ffc6;
+    --df-accent-rgb: 0 255 198;
+    --df-accent-soft: rgb(0 255 198 / 0.11);
+    --df-accent-border: rgb(0 255 198 / 0.26);
+    --df-danger: #ff6f7d;
+    --df-warning: #f5c565;
+    --df-radius-sm: 8px;
+    --df-radius-md: 12px;
+    --df-radius-lg: 18px;
+    --df-shadow-sm: 0 8px 24px rgb(0 0 0 / 0.24);
+    --df-shadow-md: 0 18px 48px rgb(0 0 0 / 0.32);
+    --df-shadow-lg: 0 28px 80px rgb(0 0 0 / 0.42);
+    --df-content-max: 1760px;
+    --df-content-gutter: clamp(18px, 2.2vw, 42px);
+    --df-card-width: clamp(176px, 12.5vw, 250px);
+    --df-card-gap: clamp(12px, 0.9vw, 18px);
+    --df-header-height: 68px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Global foundation                                                          */
+/* -------------------------------------------------------------------------- */
+
+html,
+body {
+    background: var(--df-bg) !important;
+    color: var(--df-text) !important;
+}
+
+html {
+    color-scheme: dark;
+    scrollbar-width: thin;
+    scrollbar-color: #3d464c var(--df-bg);
+}
+
+body {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+    text-rendering: optimizeLegibility;
+}
+
+body,
+.mainAnimatedPage,
+.page,
+.libraryPage,
+#itemDetailPage {
+    background: var(--df-bg) !important;
+}
+
+.backgroundContainer,
+.backgroundContainer.withBackdrop,
+.nowPlayingPlaylist {
+    background-color: var(--df-bg) !important;
+}
+
+.backgroundContainer.withBackdrop {
+    opacity: 0.92;
+}
+
+/* Keep Jellyfin's pages in control of their own scrolling and stacking. */
+body,
+html,
+.mainAnimatedPage {
+    overflow-x: hidden;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Native header / app bar                                                     */
+/* -------------------------------------------------------------------------- */
+
+.skinHeader,
+.skinHeader-withBackground,
+.skinHeader.semiTransparent,
+.MuiAppBar-root {
+    background: rgb(7 9 11 / 0.88) !important;
+    border-bottom: 1px solid var(--df-border) !important;
+    box-shadow: 0 8px 28px rgb(0 0 0 / 0.16) !important;
+    backdrop-filter: blur(18px) saturate(125%);
+    -webkit-backdrop-filter: blur(18px) saturate(125%);
+}
+
+.skinHeader {
+    min-height: var(--df-header-height);
+}
+
+.headerTop,
+.MuiToolbar-root {
+    min-height: var(--df-header-height) !important;
+}
+
+.headerTop {
+    padding-inline: clamp(12px, 1.5vw, 26px) !important;
+}
+
+.skinHeader::after,
+.MuiAppBar-root::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgb(var(--df-accent-rgb) / 0.22) 50%, transparent 100%);
+    pointer-events: none;
+}
+
+.headerButton,
+.paper-icon-button-light,
+.emby-input-iconbutton,
+.MuiIconButton-root {
+    color: var(--df-text-2) !important;
+    transition: color 140ms ease, background-color 140ms ease, transform 140ms ease;
+}
+
+.headerButton:hover,
+.paper-icon-button-light:hover,
+.emby-input-iconbutton:hover,
+.MuiIconButton-root:hover {
+    color: var(--df-text) !important;
+    background: rgb(255 255 255 / 0.055) !important;
+}
+
+.headerButton:focus-visible,
+.paper-icon-button-light:focus-visible,
+.emby-input-iconbutton:focus-visible,
+.MuiIconButton-root:focus-visible {
+    outline: 2px solid var(--df-accent) !important;
+    outline-offset: 2px;
+}
+
+/* Native Jellyfin text branding becomes quiet and premium rather than loud. */
+.skinHeader .headerUserButton,
+.skinHeader .headerHomeButton {
+    border-radius: 12px;
+}
+
+.headerTabs,
+.sectionTabs,
+.emby-tabs-slider {
+    border-bottom-color: var(--df-border) !important;
+}
+
+.emby-tab-button {
+    color: var(--df-text-2) !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em;
+    transition: color 140ms ease, opacity 140ms ease;
+}
+
+.emby-tab-button:hover,
+.emby-tab-button-active {
+    color: var(--df-text) !important;
+}
+
+.emby-tab-button-active::after {
+    background: var(--df-accent) !important;
+    box-shadow: 0 0 16px rgb(var(--df-accent-rgb) / 0.34);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Native navigation drawer                                                    */
+/* -------------------------------------------------------------------------- */
+
+.mainDrawer,
+.MuiDrawer-paper {
+    background: linear-gradient(180deg, #0a0d10 0%, #0b0f12 100%) !important;
+    border-right: 1px solid var(--df-border) !important;
+    box-shadow: 24px 0 60px rgb(0 0 0 / 0.22) !important;
+}
+
+.mainDrawer .sidebarHeader,
+.MuiDrawer-paper .sidebarHeader {
+    color: var(--df-text) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em;
+}
+
+.mainDrawer .navMenuOption,
+.MuiDrawer-paper .MuiListItemButton-root {
+    color: var(--df-text-2) !important;
+    border-radius: 11px !important;
+    margin: 3px 10px !important;
+    transition: background-color 140ms ease, color 140ms ease, transform 140ms ease;
+}
+
+.mainDrawer .navMenuOption:hover,
+.MuiDrawer-paper .MuiListItemButton-root:hover {
+    color: var(--df-text) !important;
+    background: rgb(255 255 255 / 0.045) !important;
+}
+
+.mainDrawer .navMenuOption-selected,
+.MuiDrawer-paper .Mui-selected {
+    color: var(--df-text) !important;
+    background: var(--df-accent-soft) !important;
+    box-shadow: inset 2px 0 0 var(--df-accent);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Main content sizing                                                         */
+/* -------------------------------------------------------------------------- */
+
+.layout-desktop .mainAnimatedPage,
+.layout-desktop .libraryPage,
+.layout-desktop .homeSectionsContainer,
+.layout-desktop .content-primary {
+    width: min(var(--df-content-max), calc(100% - (var(--df-content-gutter) * 2))) !important;
+    max-width: var(--df-content-max) !important;
+    margin-inline: auto !important;
+}
+
+.layout-desktop .homeSectionsContainer,
+.layout-desktop .verticalSection,
+.layout-desktop .sectionContainer {
+    padding-inline: 0 !important;
+}
+
+.pageContainer,
+.content-primary {
+    box-sizing: border-box;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Home sections / native scrollers                                           */
+/* -------------------------------------------------------------------------- */
+
+.sectionTitle,
+.sectionTitle-cards,
+.itemsContainer .sectionTitle,
+.MuiTypography-h5,
+.MuiTypography-h6 {
+    color: var(--df-text) !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.015em;
+}
+
+.sectionTitle {
+    margin-bottom: 0.7rem !important;
+}
+
+.sectionTitle::after {
+    content: "";
+    display: inline-block;
+    width: 28px;
+    height: 2px;
+    margin-left: 9px;
+    margin-bottom: 0.12em;
+    border-radius: 999px;
+    background: var(--df-accent);
+    opacity: 0.8;
+}
+
+.emby-scroller,
+.scrollSlider {
+    scrollbar-width: none;
+}
+
+.emby-scroller::-webkit-scrollbar,
+.scrollSlider::-webkit-scrollbar {
+    display: none;
+}
+
+/* Six-card desktop rows: the native Jellyfin scroller remains in charge of navigation. */
+.layout-desktop .itemsContainer.scrollSlider > .card,
+.layout-desktop .itemsContainer.scrollSlider > .overflowPortraitCard,
+.layout-desktop .itemsContainer.scrollSlider > .overflowSquareCard,
+.layout-desktop .itemsContainer.scrollSlider > .overflowBackdropCard {
+    flex: 0 0 calc((100% - (var(--df-card-gap) * 5)) / 6) !important;
+    width: calc((100% - (var(--df-card-gap) * 5)) / 6) !important;
+    min-width: calc((100% - (var(--df-card-gap) * 5)) / 6) !important;
+    max-width: calc((100% - (var(--df-card-gap) * 5)) / 6) !important;
+}
+
+/* Fallback card sizing for non-scroller layouts. */
+.layout-desktop .overflowPortraitCard,
+.layout-desktop .overflowSquareCard,
+.layout-desktop .overflowBackdropCard,
+.layout-desktop .portraitCard,
+.layout-desktop .backdropCard {
+    width: var(--df-card-width) !important;
+    min-width: var(--df-card-width) !important;
+    max-width: var(--df-card-width) !important;
+    margin-right: var(--df-card-gap) !important;
+}
+
+.layout-desktop .cardScalable,
+.layout-desktop .cardBox,
+.layout-desktop .cardImageContainer,
+.layout-desktop .visualCardBox {
+    border-radius: var(--df-radius-md) !important;
+}
+
+.layout-desktop .cardScalable,
+.layout-desktop .cardBox {
+    overflow: hidden;
+}
+
+.cardBox,
+.visualCardBox,
+.paperList {
+    background: var(--df-surface) !important;
+    border: 1px solid transparent;
+    box-shadow: none !important;
+}
+
+.cardImageContainer,
+.cardScalable,
+.cardImageContainer img,
+.cardImageContainer .coveredImage {
+    background-color: var(--df-surface-2) !important;
+}
+
+.cardImageContainer img,
+.coveredImage {
+    transition: transform 180ms cubic-bezier(.22,.72,.2,1), filter 180ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .card:hover .cardBox,
+    .card:hover .visualCardBox {
+        border-color: var(--df-border-strong) !important;
+        box-shadow: var(--df-shadow-sm) !important;
+        transform: translateY(-2px);
+        transition: transform 170ms ease, box-shadow 170ms ease, border-color 170ms ease;
+    }
+
+    .card:hover .cardImageContainer img,
+    .card:hover .coveredImage {
+        transform: scale(1.025);
+        filter: saturate(1.03) contrast(1.015);
+    }
+}
+
+.cardText,
+.cardText-first,
+.cardText-secondary,
+.cardFooter-vibrant .cardText-secondary {
+    color: var(--df-text) !important;
+}
+
+.cardText-secondary,
+.secondaryText,
+.fieldDescription,
+.listItem .secondary {
+    color: var(--df-text-2) !important;
+}
+
+.cardText,
+.cardText-first {
+    font-weight: 600 !important;
+}
+
+.cardText-secondary {
+    opacity: 0.82;
+    font-size: 0.9em;
+}
+
+/* Keep card labels tidy instead of letting them produce ugly tall stacks. */
+.layout-desktop .cardText,
+.layout-desktop .cardText-first,
+.layout-desktop .cardText-secondary {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.layout-desktop .cardText-first {
+    white-space: nowrap;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Badges / ratings / progress                                                 */
+/* -------------------------------------------------------------------------- */
+
+.cardOverlayContainer,
+.cardOverlayButton,
+.itemSelectionPanel {
+    border-radius: var(--df-radius-md) !important;
+}
+
+.cardOverlayButton,
+.cardOverlayButton-hover,
+.playstatebutton-icon-played,
+.ratingbutton-icon-withrating {
+    color: var(--df-accent) !important;
+}
+
+.cardOverlayButton:hover {
+    background: rgb(var(--df-accent-rgb) / 0.12) !important;
+}
+
+.itemProgressBar,
+.playbackProgressBar {
+    background: rgb(255 255 255 / 0.10) !important;
+    border-radius: 999px !important;
+    overflow: hidden;
+}
+
+.itemProgressBar .itemProgressBarForeground,
+.playbackProgressBar .innerProgressBar {
+    background: var(--df-accent) !important;
+    box-shadow: 0 0 12px rgb(var(--df-accent-rgb) / 0.2);
+}
+
+.cardFooter-vibrant {
+    background: linear-gradient(180deg, transparent 0%, rgb(7 9 11 / 0.92) 76%) !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Lists, rows, people and generic surfaces                                    */
+/* -------------------------------------------------------------------------- */
+
+.listItem,
+.paperList,
+.visualCardBox,
+.MuiPaper-root,
+.MuiCard-root {
+    border-color: var(--df-border) !important;
+}
+
+.listItem {
+    border-radius: var(--df-radius-md) !important;
+}
+
+.listItem:hover {
+    background: rgb(255 255 255 / 0.028) !important;
+}
+
+.personCard .cardScalable,
+.personCard .cardBox,
+.personCard .coveredImage {
+    border-radius: 50% !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Buttons / inputs                                                            */
+/* -------------------------------------------------------------------------- */
+
+.emby-button,
+.raised,
+.button-submit,
+.MuiButton-root {
+    border-radius: 10px !important;
+    font-weight: 650 !important;
+    transition: transform 140ms ease, background-color 140ms ease, box-shadow 140ms ease;
+}
+
+.emby-button:not(.button-submit),
+.MuiButton-outlined {
+    background: rgb(255 255 255 / 0.045) !important;
+    border: 1px solid var(--df-border-strong) !important;
+    color: var(--df-text) !important;
+}
+
+.emby-button:not(.button-submit):hover,
+.MuiButton-outlined:hover {
+    background: rgb(255 255 255 / 0.07) !important;
+    border-color: rgb(255 255 255 / 0.20) !important;
+}
+
+.button-submit,
+.MuiButton-containedPrimary {
+    background: var(--df-accent) !important;
+    color: #03110e !important;
+    box-shadow: 0 8px 24px rgb(var(--df-accent-rgb) / 0.14) !important;
+}
+
+.button-submit:hover,
+.MuiButton-containedPrimary:hover {
+    background: #16ffd0 !important;
+    transform: translateY(-1px);
+}
+
+.emby-input,
+.emby-textarea,
+.emby-select,
+select,
+input,
+textarea,
+.MuiOutlinedInput-root,
+.MuiInputBase-root {
+    background: var(--df-surface) !important;
+    color: var(--df-text) !important;
+    border-radius: 10px !important;
+}
+
+.emby-input,
+.emby-textarea,
+.emby-select,
+.MuiOutlinedInput-root {
+    border-color: var(--df-border-strong) !important;
+}
+
+.emby-input:focus,
+.emby-textarea:focus,
+.emby-select:focus,
+.MuiOutlinedInput-root.Mui-focused {
+    border-color: var(--df-accent) !important;
+    box-shadow: 0 0 0 3px rgb(var(--df-accent-rgb) / 0.10) !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Menus / popovers / dialogs                                                   */
+/* -------------------------------------------------------------------------- */
+
+.menuContainer,
+.actionSheet,
+.dialog,
+.dialogContainer,
+.formDialog,
+.MuiMenu-paper,
+.MuiPopover-paper,
+.MuiDialog-paper,
+.MuiPaper-root.menu {
+    background: #11161a !important;
+    color: var(--df-text) !important;
+    border: 1px solid var(--df-border-strong) !important;
+    border-radius: var(--df-radius-md) !important;
+    box-shadow: var(--df-shadow-lg) !important;
+}
+
+.menuContainer .actionSheetMenuItem,
+.actionSheetMenuItem,
+.MuiMenuItem-root {
+    color: var(--df-text-2) !important;
+    border-radius: 8px !important;
+    margin: 3px 5px !important;
+}
+
+.menuContainer .actionSheetMenuItem:hover,
+.actionSheetMenuItem:hover,
+.MuiMenuItem-root:hover {
+    color: var(--df-text) !important;
+    background: rgb(255 255 255 / 0.055) !important;
+}
+
+.dialogBackdrop,
+.MuiBackdrop-root {
+    background: rgb(0 0 0 / 0.70) !important;
+    backdrop-filter: blur(5px);
+}
+
+.formDialogHeader,
+.formDialogFooter {
+    background: transparent !important;
+    border-color: var(--df-border) !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Detail pages                                                                */
+/* -------------------------------------------------------------------------- */
+
+#itemDetailPage,
+.layout-desktop #itemDetailPage {
+    --detail-page-gutter: clamp(18px, 2.5vw, 44px);
+}
+
+#itemDetailPage .itemBackdrop {
+    opacity: 0.66;
+    filter: saturate(0.9) contrast(1.04);
+}
+
+#itemDetailPage .itemBackdrop::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(180deg, rgb(7 9 11 / 0.10) 0%, rgb(7 9 11 / 0.40) 52%, var(--df-bg) 100%),
+        linear-gradient(90deg, rgb(7 9 11 / 0.36) 0%, transparent 55%, rgb(7 9 11 / 0.25) 100%);
+    pointer-events: none;
+}
+
+#itemDetailPage .detailImageContainer .card,
+#itemDetailPage .detailImageContainer .cardScalable,
+#itemDetailPage .detailImageContainer .cardBox {
+    border-radius: var(--df-radius-lg) !important;
+    overflow: hidden;
+    box-shadow: var(--df-shadow-md) !important;
+}
+
+#itemDetailPage .infoWrapper {
+    background: linear-gradient(180deg, rgb(15 20 24 / 0.92) 0%, rgb(11 15 18 / 0.86) 100%) !important;
+    border: 1px solid var(--df-border) !important;
+    border-radius: var(--df-radius-lg) !important;
+    box-shadow: var(--df-shadow-md) !important;
+}
+
+#itemDetailPage .itemName,
+#itemDetailPage .parentName,
+#itemDetailPage .nameContainer h1 {
+    color: var(--df-text) !important;
+    font-weight: 760 !important;
+    letter-spacing: -0.026em;
+}
+
+#itemDetailPage .overview,
+#itemDetailPage .tagline,
+#itemDetailPage .itemMiscInfo,
+#itemDetailPage .itemDateCreated {
+    color: var(--df-text-2) !important;
+}
+
+#itemDetailPage .itemMiscInfo .mediaInfo,
+#itemDetailPage .itemMiscInfo .communityRating,
+#itemDetailPage .itemMiscInfo .criticRating,
+#itemDetailPage .itemMiscInfo .runTimeTicks {
+    color: var(--df-text-2) !important;
+}
+
+#itemDetailPage .tagline,
+#itemDetailPage .genreButton {
+    color: var(--df-text-2) !important;
+}
+
+#itemDetailPage .genreButton {
+    background: rgb(255 255 255 / 0.045) !important;
+    border: 1px solid var(--df-border) !important;
+    border-radius: 999px !important;
+}
+
+#itemDetailPage .genreButton:hover {
+    color: var(--df-text) !important;
+    border-color: var(--df-accent-border) !important;
+    background: var(--df-accent-soft) !important;
+}
+
+#itemDetailPage .detailRibbon {
+    background: transparent !important;
+    border-color: transparent !important;
+}
+
+/* Native season/episode sections: make them feel like distinct content cards. */
+#itemDetailPage .sectionTitle,
+#itemDetailPage .sectionTitle-cards {
+    margin-top: 1.4rem !important;
+}
+
+#itemDetailPage .listItem,
+#itemDetailPage .visualCardBox {
+    background: var(--df-surface) !important;
+}
+
+#itemDetailPage .listItem .secondary,
+#itemDetailPage .cardText-secondary {
+    color: var(--df-text-2) !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Player                                                                     */
+/* -------------------------------------------------------------------------- */
+
+.videoPlayerContainer,
+.videoPlayerContainer video,
+.videoPlayerContainer .videoSubtitles {
+    background: #000 !important;
+}
+
+.videoOsdBottom,
+.videoOsdTop {
+    background: linear-gradient(180deg, transparent 0%, rgb(0 0 0 / 0.78) 100%) !important;
+}
+
+/* Crucial: do not hide or replace Jellyfin's player controls. */
+
+/* -------------------------------------------------------------------------- */
+/* Search / auth / utility pages                                               */
+/* -------------------------------------------------------------------------- */
+
+.searchFields,
+.searchResults,
+.dashboardGeneralForm,
+.formDialog-content,
+.MuiContainer-root {
+    color: var(--df-text) !important;
+}
+
+.searchFields .emby-input,
+.searchFields .emby-input:focus {
+    background: var(--df-surface) !important;
+}
+
+.loginPage,
+#loginPage {
+    background:
+        radial-gradient(circle at 78% 18%, rgb(var(--df-accent-rgb) / 0.06), transparent 28%),
+        radial-gradient(circle at 18% 82%, rgb(255 255 255 / 0.035), transparent 26%),
+        var(--df-bg) !important;
+}
+
+.loginPage .readOnlyContent,
+.loginPage .padded-left-right {
+    background: transparent !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Toasts / notifications                                                      */
+/* -------------------------------------------------------------------------- */
+
+.toast,
+.MuiSnackbarContent-root {
+    background: #11161a !important;
+    color: var(--df-text) !important;
+    border: 1px solid var(--df-border-strong) !important;
+    border-radius: var(--df-radius-md) !important;
+    box-shadow: var(--df-shadow-md) !important;
+}
+
+.toast .material-icons,
+.toast .fa,
+.MuiSnackbarContent-action {
+    color: var(--df-accent) !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Focus / accessibility                                                       */
+/* -------------------------------------------------------------------------- */
+
+:focus-visible {
+    outline: 2px solid var(--df-accent) !important;
+    outline-offset: 2px;
+}
+
+/* Avoid making normal Jellyfin focus rings disappear for keyboard users. */
+
+/* -------------------------------------------------------------------------- */
+/* Responsive                                                                  */
+/* -------------------------------------------------------------------------- */
+
+@media (max-width: 1200px) {
+    :root {
+        --df-card-width: clamp(164px, 15vw, 220px);
+    }
+
+    .layout-desktop .mainAnimatedPage,
+    .layout-desktop .libraryPage,
+    .layout-desktop .homeSectionsContainer,
+    .layout-desktop .content-primary {
+        width: min(var(--df-content-max), calc(100% - 28px)) !important;
+    }
+}
+
+@media (max-width: 900px) {
+    :root {
+        --df-content-gutter: 14px;
+        --df-card-width: clamp(142px, 26vw, 190px);
+    }
+
+    .layout-desktop .mainAnimatedPage,
+    .layout-desktop .libraryPage,
+    .layout-desktop .homeSectionsContainer,
+    .layout-desktop .content-primary {
+        width: calc(100% - 20px) !important;
+        max-width: none !important;
+    }
+
+    .headerTop,
+    .MuiToolbar-root {
+        min-height: 60px !important;
+    }
+
+    .skinHeader {
+        min-height: 60px;
+    }
+
+    #itemDetailPage .infoWrapper {
+        border-radius: var(--df-radius-md) !important;
+    }
+}
+
+@media (max-width: 640px) {
+    :root {
+        --df-card-width: 42vw;
+    }
+
+    .sectionTitle::after {
+        display: none;
+    }
+
+    .layout-desktop .overflowPortraitCard,
+    .layout-desktop .overflowSquareCard,
+    .layout-desktop .overflowBackdropCard,
+    .layout-desktop .portraitCard,
+    .layout-desktop .backdropCard {
+        margin-right: 10px !important;
+    }
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* DINKFLIX enhancement surfaces                                              */
+/* -------------------------------------------------------------------------- */
+
+html.df-booting body {
+    visibility: hidden;
+}
+
+html.df-ready body {
+    visibility: visible;
+}
+
+.df-local-end-time {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    margin-top: 0.55rem;
+    padding: 0.38rem 0.7rem;
+    border: 1px solid var(--df-accent-border);
+    border-radius: 999px;
+    background: var(--df-accent-soft);
+    color: var(--df-text) !important;
+    font-size: 0.82rem;
+    font-weight: 650;
+    letter-spacing: 0.01em;
+}
+
+.df-media-technical {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: 0.7rem;
+}
+
+.df-media-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0.35rem 0.62rem;
+    border: 1px solid var(--df-border);
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.035);
+    color: var(--df-text-2);
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.025em;
+    text-transform: uppercase;
+}
+
+.df-series-meta {
+    margin-top: 0.22rem;
+    color: var(--df-text-2) !important;
+    font-size: 0.79rem;
+    font-weight: 550;
+    line-height: 1.25;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Jellyfin 12 Modern cards                                                   */
+/* -------------------------------------------------------------------------- */
+
+.MuiCard-root {
+    background: var(--df-surface) !important;
+    border: 1px solid var(--df-border) !important;
+    border-radius: var(--df-radius-md) !important;
+    box-shadow: none !important;
+    overflow: hidden;
+}
+
+.MuiCard-root .MuiCardContent-root {
+    background: transparent !important;
+}
+
+.MuiCard-root img,
+.MuiCardMedia-root {
+    border-radius: var(--df-radius-md) !important;
+}
+
+.MuiTypography-root {
+    font-family: inherit !important;
+}
+
+.MuiButton-root,
+.MuiIconButton-root {
+    text-transform: none !important;
+}
+
+.MuiAppBar-root {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1100 !important;
+}
+
+/* Keep the native horizontal scroller and its navigation controls intact. */
+.emby-scroller .scrollButton,
+.emby-scroller .nextButton,
+.emby-scroller .previousButton,
+.emby-scroller .btnNextPage,
+.emby-scroller .btnPrevPage {
+    width: 42px !important;
+    height: 42px !important;
+    border: 1px solid var(--df-border-strong) !important;
+    border-radius: 999px !important;
+    background: rgb(12 16 19 / 0.92) !important;
+    color: var(--df-text) !important;
+    box-shadow: var(--df-shadow-sm) !important;
+}
+
+.emby-scroller .scrollButton:hover,
+.emby-scroller .nextButton:hover,
+.emby-scroller .previousButton:hover,
+.emby-scroller .btnNextPage:hover,
+.emby-scroller .btnPrevPage:hover {
+    border-color: var(--df-accent-border) !important;
+    background: var(--df-accent-soft) !important;
+    color: var(--df-accent) !important;
+}
+
+@media (min-width: 1700px) {
+    :root {
+        --df-card-width: min(280px, calc((100vw - 180px) / 6));
+    }
+}
+
+@media (min-width: 1400px) and (max-width: 1699px) {
+    :root {
+        --df-card-width: min(250px, calc((100vw - 130px) / 6));
+    }
+}
+
+@media (min-width: 1050px) and (max-width: 1399px) {
+    :root {
+        --df-card-width: min(220px, calc((100vw - 100px) / 6));
+    }
+}
+
+button[aria-label*="next" i],
+button[aria-label*="previous" i],
+button[aria-label*="forward" i],
+button[aria-label*="back" i] {
+    border: 1px solid var(--df-border-strong) !important;
+    border-radius: 999px !important;
+    background: rgb(12 16 19 / 0.92) !important;
+    color: var(--df-text) !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Jellyfin 12 details, seasons, episodes and native utility surfaces          */
+/* -------------------------------------------------------------------------- */
+
+/* Season pickers and episode rows become deliberate cards rather than a
+   long wall of plain list items. Jellyfin still owns the links/actions. */
+#itemDetailPage .itemsContainer,
+#itemDetailPage .episodeItems,
+#itemDetailPage .seasonItems {
+    gap: var(--df-card-gap) !important;
+}
+
+#itemDetailPage .episode,
+#itemDetailPage .episodeListItem,
+#itemDetailPage .season,
+#itemDetailPage .seasonListItem,
+#itemDetailPage .listItem-withContent {
+    background: var(--df-surface) !important;
+    border: 1px solid var(--df-border) !important;
+    border-radius: var(--df-radius-md) !important;
+    box-shadow: none !important;
+}
+
+#itemDetailPage .episode:hover,
+#itemDetailPage .episodeListItem:hover,
+#itemDetailPage .season:hover,
+#itemDetailPage .seasonListItem:hover,
+#itemDetailPage .listItem-withContent:hover {
+    border-color: var(--df-border-strong) !important;
+    background: var(--df-surface-2) !important;
+}
+
+#itemDetailPage .episode .cardImageContainer,
+#itemDetailPage .episodeListItem .cardImageContainer,
+#itemDetailPage .season .cardImageContainer,
+#itemDetailPage .seasonListItem .cardImageContainer {
+    border-radius: var(--df-radius-sm) !important;
+}
+
+#itemDetailPage .peopleItemsContainer,
+#itemDetailPage .castItemsContainer,
+#itemDetailPage .crewItemsContainer {
+    scrollbar-width: none;
+}
+
+#itemDetailPage .peopleItemsContainer::-webkit-scrollbar,
+#itemDetailPage .castItemsContainer::-webkit-scrollbar,
+#itemDetailPage .crewItemsContainer::-webkit-scrollbar {
+    display: none;
+}
+
+/* Native metadata links / genre chips. */
+#itemDetailPage a,
+.MuiLink-root {
+    color: inherit;
+}
+
+#itemDetailPage .genreButton,
+#itemDetailPage .tagButton,
+#itemDetailPage .itemTag {
+    transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+/* Keep native drawers, popovers and dialogs above the page without inventing
+   another stacking context. */
+.MuiDrawer-root,
+.MuiPopover-root,
+.MuiDialog-root,
+.dialogContainer {
+    z-index: 1200;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Reduced motion                                                              */
+/* -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}
