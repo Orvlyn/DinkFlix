@@ -12,7 +12,7 @@ const features = (window.SleekFinFeatures = window.SleekFinFeatures || {});
 features.hero?.stop?.();
 
 const state = {
-  enabled: document.documentElement.dataset.sleekfinHeroEnabled === 'true',
+  enabled: document.documentElement.dataset.sleekfinHeroEnabled !== 'false',
   failedHost: null,
   generation: 0,
   loadingTimer: 0,
@@ -47,6 +47,18 @@ function findHost() {
   if (!isHomeRoute()) return null;
   const candidates = document.querySelectorAll('#indexPage #homeTab .sections, #indexPage .homePage .sections');
   return Array.from(candidates).find((element) => dom.isVisible(element)) || null;
+}
+
+function hideMyMedia() {
+  const roots = document.querySelectorAll('#indexPage .sections, #indexPage .section, #indexPage .verticalSection');
+  roots.forEach((section) => {
+    if (section.closest('.sleekfin-hero')) return;
+    const title = section.querySelector('.sectionTitle, h2, h3, .sectionTitleContainer');
+    const text = (title?.textContent || '').trim().replace(/\s+/g, ' ').toLowerCase();
+    if ((text === 'my media' || text.startsWith('my media ')) && !section.classList.contains('dinkflix-hidden-my-media')) {
+      section.classList.add('dinkflix-hidden-my-media');
+    }
+  });
 }
 
 function removeMount() {
@@ -117,6 +129,7 @@ function mount(host) {
 
 function reconcile() {
   if (!state.started || !window.ApiClient) return;
+  hideMyMedia();
   const host = findHost();
   if (!host) {
     unmount();
