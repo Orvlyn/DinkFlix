@@ -1,0 +1,70 @@
+/* DINKFLIX presentation overrides.
+ * Loaded after the base media stylesheet so Jellyfin's card defaults
+ * cannot shrink the intended DINKFLIX layout.
+ */
+
+html.sleekfin-main-ui:root {
+    --jf-palette-primary-mainChannel: 0 255 198;
+    --jf-palette-primary-dark: #00b89a;
+    --jf-palette-primary-darkChannel: 0 184 154;
+    --jf-palette-primary-light: #66ffe0;
+    --jf-palette-primary-lightChannel: 102 255 224;
+    --jf-palette-secondary-mainChannel: 0 255 198;
+    --jf-palette-secondary-dark: #00b89a;
+    --jf-palette-secondary-darkChannel: 0 184 154;
+    --jf-palette-secondary-light: #66ffe0;
+    --jf-palette-secondary-lightChannel: 102 255 224;
+    --jf-palette-error-mainChannel: 0 255 198;
+    --jf-palette-error-dark: #00b89a;
+    --jf-palette-error-darkChannel: 0 184 154;
+    --jf-palette-error-light: #66ffe0;
+    --jf-palette-error-lightChannel: 102 255 224;
+    --jf-palette-starIcon-mainChannel: 0 255 198;
+}
+
+/* Hide only Jellyfin's My Media library shortcut section. */
+html.sleekfin-media-mounted #indexPage .verticalSection:has(.homeLibraryButtonContainer) {
+    display: none !important;
+}
+
+/* Larger portrait cards, including home rows and library pages. */
+html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowPortraitCard, .portraitCard) {
+    flex: 0 0 220px !important;
+    width: 220px !important;
+    max-width: 220px !important;
+}
+
+/* Larger landscape cards, including Continue Watching rows. */
+html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) {
+    flex: 0 0 360px !important;
+    width: 360px !important;
+    max-width: 360px !important;
+}
+
+@media (min-width: 1600px) {
+    html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowPortraitCard, .portraitCard) {
+        flex-basis: 240px !important;
+        width: 240px !important;
+        max-width: 240px !important;
+    }
+
+    html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) {
+        flex-basis: 400px !important;
+        width: 400px !important;
+        max-width: 400px !important;
+    }
+}
+
+@media (max-width: 700px) {
+    html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowPortraitCard, .portraitCard) {
+        flex-basis: 160px !important;
+        width: 160px !important;
+        max-width: 160px !important;
+    }
+
+    html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) {
+        flex-basis: 280px !important;
+        width: 280px !important;
+        max-width: 280px !important;
+    }
+}
