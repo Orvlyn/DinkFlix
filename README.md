@@ -7,17 +7,18 @@ This repository contains two deliberately separate layers:
 
 The plugin does not replace Jellyfin routing, playback, context menus, search, user profile/preferences, Requests, or the dashboard.
 
-## Jellyfin Custom CSS
+## Installation
 
-Replace the entire Custom CSS field with:
+DINKFLIX is distributed as a normal Jellyfin plugin repository.
 
-```css
-@import url("https://cdn.jsdelivr.net/gh/Orvlyn/DinkFlix@main/dinkflix.css?v=7.0.0.3");
-```
+1. Open **Dashboard → Plugins → Repositories**.
+2. Add this repository:
+   `https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/manifest.json`
+3. Open **Catalog**, find **DINKFLIX**, install it, and restart Jellyfin.
 
-The external stylesheet must be reachable by the browser/client. Jellyfin documents external CSS imports as supported, and community theme guidance commonly uses jsDelivr for GitHub-hosted themes.
+Once the plugin is installed, **you do not need to paste an @import into Jellyfin Custom CSS**. The plugin loads the DINKFLIX stylesheet into Jellyfin Web itself.
 
-For an update that is not appearing immediately, use a hard refresh. CDN caching can delay changes; a version/commit-pinned import is the most deterministic option.
+The stylesheet is the standalone DINKFLIX theme; it does not depend on ElegantFin or another theme.
 
 ## Plugin
 

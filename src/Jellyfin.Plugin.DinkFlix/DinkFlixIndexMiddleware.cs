@@ -15,7 +15,7 @@ public sealed class DinkFlixIndexMiddleware
 {
     private const string ScriptResource = "Jellyfin.Plugin.DinkFlix.Web.dinkflix.js";
     private const string Marker = "dinkflix-boot";
-    private const string ThemeUrl = "https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix.css?v=7.0.0.3";
+    private const string ThemeUrl = "https://cdn.jsdelivr.net/gh/Orvlyn/DinkFlix@main/dinkflix.css?v=7.0.0.4";
 
     private readonly RequestDelegate _next;
     public DinkFlixIndexMiddleware(RequestDelegate next)

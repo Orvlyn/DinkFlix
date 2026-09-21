@@ -35,7 +35,7 @@ assert isinstance(manifest, list)
 plugin = next((p for p in manifest if p.get('guid') == 'B4A9D4E6-4E4D-4F42-9E90-9C5B4D4B8D2B'), None)
 assert plugin is not None
 assert plugin['name'] == 'DINKFLIX'
-assert plugin.get('versions') == []
+assert isinstance(plugin.get('versions'), list)
 
 txt = (ROOT/'build.yaml').read_text()
 m = re.search(r'^version:\s*["\']?([^"\'\s]+)', txt, re.M)
@@ -69,6 +69,7 @@ assert 'IApplicationPaths' in pl and 'IXmlSerializer' in pl
 mw = (ROOT/'src/Jellyfin.Plugin.DinkFlix/DinkFlixIndexMiddleware.cs').read_text()
 assert 'using Microsoft.Extensions.Logging;' not in mw
 assert 'ILogger<DinkFlixIndexMiddleware>' not in mw
+assert 'https://cdn.jsdelivr.net/gh/Orvlyn/DinkFlix@main/dinkflix.css' in mw
 assert 'interpolated raw string' not in mw
 
 for p in (ROOT/'src/Jellyfin.Plugin.DinkFlix').rglob('*.cs'):
