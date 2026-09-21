@@ -1,9 +1,0 @@
-{
-  "name": "DINKFLIX Web",
-  "version": "2.1.0.0",
-  "target": "Jellyfin 12.1.x",
-  "targetAbi": "12.1.0.0",
-  "framework": "net10.0",
-  "scope": "desktop-web",
-  "frontend": "framework-free"
-}
