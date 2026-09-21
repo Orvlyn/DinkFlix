@@ -21,6 +21,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Configuration/configPage.html" LogicalName="Jellyfin.Plugin.DinkFlix.Configuration.configPage.html" />
     <EmbeddedResource Include="Web/dinkflix.js" LogicalName="Jellyfin.Plugin.DinkFlix.Web.dinkflix.js" />
-    <EmbeddedResource Include="../../../../dinkflix.css" LogicalName="Jellyfin.Plugin.DinkFlix.Web.dinkflix.css" />
+    <EmbeddedResource Include="../../dinkflix.css" LogicalName="Jellyfin.Plugin.DinkFlix.Web.dinkflix.css" />
   </ItemGroup>
 </Project>
