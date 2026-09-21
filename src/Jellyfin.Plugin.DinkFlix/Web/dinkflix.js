@@ -3,12 +3,12 @@
 (() => {
   'use strict';
 
-  if (window.__DINKFLIX_WEB_83__) {
+  if (window.__DINKFLIX_WEB_84__) {
     return;
   }
-  window.__DINKFLIX_WEB_83__ = true;
+  window.__DINKFLIX_WEB_84__ = true;
 
-  const VERSION = '8.3.0';
+  const VERSION = '8.4.0';
   const state = {
     user: null,
     userId: null,
@@ -241,20 +241,33 @@
 
   function getRoute() {
     const { path, params } = parseHash();
+    // Legacy DINKFLIX paths are migration-only.
     if (path === '/dinkflix/library') {
-      return { type: 'library', viewId: params.get('viewId') };
+      return { type: 'legacy-library', viewId: params.get('viewId') };
     }
     if (path === '/dinkflix/item') {
-      return { type: 'item', id: params.get('id') };
+      return { type: 'legacy-item', id: params.get('id') };
     }
     if (path === '/dinkflix/list') {
-      return { type: 'list' };
+      return { type: 'legacy-list' };
     }
     if (path === '/dinkflix/search') {
-      return { type: 'search', q: params.get('q') || '' };
+      return { type: 'legacy-search', q: params.get('q') || '' };
     }
     if (path === '/dinkflix/about') {
-      return { type: 'about' };
+      return { type: 'legacy-about' };
+    }
+    if (path === '/details' && params.get('df') === 'dinkflix') {
+      return { type: 'item', id: params.get('id') };
+    }
+    if ((path === '/movies' || path === '/tv' || path === '/tvshows') && params.get('df') === 'dinkflix') {
+      return { type: 'library', viewId: params.get('topParentId'), collectionType: params.get('collectionType') };
+    }
+    if (path === '/search' && params.get('df') === 'dinkflix') {
+      return { type: 'search', q: params.get('q') || '' };
+    }
+    if (path === '/home' && params.get('df') === 'dinkflix-list') {
+      return { type: 'list' };
     }
     if (path === '/home' && params.get('df') === 'library') {
       return { type: 'library', viewId: params.get('viewId') };
@@ -294,15 +307,17 @@
     if (path === '/home' && routeParams.df) {
       const df = routeParams.df;
       delete routeParams.df;
-      const routeMap = {
-        library: '/dinkflix/library',
-        item: '/dinkflix/item',
-        list: '/dinkflix/list',
-        search: '/dinkflix/search',
-        about: '/dinkflix/about'
-      };
-      if (routeMap[df]) {
-        path = routeMap[df];
+      if (df === 'item') {
+        path = '/details';
+        routeParams.df = 'dinkflix';
+      } else if (df === 'list') {
+        routeParams.tab = 1;
+        routeParams.df = 'dinkflix-list';
+      } else if (df === 'search') {
+        path = '/search';
+        routeParams.df = 'dinkflix';
+      } else if (df === 'about') {
+        routeParams.df = 'about';
       }
     }
     const query = new URLSearchParams();
@@ -344,7 +359,14 @@
   }
 
   function viewHref(view) {
-    return `#/dinkflix/library?viewId=${encodeURIComponent(view.Id)}`;
+    const type = String(view?.CollectionType || '').toLowerCase();
+    const path = type === 'tvshows' ? '/tv' : '/movies';
+    const params = new URLSearchParams({
+      topParentId: view.Id,
+      collectionType: view.CollectionType || '',
+      df: 'dinkflix'
+    });
+    return `#${path}?${params.toString()}`;
   }
 
   const icons = {
@@ -528,9 +550,16 @@
   }
 
   function navigateToView(view) {
-    if (view?.Id) {
-      setHash('/home', { df: 'library', viewId: view.Id });
+    if (!view?.Id) {
+      return;
     }
+    const type = String(view.CollectionType || '').toLowerCase();
+    const path = type === 'tvshows' ? '/tv' : '/movies';
+    setHash(path, {
+      topParentId: view.Id,
+      collectionType: view.CollectionType || '',
+      df: 'dinkflix'
+    });
   }
 
   function avatar() {
@@ -717,17 +746,59 @@
   function card(item) {
     const id = item.Id;
     const title = esc(item.Name || 'Untitled');
-    const playable = ['Movie', 'Episode', 'Video'].includes(item.Type);
+    const playId = item.__dfResumeEpisodeId || id;
+    const playable = ['Movie', 'Episode', 'Video'].includes(item.Type) || Boolean(item.__dfResumeEpisodeId);
     const meta = [fmtYear(item.ProductionYear || item.PremiereDate || item.DateCreated), humanMinutes(item.RunTimeTicks)].filter(Boolean);
     const progress = playbackPercent(item);
-    return `<article class="df-card" data-id="${esc(id)}"><div class="df-card-media"><a href="#/dinkflix/item?id=${encodeURIComponent(id)}" class="df-card-link" data-df-item="${esc(id)}" aria-label="Open ${title}"></a><img loading="lazy" src="${esc(imageUrl(item, 'Primary', 900))}" alt="${title}"><button class="df-card-menu-btn" data-df-menu="${esc(id)}" type="button" aria-label="More actions for ${title}" title="More actions">${svg('dots')}</button>${playable ? `<button class="df-card-play-btn" data-df-play="${esc(id)}" type="button" aria-label="Play ${title}" title="Play">${svg('play')}</button>` : ''}${progress > 0 ? `<div class="df-progress"><span style="width:${progress}%"></span></div>` : ''}</div><div class="df-card-content"><div class="df-card-title">${title}</div><div class="df-card-meta">${meta.map((value, index) => `${index ? '<span class="df-meta-dot">•</span>' : ''}<span>${esc(value)}</span>`).join('')}</div><div class="df-card-badges">${badgeHtml(item)}${tagHtml(item)}</div></div></article>`;
+    const continueLabel = item.__dfContinueLabel ? '<div class="df-card-continue">' + esc(item.__dfContinueLabel) + '</div>' : '';
+    const detailHref = '#/details?id=' + encodeURIComponent(id) + '&df=dinkflix&serverId=' + encodeURIComponent(state.serverId || '');
+    let html = '<article class="df-card" data-id="' + esc(id) + '">';
+    html += '<div class="df-card-media">';
+    html += '<a href="' + esc(detailHref) + '" class="df-card-link" data-df-item="' + esc(id) + '" aria-label="Open ' + title + '"></a>';
+    html += '<img loading="lazy" src="' + esc(imageUrl(item, 'Primary', 900)) + '" alt="' + title + '">';
+    html += '<button class="df-card-menu-btn" data-df-menu="' + esc(id) + '" type="button" aria-label="More actions for ' + title + '" title="More actions">' + svg('dots') + '</button>';
+    if (playable) {
+      html += '<button class="df-card-play-btn" data-df-play="' + esc(playId) + '" type="button" aria-label="Play ' + title + '" title="Play">' + svg('play') + '</button>';
+    }
+    if (progress > 0) {
+      html += '<div class="df-progress"><span style="width:' + progress + '%"></span></div>';
+    }
+    html += '</div><div class="df-card-content">';
+    html += '<div class="df-card-title">' + title + '</div>';
+    html += '<div class="df-card-meta">' + meta.map((value, index) => (index ? '<span class="df-meta-dot">•</span>' : '') + '<span>' + esc(value) + '</span>').join('') + '</div>';
+    html += '<div class="df-card-badges">' + badgeHtml(item) + tagHtml(item) + '</div>';
+    html += continueLabel;
+    html += '</div></article>';
+    return html;
   }
-
   function section(title, items, href = '') {
     if (!items?.length) {
       return '';
     }
-    return `<section class="df-section"><div class="df-section-head"><h2 class="df-section-title">${esc(title)}</h2>${href ? `<a class="df-section-link" href="${href}">View all →</a>` : ''}</div><div class="df-row">${items.map(card).join('')}</div></section>`;
+    return `<section class="df-section"><div class="df-section-head"><h2 class="df-section-title">${esc(title)}</h2>${href ? `<a class="df-section-link" href="${href}">View all →</a>` : ''}</div><div class="df-row-shell"><button class="df-row-arrow df-row-prev" type="button" data-df-row-prev aria-label="Previous ${esc(title)}">‹</button><div class="df-row">${items.map(card).join('')}</div><button class="df-row-arrow df-row-next" type="button" data-df-row-next aria-label="Next ${esc(title)}">›</button></div></section>`;
+  }
+
+  function bindSectionArrows(root) {
+    root.querySelectorAll('.df-row-shell').forEach((shell) => {
+      const row = shell.querySelector('.df-row');
+      const prev = shell.querySelector('[data-df-row-prev]');
+      const next = shell.querySelector('[data-df-row-next]');
+      if (!row || !prev || !next || shell.dataset.bound === '1') {
+        return;
+      }
+      shell.dataset.bound = '1';
+      const update = () => {
+        const max = Math.max(0, row.scrollWidth - row.clientWidth);
+        prev.disabled = row.scrollLeft <= 4;
+        next.disabled = row.scrollLeft >= max - 4;
+        shell.classList.toggle('df-has-overflow', max > 4);
+      };
+      prev.addEventListener('click', () => row.scrollBy({ left: -row.clientWidth, behavior: 'smooth' }));
+      next.addEventListener('click', () => row.scrollBy({ left: row.clientWidth, behavior: 'smooth' }));
+      row.addEventListener('scroll', update, { passive: true });
+      window.addEventListener('resize', update, { passive: true });
+      requestAnimationFrame(update);
+    });
   }
 
   function rememberItems(items) {
@@ -744,7 +815,7 @@
       anchor.addEventListener('click', (event) => {
         event.preventDefault();
         event.stopPropagation();
-        setHash('/home', { df: 'item', id: anchor.dataset.dfItem });
+        setHash('/details', { df: 'dinkflix', id: anchor.dataset.dfItem, serverId: state.serverId });
       });
     });
     root.querySelectorAll('[data-df-menu]').forEach((button) => {
@@ -779,7 +850,7 @@
       const items = await getItems({ IncludeItemTypes: 'Movie,Series', Limit: 100, SortBy: 'DateCreated', SortOrder: 'Descending' });
       if (items.length) {
         rememberItems(items);
-        setHash('/home', { df: 'item', id: items[Math.floor(Math.random() * items.length)].Id });
+        setHash('/details', { df: 'dinkflix', id: items[Math.floor(Math.random() * items.length)].Id, serverId: state.serverId });
       }
     } catch {
       toast('Could not choose a random title.');
@@ -1030,13 +1101,87 @@
     }
   }
 
+  async function getContinueWatching() {
+    const [episodes, movies] = await Promise.all([
+      getItems({
+        IncludeItemTypes: 'Episode',
+        IsResumable: true,
+        SortBy: 'DatePlayed',
+        SortOrder: 'Descending',
+        Limit: 60
+      }),
+      getItems({
+        IncludeItemTypes: 'Movie',
+        IsResumable: true,
+        SortBy: 'DatePlayed',
+        SortOrder: 'Descending',
+        Limit: 20
+      })
+    ]);
+
+    const bySeries = new Map();
+    episodes.forEach((episode) => {
+      if (episode?.SeriesId && !bySeries.has(episode.SeriesId)) {
+        bySeries.set(episode.SeriesId, episode);
+      }
+    });
+
+    const seriesIds = [...bySeries.keys()];
+    let series = [];
+    if (seriesIds.length) {
+      series = await getItems({
+        Ids: seriesIds.join(','),
+        IncludeItemTypes: 'Series',
+        Limit: seriesIds.length,
+        SortBy: 'SortName',
+        SortOrder: 'Ascending'
+      }).catch(() => []);
+    }
+
+    const result = [];
+    series.forEach((show) => {
+      const episode = bySeries.get(show.Id);
+      if (!episode) {
+        return;
+      }
+      const remainingTicks = Math.max(
+        0,
+        Number(episode.RunTimeTicks || 0) - Number(episode.UserData?.PlaybackPositionTicks || 0)
+      );
+      const display = {
+        ...show,
+        __dfResumeEpisodeId: episode.Id,
+        __dfContinueLabel: 'S' + String(episode.ParentIndexNumber || 0).padStart(2, '0')
+          + ' · E' + String(episode.IndexNumber || 0).padStart(2, '0')
+          + ' · ' + (humanMinutes(remainingTicks) || 'Resume') + ' left',
+        UserData: episode.UserData || show.UserData
+      };
+      state.cardData.set(show.Id, display);
+      state.cardData.set(episode.Id, episode);
+      result.push(display);
+    });
+
+    movies.forEach((movie) => {
+      const remainingTicks = Math.max(
+        0,
+        Number(movie.RunTimeTicks || 0) - Number(movie.UserData?.PlaybackPositionTicks || 0)
+      );
+      result.push({
+        ...movie,
+        __dfContinueLabel: (humanMinutes(remainingTicks) || 'Resume') + ' left'
+      });
+    });
+
+    return result.slice(0, 40);
+  }
+
   async function renderHome() {
     const shell = ensureShell();
     shell.innerHTML = '<div class="df-home-loading"><div class="df-loading-line"></div><div class="df-loading-line short"></div></div>';
     try {
       const results = await Promise.allSettled([
         getItems({ IncludeItemTypes: 'Movie,Series', SortBy: 'DateCreated', SortOrder: 'Descending', Limit: 24 }),
-        getItems({ IncludeItemTypes: 'Movie,Episode', IsResumable: true, SortBy: 'DatePlayed', SortOrder: 'Descending', Limit: 16 }),
+        getContinueWatching(),
         getItems({ IncludeItemTypes: 'Movie,Series', IsPlayed: true, SortBy: 'DatePlayed', SortOrder: 'Descending', Limit: 16 }),
         getItems({ IncludeItemTypes: 'Movie,Series', IsFavorite: true, SortBy: 'SortName', SortOrder: 'Ascending', Limit: 16 }),
         getItems({ IncludeItemTypes: 'Movie', SortBy: 'DateCreated', SortOrder: 'Descending', Limit: 16 }),
@@ -1058,6 +1203,7 @@
       const showView = visibleViews().find((view) => String(view.CollectionType || '').toLowerCase() === 'tvshows');
       shell.innerHTML = `<div class="df-hero" id="df-hero"><div class="df-hero-media" id="df-hero-media"></div><div class="df-hero-overlay"></div><div class="df-hero-content" id="df-hero-content"></div><div class="df-hero-dots" id="df-hero-dots"></div></div><div class="df-page">${section('Continue Watching', resume)}${section('Recently Played', played)}${section('Recently Added', recent)}${section('Movies', movies, movieView ? viewHref(movieView) : '')}${section('TV Shows', shows, showView ? viewHref(showView) : '')}${section('My List', favs, '#/dinkflix/list')}</div>`;
       bindCardActions(shell);
+      bindSectionArrows(shell);
       if (state.heroItems.length) {
         showHero(0);
       } else {
@@ -1194,6 +1340,7 @@
       return;
     }
     state.cardData.set(item.Id, item);
+    document.title = (item.Name || 'DINKFLIX') + ' — DINKFLIX';
     const kind = item.Type === 'Series' ? 'TV Series' : item.Type === 'Season' ? 'Season' : item.Type === 'Episode' ? 'Episode' : 'Movie';
     const cast = (item.People || []).filter((person) => person?.PersonId).slice(0, 10);
     const background = backdropUrl(item, 2400);
@@ -1206,7 +1353,11 @@
       childItems = await getItems({ ParentId: item.Id, IncludeItemTypes: 'Episode', Limit: 200, SortBy: 'IndexNumber', SortOrder: 'Ascending', Fields: 'PrimaryImageAspectRatio,Overview,UserData,ProductionYear,PremiereDate,IndexNumber,ParentIndexNumber,RunTimeTicks,ImageTags,BackdropImageTags,Width,Height,VideoRange,VideoRangeType,CommunityRating,OfficialRating,Tags,Genres' }).catch(() => []);
     }
     rememberItems(childItems);
-    const children = item.Type === 'Season' ? `<section class="df-detail-section"><div class="df-section-head"><h2 class="df-section-title">Episodes</h2></div><div class="df-detail-episodes">${childItems.map((episode) => `<button class="df-episode-row" type="button" data-df-episode="${esc(episode.Id)}"><span class="df-episode-number">${esc(String(episode.IndexNumber ?? '').padStart(2, '0'))}</span><span class="df-episode-copy"><strong>${esc(episode.Name || 'Episode')}</strong><small>${esc(episode.Overview || '')}</small></span><span class="df-episode-time">${esc(humanMinutes(episode.RunTimeTicks))}</span></button>`).join('')}</div></section>` : item.Type === 'Series' ? `<section class="df-detail-section"><div class="df-section-head"><h2 class="df-section-title">Seasons</h2></div><div class="df-row">${childItems.map(card).join('')}</div></section>` : '';
+    const children = item.Type === 'Season'
+      ? section('Episodes', childItems)
+      : item.Type === 'Series'
+        ? section('Seasons', childItems)
+        : '';
     shell.innerHTML = `<article class="df-detail"><div class="df-detail-bg" style="background-image:url('${esc(background)}')"></div><div class="df-detail-vignette"></div><div class="df-detail-content"><div class="df-detail-poster"><img loading="eager" src="${esc(poster)}" alt="${esc(item.Name)}"></div><div><div class="df-kicker">${esc(kind)}</div><h1 class="df-detail-title">${esc(item.Name)}</h1><div class="df-detail-meta"><span>${esc(fmtYear(item.ProductionYear || item.PremiereDate || item.DateCreated))}</span>${humanMinutes(item.RunTimeTicks) ? `<span>•</span><span>${humanMinutes(item.RunTimeTicks)}</span>` : ''}${badgeHtml(item)}</div><div class="df-detail-tags">${(item.Genres || []).slice(0, 5).map((genre) => `<span class="df-badge tag">${esc(genre)}</span>`).join('')}${tagHtml(item)}</div><p class="df-detail-overview">${esc(item.Overview || 'No overview available.')}</p><div class="df-actions"><button class="df-button df-button-primary" id="df-detail-play" type="button">${svg('play')} ${item.UserData?.PlaybackPositionTicks ? 'Resume' : 'Play'}</button><button class="df-button df-button-secondary" id="df-detail-list" type="button">${item.UserData?.IsFavorite ? '✓ In My List' : '＋ My List'}</button><button class="df-button df-button-secondary" id="df-detail-more" type="button">${svg('dots')} More</button></div>${children}${cast.length ? `<div class="df-detail-cast"><h3>Cast</h3><div class="df-cast-row">${cast.map((person) => `<div class="df-cast"><img loading="lazy" src="${esc(person.PrimaryImageTag ? `${baseUrl()}/Persons/${encodeURIComponent(person.PersonId)}/Images/Primary?tag=${encodeURIComponent(person.PrimaryImageTag)}&maxWidth=168` : '')}" alt="${esc(person.Name || '')}"><div class="df-cast-name">${esc(person.Name || '')}</div></div>`).join('')}</div></div>` : ''}</div></div></article>`;
     shell.querySelector('#df-detail-play').addEventListener('click', () => playItem(item));
     shell.querySelector('#df-detail-list').addEventListener('click', async () => {
@@ -1225,6 +1376,7 @@
       }
     }));
     bindCardActions(shell);
+    bindSectionArrows(shell);
     markReady();
   }
 
@@ -1386,6 +1538,11 @@
       renderAbout();
     } else if (route.type === 'playback') {
       autoPlayFallback();
+    } else {
+      // Let Jellyfin render every native/utility route it owns.
+      // This is essential for Requests, Bookmarks, Calendar, Profile,
+      // Preferences, Dashboard, native Search, and the native player.
+      fallbackToNative();
     }
   }
 
@@ -1408,6 +1565,7 @@
     document.body.dataset.dinkflixBooted = '1';
     await waitForJellyfin();
     if (!await loadUser()) {
+      document.documentElement.classList.add('df-dinkflix-boot-ready');
       document.body.dataset.dinkflixBooted = '0';
       setTimeout(boot, 700);
       return;
@@ -1417,7 +1575,11 @@
     normalizeLegacyHash();
     buildNav();
     bindGlobal();
-    await renderRoute();
+    try {
+      await renderRoute();
+    } finally {
+      document.documentElement.classList.add('df-dinkflix-boot-ready');
+    }
     setInterval(async () => {
       await loadViews();
       updateNav();
