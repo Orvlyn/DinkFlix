@@ -1,0 +1,87 @@
+name: Build and Release DINKFLIX Web
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore
+        run: dotnet restore src/Jellyfin.Plugin.DinkFlix/Jellyfin.Plugin.DinkFlix.csproj
+
+      - name: Publish
+        run: dotnet publish src/Jellyfin.Plugin.DinkFlix/Jellyfin.Plugin.DinkFlix.csproj -c Release -o artifacts/publish --no-restore
+
+      - name: Package plugin
+        id: package
+        shell: bash
+        run: |
+          zip_name="DinkFlix.Web_12.1.0.zip"
+          (cd artifacts/publish && zip -9 -j "../../${zip_name}" Jellyfin.Plugin.DinkFlix.dll)
+          checksum="$(md5sum "${zip_name}" | awk '{print toupper($1)}')"
+          echo "zip_name=${zip_name}" >> "$GITHUB_OUTPUT"
+          echo "checksum=${checksum}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" "${{ steps.package.outputs.zip_name }}" --title "DINKFLIX Web ${GITHUB_REF_NAME#v}" --generate-notes
+
+      - name: Update plugin manifest
+        env:
+          REPOSITORY: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+          CHECKSUM: ${{ steps.package.outputs.checksum }}
+        run: |
+          python3 - <<'PY'
+          import json, os, datetime
+          path = 'manifest.json'
+          data = json.load(open(path, encoding='utf-8'))
+          version = '2.0.0.0'
+          version_entry = {
+              'version': version,
+              'changelog': 'DINKFLIX Web v2 foundation release for Jellyfin 12.1.',
+              'targetAbi': '12.1.0.0',
+              'sourceUrl': f"https://github.com/{os.environ['REPOSITORY']}/releases/download/{os.environ['TAG']}/DinkFlix.Web_12.1.0.zip",
+              'checksum': os.environ['CHECKSUM'],
+              'timestamp': datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z')
+          }
+          for plugin in data:
+              if plugin.get('guid') == '9b8e4d39-6a4c-4b5d-b6aa-d2b1c4f3c9e8':
+                  plugin['versions'] = [version_entry]
+                  break
+          else:
+              raise SystemExit('DINKFLIX manifest entry not found')
+          json.dump(data, open(path, 'w', encoding='utf-8'), indent=2)
+          open(path, 'a', encoding='utf-8').write('\n')
+          PY
+
+      - name: Commit manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          branch="${{ github.event.repository.default_branch }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin "${branch}"
+          git checkout "${branch}"
+          git pull --ff-only origin "${branch}"
+          git add manifest.json
+          git commit -m "chore: publish DINKFLIX Web ${GITHUB_REF_NAME}" || echo "manifest already current"
+          git push origin "${branch}"
