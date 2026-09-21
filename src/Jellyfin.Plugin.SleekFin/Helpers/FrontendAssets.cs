@@ -36,6 +36,7 @@ public static class FrontendAssets
         new("sleekfin-hero-slide.css", "Hero", Feature.Hero),
         new("sleekfin-hero-carousel.css", "Hero", Feature.Hero),
         new("sleekfin-media.css", "Media"),
+        new("sleekfin-dinkflix-sizing.css", "Media"),
         new("sleekfin-media-metadata.css", "Media"),
         new("sleekfin-dinkflix-overrides.css", "Media"),
         new("sleekfin-details.css", "Details", Feature.Details),
