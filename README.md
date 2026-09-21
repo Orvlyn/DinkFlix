@@ -12,7 +12,7 @@ The plugin does not replace Jellyfin routing, playback, context menus, search, u
 Replace the entire Custom CSS field with:
 
 ```css
-@import url("https://cdn.jsdelivr.net/gh/Orvlyn/DinkFlix@main/dinkflix.css?v=7.0.0.2");
+@import url("https://cdn.jsdelivr.net/gh/Orvlyn/DinkFlix@main/dinkflix.css?v=7.0.0.3");
 ```
 
 The external stylesheet must be reachable by the browser/client. Jellyfin documents external CSS imports as supported, and community theme guidance commonly uses jsDelivr for GitHub-hosted themes.
