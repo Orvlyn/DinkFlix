@@ -1,0 +1,1 @@
+DINKFLIX visual foundation update: background, hero blending, card sizing, progress styling, navigation layering and responsive media grid.
