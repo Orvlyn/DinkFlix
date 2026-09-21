@@ -93,7 +93,7 @@ for token in [
     "#/dinkflix/library",
     "#/dinkflix/item",
     "#/dinkflix/list",
-    "#/dinkflix/search",
+    "path === '/dinkflix/search'",
     "#/dinkflix/about",
     "#/home?tab=2",
     "#/home?tab=3",
