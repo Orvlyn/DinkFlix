@@ -1,0 +1,12 @@
+{
+  "name": "DINKFLIX Web",
+  "version": "3.0.0.0",
+  "target": "Jellyfin Web 12.1.x",
+  "design": {
+    "accent": "#00FFC6",
+    "hero": "recently-added",
+    "heroRotationSeconds": 15,
+    "density": "balanced-spacious",
+    "motion": "light"
+  }
+}
