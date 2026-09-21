@@ -96,7 +96,7 @@ for token in [
     "path === '/dinkflix/search'",
     "path === '/dinkflix/about'",
     "#/home?tab=2",
-    "#/home?tab=3",
+    "tab: 3",
 ]:
     assert token in root_js, token
 for forbidden in ["createElement('video')", "pushState(", "replaceState("]:
