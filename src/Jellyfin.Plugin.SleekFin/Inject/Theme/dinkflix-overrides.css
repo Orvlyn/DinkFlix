@@ -1,6 +1,5 @@
 /* DINKFLIX visual layer
  * Based on SleekFin. Original project credit is retained in the repository README.
- * This file is intentionally additive so future redesign work can be made in small, reversible steps.
  */
 html.sleekfin-main-ui:root {
     --sleekfin-accent: #00ffc6;
@@ -21,7 +20,13 @@ html.sleekfin-main-ui:root {
     --jf-palette-starIcon-main: #00ffc6;
 }
 
-/* Keep the navigation present without covering content while scrolling. */
+html.sleekfin-main-ui,
+html.sleekfin-main-ui body,
+html.sleekfin-main-ui .skinBody,
+html.sleekfin-main-ui .mainAnimatedPage {
+    background: var(--sleekfin-background) !important;
+}
+
 html.sleekfin-main-ui .skinHeader {
     position: sticky;
     top: 0;
@@ -31,7 +36,6 @@ html.sleekfin-main-ui .skinHeader {
     backdrop-filter: blur(14px) saturate(125%);
 }
 
-/* Calm, spacious card presentation. */
 html.sleekfin-main-ui .cardBox,
 html.sleekfin-main-ui .cardScalable {
     border-radius: 10px;
@@ -43,7 +47,6 @@ html.sleekfin-main-ui .cardBox:focus-within {
     outline-offset: 2px;
 }
 
-/* Use Jellyfin's native horizontal scrollers; only tune the visual treatment. */
 html.sleekfin-main-ui .itemsContainer,
 html.sleekfin-main-ui .scrollSlider {
     scrollbar-width: thin;
@@ -62,20 +65,86 @@ html.sleekfin-main-ui [tabindex]:focus-visible {
     outline-offset: 3px;
 }
 
-/* Larger native poster cards without forcing a new grid or breaking Jellyfin sizing. */
+/* Larger native Jellyfin cards; no forced six-column grid. */
 html.sleekfin-main-ui :is(.overflowPortraitCard, .portraitCard) {
-    width: 230px;
+    width: clamp(190px, 14vw, 230px);
     max-width: 230px;
 }
 
 html.sleekfin-main-ui :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) {
+    width: clamp(280px, 28vw, 360px);
     max-width: 360px;
 }
 
-/* Keep the hero visually joined to the DINKFLIX page background. */
+html.sleekfin-main-ui .cardImageContainer,
+html.sleekfin-main-ui .cardScalable,
+html.sleekfin-main-ui .cardContent {
+    overflow: hidden;
+}
+
+html.sleekfin-main-ui .cardContent {
+    transition: transform 220ms ease, border-color 220ms ease;
+}
+
+html.sleekfin-main-ui .card:hover .cardContent {
+    transform: translateY(-3px);
+}
+
+html.sleekfin-main-ui .itemProgressBarForeground {
+    background: var(--sleekfin-accent) !important;
+}
+
+html.sleekfin-main-ui .itemProgressBar {
+    background: rgba(156, 170, 176, 0.28);
+    height: 4px;
+}
+
 html.sleekfin-main-ui .sleekfin-hero,
 html.sleekfin-main-ui .sleekfin-hero-slide {
     background: var(--sleekfin-background);
+}
+
+html.sleekfin-main-ui .sleekfin-hero-pager {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    position: absolute;
+    right: clamp(24px, 5vw, 72px);
+    bottom: 28px;
+    z-index: 12;
+}
+
+html.sleekfin-main-ui .sleekfin-hero-pager-button {
+    min-width: 34px;
+    height: 28px;
+    padding: 0 10px;
+    border: 1px solid rgba(241, 247, 246, 0.22);
+    border-radius: 999px;
+    background: rgba(5, 8, 16, 0.64);
+    color: var(--sleekfin-muted);
+    cursor: pointer;
+    transition: background 180ms ease, color 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+html.sleekfin-main-ui .sleekfin-hero-pager-button[data-active="true"],
+html.sleekfin-main-ui .sleekfin-hero-pager-button:hover,
+html.sleekfin-main-ui .sleekfin-hero-pager-button:focus-visible {
+    background: var(--sleekfin-accent);
+    border-color: var(--sleekfin-accent);
+    color: #04100d;
+    transform: translateY(-1px);
+}
+
+html.sleekfin-main-ui .sleekfin-hero-pager-button:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+}
+
+/* Keep the detail back control clickable without changing player layering. */
+html.sleekfin-main-ui .sleekfin-details-back {
+    position: relative;
+    z-index: 20;
+    pointer-events: auto;
 }
 
 @media (max-width: 650px) {
@@ -85,7 +154,13 @@ html.sleekfin-main-ui .sleekfin-hero-slide {
     }
 
     html.sleekfin-main-ui :is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) {
+        width: 280px;
         max-width: 280px;
+    }
+
+    html.sleekfin-main-ui .sleekfin-hero-pager {
+        right: 20px;
+        bottom: 18px;
     }
 }
 
