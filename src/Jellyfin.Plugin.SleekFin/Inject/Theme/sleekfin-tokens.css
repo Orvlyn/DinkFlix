@@ -1,6 +1,6 @@
 html.sleekfin-main-ui:root {
-    --sleekfin-accent: #dc2626;
-    --sleekfin-background: ##00ffc6;
+    --sleekfin-accent: #00ffc6;
+    --sleekfin-background: #050810;
     --sleekfin-border: #26292e;
     --sleekfin-border-hover: rgba(241, 242, 244, 0.22);
     --sleekfin-font-family: Inter, "Noto Sans", sans-serif;
