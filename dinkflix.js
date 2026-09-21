@@ -1376,6 +1376,7 @@
       }
     }));
     bindCardActions(shell);
+    bindSectionArrows(shell);
     markReady();
   }
 
