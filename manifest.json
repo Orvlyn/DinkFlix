@@ -6,7 +6,16 @@
     "description": "DINKFLIX Web replaces the desktop Jellyfin Web browsing experience with its own navigation, cinematic Recently Added hero, Continue Watching and discovery rows, separate Movies and TV Shows libraries, My List, search, rich title details and a human project page.",
     "owner": "Orvlyn",
     "category": "General",
-    "versions": [],
+    "versions": [
+      {
+        "version": "3.0.0.0",
+        "changelog": "DINKFLIX Web 3.0.0.0: custom desktop navigation, Recently Added hero, Continue Watching, Recently Played, Movies, TV Shows, My List, search, title details and lightweight premium styling.",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/Orvlyn/DinkFlix/releases/download/v3.0.0.0/DinkFlix.Web_3.0.0.0.zip",
+        "checksum": "AB24F3E191FEA9D1AA5E242C867B6699",
+        "timestamp": "2026-09-21T11:11:39Z"
+      }
+    ],
     "imageUrl": "https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix-icon.png",
     "repositoryUrl": "https://github.com/Orvlyn/DinkFlix"
   }
