@@ -1,0 +1,74 @@
+/* DINKFLIX visual layer
+ * Based on SleekFin. Original project credit is retained in the repository README.
+ * This file is intentionally additive so future redesign work can be made in small, reversible steps.
+ */
+html.sleekfin-main-ui:root {
+    --sleekfin-accent: #00ffc6;
+    --sleekfin-accent-soft: rgba(0, 255, 198, 0.14);
+    --sleekfin-background: #080a0b;
+    --sleekfin-surface: #101416;
+    --sleekfin-surface-raised: #171c1e;
+    --sleekfin-border: #283033;
+    --sleekfin-border-hover: rgba(0, 255, 198, 0.42);
+    --sleekfin-muted: #a1abad;
+    --sleekfin-text: #f2f7f6;
+    --jf-palette-primary-main: #00ffc6;
+    --jf-palette-primary-mainChannel: 0 255 198;
+    --jf-palette-primary-dark: #00b894;
+    --jf-palette-primary-light: #66ffe0;
+    --jf-palette-secondary-main: #00ffc6;
+    --jf-palette-secondary-mainChannel: 0 255 198;
+    --jf-palette-starIcon-main: #00ffc6;
+}
+
+/* Keep the navigation present without covering content while scrolling. */
+html.sleekfin-main-ui .skinHeader {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(8, 10, 11, 0.94);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(14px) saturate(125%);
+}
+
+/* Calm, spacious card presentation. */
+html.sleekfin-main-ui .cardBox,
+html.sleekfin-main-ui .cardScalable {
+    border-radius: 10px;
+}
+
+html.sleekfin-main-ui .cardBox:hover,
+html.sleekfin-main-ui .cardBox:focus-within {
+    outline: 1px solid rgba(0, 255, 198, 0.32);
+    outline-offset: 2px;
+}
+
+/* Prevent long rows from becoming an awkward clipped wall of posters. */
+html.sleekfin-main-ui .itemsContainer,
+html.sleekfin-main-ui .scrollSlider {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 255, 198, 0.45) transparent;
+}
+
+html.sleekfin-main-ui .sectionTitle {
+    letter-spacing: -0.015em;
+    font-weight: 500;
+}
+
+html.sleekfin-main-ui button:focus-visible,
+html.sleekfin-main-ui a:focus-visible,
+html.sleekfin-main-ui [tabindex]:focus-visible {
+    outline: 2px solid #00ffc6;
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.sleekfin-main-ui *,
+    html.sleekfin-main-ui *::before,
+    html.sleekfin-main-ui *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
