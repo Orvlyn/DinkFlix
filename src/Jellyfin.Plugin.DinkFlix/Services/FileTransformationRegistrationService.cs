@@ -7,18 +7,18 @@ using Microsoft.Extensions.Logging;
 namespace Jellyfin.Plugin.DinkFlix.Services;
 
 /// <summary>
-/// Registers the DINKFLIX index.html transformation with File Transformation.
+/// Registers the DINKFLIX Web transformation with the File Transformation plugin.
 /// </summary>
 public sealed class FileTransformationRegistrationService : IHostedService
 {
-    private static readonly Guid TransformationGuid = Guid.Parse("4aa2d9bf-d9d6-4f56-b3f8-7c0e8eecfb72");
+    private static readonly Guid TransformationId = Guid.Parse("4aa2d9bf-d9d6-4f56-b3f8-7c0e8eecfb72");
     private readonly ILogger<FileTransformationRegistrationService> _logger;
     private Task? _registrationTask;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileTransformationRegistrationService"/> class.
     /// </summary>
-    /// <param name="logger">Plugin logger.</param>
+    /// <param name="logger">The service logger.</param>
     public FileTransformationRegistrationService(ILogger<FileTransformationRegistrationService> logger)
     {
         _logger = logger;
@@ -43,7 +43,7 @@ public sealed class FileTransformationRegistrationService : IHostedService
         }
         catch (OperationCanceledException)
         {
-            // Server shutdown is already underway.
+            // Jellyfin is already shutting down.
         }
 
         TryUnregister();
@@ -83,25 +83,36 @@ public sealed class FileTransformationRegistrationService : IHostedService
             }
 
             var register = interfaceType.GetMethod("RegisterTransformation", BindingFlags.Public | BindingFlags.Static);
-            var payloadType = register?.GetParameters().FirstOrDefault()?.ParameterType;
-            var parse = payloadType?.GetMethod("Parse", BindingFlags.Public | BindingFlags.Static, null, [typeof(string)], null);
-            if (register is null || parse is null)
+            if (register is null)
             {
-                _logger.LogWarning("DINKFLIX Web found File Transformation, but its RegisterTransformation payload type could not be resolved.");
+                _logger.LogWarning("DINKFLIX Web found File Transformation, but RegisterTransformation was unavailable.");
+                return false;
+            }
+
+            var payloadType = register.GetParameters().FirstOrDefault()?.ParameterType;
+            var parse = payloadType?.GetMethod(
+                "Parse",
+                BindingFlags.Public | BindingFlags.Static,
+                binder: null,
+                types: new[] { typeof(string) },
+                modifiers: null);
+            if (parse is null)
+            {
+                _logger.LogWarning("DINKFLIX Web could not resolve the File Transformation JSON payload parser.");
                 return false;
             }
 
             var payloadJson = JsonSerializer.Serialize(new
             {
-                id = TransformationGuid,
+                id = TransformationId,
                 fileNamePattern = "index.html",
                 callbackAssembly = typeof(WebFileTransformation).Assembly.FullName,
                 callbackClass = typeof(WebFileTransformation).FullName,
                 callbackMethod = nameof(WebFileTransformation.TransformIndexHtml)
             });
 
-            var payload = parse.Invoke(null, [payloadJson]);
-            register.Invoke(null, [payload]);
+            var payload = parse.Invoke(null, new object?[] { payloadJson });
+            register.Invoke(null, new[] { payload });
             _logger.LogInformation("DINKFLIX Web File Transformation registered successfully.");
             return true;
         }
@@ -119,7 +130,7 @@ public sealed class FileTransformationRegistrationService : IHostedService
             var assembly = FindFileTransformationAssembly();
             var interfaceType = assembly?.GetType("Jellyfin.Plugin.FileTransformation.PluginInterface", throwOnError: false);
             var remove = interfaceType?.GetMethod("RemoveTransformation", BindingFlags.Public | BindingFlags.Static);
-            remove?.Invoke(null, [TransformationGuid]);
+            remove?.Invoke(null, new object?[] { TransformationId });
         }
         catch (Exception ex)
         {
@@ -131,6 +142,7 @@ public sealed class FileTransformationRegistrationService : IHostedService
     {
         return AssemblyLoadContext.All
             .SelectMany(static context => context.Assemblies)
-            .FirstOrDefault(static candidate => candidate.GetName().Name?.Contains("FileTransformation", StringComparison.OrdinalIgnoreCase) == true);
+            .FirstOrDefault(static candidate =>
+                candidate.GetName().Name?.Contains("FileTransformation", StringComparison.OrdinalIgnoreCase) == true);
     }
 }

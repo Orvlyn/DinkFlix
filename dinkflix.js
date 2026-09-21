@@ -156,6 +156,7 @@
       cache: 'no-store',
       headers: {
         Accept: 'application/json',
+        'X-Jellyfin-User-Id': state.userId || '',
         ...authHeaders(),
         ...(accessToken() ? { 'X-Emby-Token': accessToken() } : {})
       }
@@ -174,6 +175,7 @@
       cache: 'no-store',
       headers: {
         Accept: 'application/json',
+        'X-Jellyfin-User-Id': state.userId || '',
         ...authHeaders(),
         ...(accessToken() ? { 'X-Emby-Token': accessToken() } : {})
       }
@@ -290,6 +292,7 @@
   }
 
   function setHash(path, params = {}) {
+    closeMenus();
     const routeParams = { ...params };
     if (path === '/home' && routeParams.df) {
       const df = routeParams.df;
@@ -320,6 +323,7 @@
   }
 
   function nativeHash(path, params = {}) {
+    closeMenus();
     setHash(path, params);
   }
 
@@ -639,7 +643,7 @@
       return;
     }
     try {
-      const result = await apiGet(`/Users/${encodeURIComponent(state.userId)}/Views`);
+      const result = await apiGet(`/UserViews?UserId=${encodeURIComponent(state.userId)}`);
       state.views = Array.isArray(result) ? result : (Array.isArray(result?.Items) ? result.Items : []);
     } catch (error) {
       state.views = [];
@@ -667,7 +671,7 @@
       }
     });
     try {
-      const result = await apiGet(`/Users/${encodeURIComponent(state.userId)}/Items?${params.toString()}`);
+      const result = await apiGet(`/Items?${params.toString()}`);
       return Array.isArray(result?.Items) ? result.Items : [];
     } catch (firstError) {
       try {
@@ -685,7 +689,7 @@
 
   async function getItem(id) {
     const fields = 'PrimaryImageAspectRatio,Overview,Genres,Tags,People,MediaSources,ProviderIds,UserData,OfficialRating,CommunityRating,ProductionYear,RunTimeTicks,Width,Height,VideoRange,VideoRangeType,DateCreated,DatePlayed,ChildCount,SortName,BackdropImageTags,ImageTags';
-    return apiGet(`/Users/${encodeURIComponent(state.userId)}/Items/${encodeURIComponent(id)}?Fields=${encodeURIComponent(fields)}`);
+    return apiGet(`/Items/${encodeURIComponent(id)}?UserId=${encodeURIComponent(state.userId)}&Fields=${encodeURIComponent(fields)}`);
   }
 
   function badgeHtml(item) {
@@ -788,7 +792,7 @@
 
   async function toggleFavorite(item) {
     const favorite = !!item?.UserData?.IsFavorite;
-    await apiWrite(`/Users/${encodeURIComponent(state.userId)}/FavoriteItems/${encodeURIComponent(item.Id)}`, favorite ? 'DELETE' : 'POST');
+    await apiWrite(`/UserFavoriteItems/${encodeURIComponent(item.Id)}`, favorite ? 'DELETE' : 'POST');
     item.UserData = item.UserData || {};
     item.UserData.IsFavorite = !favorite;
     state.cardData.set(item.Id, item);
@@ -1336,6 +1340,11 @@
     if (!state.hashBound) {
       window.addEventListener('hashchange', () => setTimeout(renderRoute, 10));
       window.addEventListener('popstate', () => setTimeout(renderRoute, 10));
+      document.addEventListener('pointerdown', (event) => {
+        if (!event.target.closest('#dinkflix-menu-root, #dinkflix-nav')) {
+          closeMenus();
+        }
+      });
       document.addEventListener('click', (event) => {
         if (!event.target.closest('#dinkflix-menu-root, #dinkflix-nav')) {
           closeMenus();

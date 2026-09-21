@@ -1,30 +1,32 @@
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 namespace Jellyfin.Plugin.DinkFlix.Services;
 
 /// <summary>
-/// File Transformation callback that injects the DINKFLIX Web frontend into Jellyfin Web.
+/// File Transformation callback that embeds the DINKFLIX Web frontend into Jellyfin Web.
 /// </summary>
 public static class WebFileTransformation
 {
-    private const string StartMarker = "<!-- DINKFLIX-WEB-3:START -->";
-    private const string EndMarker = "<!-- DINKFLIX-WEB-3:END -->";
-    private const string FrontendVersion = "3.0.0";
+    private const string StartMarker = "<!-- DINKFLIX-WEB-52-START -->";
+    private const string EndMarker = "<!-- DINKFLIX-WEB-52-END -->";
+    private const string FrontendVersion = "5.2.0";
 
     /// <summary>
-    /// Transforms Jellyfin Web's index.html by embedding the DINKFLIX stylesheet and script.
+    /// Transforms Jellyfin Web index.html by embedding the DINKFLIX stylesheet and script.
     /// </summary>
-    /// <param name="input">File Transformation payload.</param>
-    /// <returns>The transformed HTML, or the original contents if injection is not possible.</returns>
-    public static string TransformIndexHtml(JObject input)
+    /// <param name="input">The payload supplied by File Transformation.</param>
+    /// <returns>The transformed HTML, or the original HTML when injection is not possible.</returns>
+    public static string TransformIndexHtml(object? input)
     {
-        var contents = input["contents"]?.Value<string>()
-            ?? input["Contents"]?.Value<string>()
-            ?? string.Empty;
+        var contents = ExtractContents(input);
+        if (string.IsNullOrEmpty(contents))
+        {
+            return contents;
+        }
 
         try
         {
-            var cleaned = RemoveExistingBlock(contents);
+            var cleaned = RemoveExistingBlocks(contents);
             var headIndex = cleaned.IndexOf("</head>", StringComparison.OrdinalIgnoreCase);
             if (headIndex < 0)
             {
@@ -39,16 +41,59 @@ public static class WebFileTransformation
         }
     }
 
+    private static string ExtractContents(object? input)
+    {
+        if (input is null)
+        {
+            return string.Empty;
+        }
+
+        if (input is string text)
+        {
+            return text;
+        }
+
+        var property = input.GetType().GetProperty("Contents")
+            ?? input.GetType().GetProperty("contents");
+        if (property?.GetValue(input) is string propertyValue)
+        {
+            return propertyValue;
+        }
+
+        try
+        {
+            using var document = JsonDocument.Parse(input.ToString() ?? string.Empty);
+            if (document.RootElement.ValueKind == JsonValueKind.Object)
+            {
+                if (document.RootElement.TryGetProperty("contents", out var lower))
+                {
+                    return lower.GetString() ?? string.Empty;
+                }
+
+                if (document.RootElement.TryGetProperty("Contents", out var upper))
+                {
+                    return upper.GetString() ?? string.Empty;
+                }
+            }
+        }
+        catch (JsonException)
+        {
+            // The callback payload was not JSON.
+        }
+
+        return string.Empty;
+    }
+
     private static string BuildInjection()
     {
         var css = ReadEmbeddedResource("dinkflix.css");
         var js = ReadEmbeddedResource("dinkflix.js")
-            .Replace("</script>", "<\\/script>", StringComparison.OrdinalIgnoreCase);
+            .Replace("</script>", "<\/script>", StringComparison.OrdinalIgnoreCase);
 
-        return $"\n        {StartMarker}\n" +
-               $"        <style id=\"dinkflix-v3-css\" data-dinkflix-version=\"{FrontendVersion}\">\n{css}\n        </style>\n" +
-               $"        <script id=\"dinkflix-v3-js\" data-dinkflix-version=\"{FrontendVersion}\">\n{js}\n        </script>\n" +
-               $"        {EndMarker}\n        ";
+        return $"\n{StartMarker}\n"
+            + $"<style id="dinkflix-css" data-dinkflix-version="{FrontendVersion}">{css}</style>\n"
+            + $"<script id="dinkflix-js" data-dinkflix-version="{FrontendVersion}">{js}</script>\n"
+            + $"{EndMarker}\n";
     }
 
     private static string ReadEmbeddedResource(string fileName)
@@ -68,16 +113,25 @@ public static class WebFileTransformation
         return reader.ReadToEnd();
     }
 
-    private static string RemoveExistingBlock(string input)
+    private static string RemoveExistingBlocks(string input)
     {
-        var start = input.IndexOf(StartMarker, StringComparison.Ordinal);
-        var end = input.IndexOf(EndMarker, StringComparison.Ordinal);
-        if (start < 0 || end < start)
+        foreach (var pair in new[]
         {
-            return input;
+            ("<!-- DINKFLIX-WEB-52-START -->", "<!-- DINKFLIX-WEB-52-END -->"),
+            ("<!-- DINKFLIX-WEB-51-START -->", "<!-- DINKFLIX-WEB-51-END -->"),
+            ("<!-- DINKFLIX-WEB-4:START -->", "<!-- DINKFLIX-WEB-4:END -->"),
+            ("<!-- DINKFLIX-WEB-3:START -->", "<!-- DINKFLIX-WEB-3:END -->")
+        })
+        {
+            var start = input.IndexOf(pair.Item1, StringComparison.Ordinal);
+            var end = input.IndexOf(pair.Item2, StringComparison.Ordinal);
+            if (start >= 0 && end > start)
+            {
+                end += pair.Item2.Length;
+                input = input.Remove(start, end - start);
+            }
         }
 
-        end += EndMarker.Length;
-        return input.Remove(start, end - start);
+        return input;
     }
 }
