@@ -2,8 +2,8 @@
   {
     "guid": "B4A9D4E6-4E4D-4F42-9E90-9C5B4D4B8D2B",
     "name": "DINKFLIX",
-    "overview": "Native Jellyfin 12 theme with lightweight DINKFLIX enhancements.",
-    "description": "A standalone DINKFLIX visual theme that styles Jellyfin's native UI. Optional plugin enhancements add only features CSS cannot provide.",
+    "overview": "Standalone DINKFLIX theme for the Jellyfin 12 Web UI with always-on frontend enhancements.",
+    "description": "DINKFLIX is a standalone Jellyfin theme. The visual theme and frontend enhancements are always enabled; there are no plugin feature toggles.",
     "owner": "Orvlyn",
     "category": "General",
     "versions": [
