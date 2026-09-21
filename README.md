@@ -3,7 +3,7 @@
 This repository contains two deliberately separate layers:
 
 - `dinkflix.css` — the DINKFLIX theme. It styles Jellyfin's existing Web UI.
-- `src/Jellyfin.Plugin.DinkFlix` — the optional enhancement plugin. It only adds features CSS cannot provide.
+- `src/Jellyfin.Plugin.DinkFlix` — the DINKFLIX plugin. It registers the frontend through File Transformation and keeps Jellyfin's native services underneath.
 
 The plugin does not replace Jellyfin routing, playback, context menus, search, user profile/preferences, Requests, or the dashboard.
 
@@ -16,7 +16,7 @@ DINKFLIX is distributed as a normal Jellyfin plugin repository.
    `https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/manifest.json`
 3. Open **Catalog**, find **DINKFLIX**, install it, and restart Jellyfin.
 
-Once the plugin is installed, **you do not need to paste an @import into Jellyfin Custom CSS**. The plugin loads the DINKFLIX stylesheet into Jellyfin Web itself.
+Once the plugin is installed, **you do not need to paste an @import into Jellyfin Custom CSS**. DINKFLIX uses the File Transformation plugin to inject its embedded stylesheet and frontend into Jellyfin Web.
 
 The stylesheet is the standalone DINKFLIX theme; it does not depend on ElegantFin or another theme.
 
@@ -24,13 +24,16 @@ The stylesheet is the standalone DINKFLIX theme; it does not depend on ElegantFi
 
 Target: Jellyfin 12.x / .NET 10 / ABI 12.0.0.0.
 
-The plugin adds:
+The plugin includes:
 
+- a cinematic DINKFLIX home page with hero, content rows, My List and six-card pagination
+- the DINKFLIX navigation and detail presentation
 - grouping of resumed TV episodes by series
 - local estimated end time on details pages
 - compact video/audio/subtitle information where Jellyfin already exposes it
+- coloured rating, quality, HDR, age and genre/tag badges
 
-All three enhancements are optional in the plugin settings.
+Everything is always enabled. There is no DINKFLIX feature toggle page.
 
 ## Build
 
