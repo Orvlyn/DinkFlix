@@ -31,8 +31,11 @@ def balanced(path: Path):
     if depth or quote or block: raise AssertionError(f'unbalanced source: {path}')
 
 manifest = json.loads((ROOT/'manifest.json').read_text())
-assert manifest['guid'] == 'B4A9D4E6-4E4D-4F42-9E90-9C5B4D4B8D2B'
-assert manifest['versions'] == []
+assert isinstance(manifest, list)
+plugin = next((p for p in manifest if p.get('guid') == 'B4A9D4E6-4E4D-4F42-9E90-9C5B4D4B8D2B'), None)
+assert plugin is not None
+assert plugin['name'] == 'DINKFLIX'
+assert plugin.get('versions') == []
 
 txt = (ROOT/'build.yaml').read_text()
 m = re.search(r'^version:\s*["\']?([^"\'\s]+)', txt, re.M)
