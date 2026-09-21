@@ -94,7 +94,7 @@ for token in [
     "#/dinkflix/item",
     "#/dinkflix/list",
     "path === '/dinkflix/search'",
-    "#/dinkflix/about",
+    "path === '/dinkflix/about'",
     "#/home?tab=2",
     "#/home?tab=3",
 ]:
