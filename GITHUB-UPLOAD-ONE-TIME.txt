@@ -1,9 +1,0 @@
-GITHUB WEB UPLOAD
-
-1. Extract this ZIP.
-2. GitHub repository → Add file → Upload files.
-3. Upload the contents to the repository root. Do not upload the ZIP.
-4. GitHub may skip the hidden .github folder. If it does, create `.github/workflows/dinkflix-release.yml` using Add file → Create new file, then paste the contents of `GITHUB-WORKFLOW.txt`.
-5. Commit the changes.
-6. Actions → DINKFLIX Build and Release → Run workflow.
-7. Wait for green.
