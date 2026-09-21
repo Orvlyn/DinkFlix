@@ -50,14 +50,12 @@ function findHost() {
 }
 
 function hideMyMedia() {
-  const roots = document.querySelectorAll('#indexPage .sections, #indexPage .section, #indexPage .verticalSection');
-  roots.forEach((section) => {
-    if (section.closest('.sleekfin-hero')) return;
-    const title = section.querySelector('.sectionTitle, h2, h3, .sectionTitleContainer');
-    const text = (title?.textContent || '').trim().replace(/\s+/g, ' ').toLowerCase();
-    if ((text === 'my media' || text.startsWith('my media ')) && !section.classList.contains('dinkflix-hidden-my-media')) {
-      section.classList.add('dinkflix-hidden-my-media');
-    }
+  const titles = document.querySelectorAll('#indexPage .sectionTitle, #indexPage h2, #indexPage h3');
+  titles.forEach((title) => {
+    const text = (title.textContent || '').trim().replace(/\s+/g, ' ').toLowerCase();
+    if (text !== 'my media' && !text.startsWith('my media ')) return;
+    const section = title.closest('.verticalSection, .section');
+    if (section && !section.closest('.sleekfin-hero')) section.classList.add('dinkflix-hidden-my-media');
   });
 }
 
@@ -81,9 +79,7 @@ function createRoot(host) {
   host.parentNode.insertBefore(root, host);
   state.mount = root;
   finishLoading();
-  if (window.CustomElements && typeof window.CustomElements.upgradeSubtree === 'function') {
-    window.CustomElements.upgradeSubtree(root);
-  }
+  if (window.CustomElements && typeof window.CustomElements.upgradeSubtree === 'function') window.CustomElements.upgradeSubtree(root);
   return root;
 }
 
