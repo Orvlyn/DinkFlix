@@ -1,4 +1,4 @@
-version: "7.0.0.0"
+version: "7.0.0.1"
 name: "DINKFLIX"
 description: "Native Jellyfin 12 theme with lightweight frontend enhancements"
 overview: "A custom DINKFLIX visual system built on Jellyfin's native Web UI."

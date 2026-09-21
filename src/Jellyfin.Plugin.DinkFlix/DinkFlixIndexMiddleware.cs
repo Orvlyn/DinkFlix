@@ -157,11 +157,12 @@ public sealed class DinkFlixIndexMiddleware
 
     private static string BuildBootstrap(string script, string configuration)
     {
-        return $"""
-<style id="dinkflix-boot">html.df-booting body{{visibility:hidden !important;}}html.df-ready body{{visibility:visible !important;}}</style>
-<script id="dinkflix-config">window.__DINKFLIX_CONFIG__={configuration};</script>
-<script id="dinkflix-boot-script">{script}</script>
-""";
+        // Do not use an interpolated raw string here. The embedded CSS contains
+        // literal braces, which can be parsed as interpolation markers by C#
+        // raw-string syntax and cause CS9006 at build time.
+        return "<style id=\"dinkflix-boot\">html.df-booting body{visibility:hidden !important;}html.df-ready body{visibility:visible !important;}</style>" +
+               "<script id=\"dinkflix-config\">window.__DINKFLIX_CONFIG__=" + configuration + ";</script>" +
+               "<script id=\"dinkflix-boot-script\">" + script + "</script>";
     }
 
     private static async Task FlushBufferedFeature(HttpContext context)

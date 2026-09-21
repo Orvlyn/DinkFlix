@@ -7,10 +7,10 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyName>Jellyfin.Plugin.DinkFlix</AssemblyName>
     <RootNamespace>Jellyfin.Plugin.DinkFlix</RootNamespace>
-    <Version>7.0.0.0</Version>
-    <AssemblyVersion>7.0.0.0</AssemblyVersion>
-    <FileVersion>7.0.0.0</FileVersion>
-    <PackageVersion>7.0.0.0</PackageVersion>
+    <Version>7.0.0.1</Version>
+    <AssemblyVersion>7.0.0.1</AssemblyVersion>
+    <FileVersion>7.0.0.1</FileVersion>
+    <PackageVersion>7.0.0.1</PackageVersion>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
   </PropertyGroup>
 

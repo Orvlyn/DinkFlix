@@ -69,7 +69,7 @@ The repository contains a GitHub Actions workflow at `.github/workflows/publish.
 
 1. Change `version` in `build.yaml`.
 2. Commit and push.
-3. Create a tag matching the version, for example `v7.0.0.0`.
+3. Create a tag matching the version, for example `v7.0.0.1`.
 4. The workflow restores against Jellyfin Controller/Model 12.0.0, builds for `net10.0`, packages the plugin, calculates its catalog checksum, creates the GitHub release, and publishes the generated manifest entry.
 
 ## Important migration note

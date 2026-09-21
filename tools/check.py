@@ -58,7 +58,7 @@ assert manifest["guid"] == "B4A9D4E6-4E4D-4F42-9E90-9C5B4D4B8D2B"
 assert manifest["versions"] == []
 
 build = (ROOT / "build.yaml").read_text(encoding="utf-8")
-assert 'version: "7.0.0.0"' in build
+assert 'version: "7.0.0.1"' in build
 assert 'targetAbi: "12.0.0.0"' in build
 assert 'framework: "net10.0"' in build
 
