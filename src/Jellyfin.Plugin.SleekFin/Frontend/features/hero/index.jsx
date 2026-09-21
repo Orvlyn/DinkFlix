@@ -39,14 +39,14 @@ function prepareLoading() {
 function isHomeRoute() {
   const match = window.location.hash.match(/^#\/(?:home)?(?:\?([^#]*))?$/);
   if (!match) return false;
-
   const tab = new URLSearchParams(match[1] || '').get('tab');
   return !tab || tab === '0';
 }
 
 function findHost() {
   if (!isHomeRoute()) return null;
-  return Array.from(document.querySelectorAll('#indexPage #homeTab.is-active .sections')).find(dom.isVisible) || null;
+  const candidates = document.querySelectorAll('#indexPage #homeTab .sections, #indexPage .homePage .sections');
+  return Array.from(candidates).find((element) => dom.isVisible(element)) || null;
 }
 
 function removeMount() {
@@ -65,7 +65,6 @@ function unmount() {
 }
 
 function createRoot(host) {
-  // Jellyfin's customized items container is upgraded only when its `is` attribute is parsed.
   const root = dom.element('<div is="emby-itemscontainer" class="sleekfin-hero itemsContainer" data-contextmenu="false" data-multiselect="false" data-state="loading"></div>');
   host.parentNode.insertBefore(root, host);
   state.mount = root;
@@ -78,7 +77,6 @@ function createRoot(host) {
 
 function renderHero(root, entries, settings) {
   if (state.mount !== root || !dom.isConnected(root) || !isHomeRoute()) return;
-
   render(h(Hero, { entries, root, settings }), root);
   state.readyFrame = window.requestAnimationFrame(() => {
     state.readyFrame = 0;
@@ -103,9 +101,8 @@ function mount(host) {
     })
     .then((result) => {
       if (!result || generation !== state.generation) return;
-      if (result.entries.length) {
-        renderHero(root, result.entries, result.settings);
-      } else {
+      if (result.entries.length) renderHero(root, result.entries, result.settings);
+      else {
         state.failedHost = host;
         removeMount();
       }
@@ -120,7 +117,6 @@ function mount(host) {
 
 function reconcile() {
   if (!state.started || !window.ApiClient) return;
-
   const host = findHost();
   if (!host) {
     unmount();
@@ -133,7 +129,6 @@ function reconcile() {
   }
   if (state.mount && dom.isConnected(state.mount) && state.mount.nextElementSibling === host) return;
   if (state.failedHost === host) return;
-
   unmount();
   mount(host);
 }
@@ -159,12 +154,8 @@ function reloadSettings() {
 
 function start() {
   if (state.started) return;
-
   state.started = true;
-  state.stopWatching = dom.watchSpa(scheduleReconcile, {
-    events: WINDOW_EVENTS,
-    viewshow: true,
-  });
+  state.stopWatching = dom.watchSpa(scheduleReconcile, { events: WINDOW_EVENTS, viewshow: true });
   window.addEventListener(SETTINGS_EVENT, reloadSettings);
   scheduleReconcile();
 }
@@ -181,5 +172,4 @@ function stop() {
 }
 
 features.hero = { start, stop };
-
 start();
