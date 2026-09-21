@@ -1,3 +1,0 @@
-No Custom CSS @import is required.
-Install DINKFLIX from the repository manifest instead:
-https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/manifest.json
