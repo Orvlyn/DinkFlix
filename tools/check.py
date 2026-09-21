@@ -61,12 +61,13 @@ assert 'BasePlugin<PluginConfiguration>' in pl
 assert 'IApplicationPaths' in pl and 'IXmlSerializer' in pl
 
 mw = (ROOT/'src/Jellyfin.Plugin.DinkFlix/DinkFlixIndexMiddleware.cs').read_text()
-assert 'using Microsoft.Extensions.Logging;' in mw
-assert 'ILogger<DinkFlixIndexMiddleware>' in mw
+assert 'using Microsoft.Extensions.Logging;' not in mw
+assert 'ILogger<DinkFlixIndexMiddleware>' not in mw
 assert 'interpolated raw string' not in mw
 
 for p in (ROOT/'src/Jellyfin.Plugin.DinkFlix').rglob('*.cs'):
     balanced(p)
+assert not (ROOT/'src/Jellyfin.Plugin.DinkFlix/PluginConfiguration.cs').exists()
 
 print('DINKFLIX static checks: PASS')
 print('version: 7.0.0.2')
