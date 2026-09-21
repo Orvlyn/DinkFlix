@@ -1,45 +1,62 @@
-# DINKFLIX — Jellyfin 12.0/12.1
+# DinkFlix
 
-This repository contains two deliberately separate layers:
+A premium, dark cyan-accented Jellyfin theme built on the [ElegantFin](https://github.com/lscambo13/ElegantFin) framework by lscambo13.
 
-- `dinkflix.css` — the DINKFLIX theme. It styles Jellyfin's existing Web UI.
-- `src/Jellyfin.Plugin.DinkFlix` — the DINKFLIX plugin. It registers the frontend through File Transformation and keeps Jellyfin's native services underneath.
+- **Background:** `#050810` (near-black obsidian)
+- **Accent:** `#00FFC6` (cyan)
+- Full desktop, mobile, and TV layout support (inherited from ElegantFin)
+- Custom forced header logo, cyan buttons/progress bars/focus rings/scrollbars
+- Single self-contained CSS file — no JavaScript required
 
-The plugin does not replace Jellyfin routing, playback, context menus, search, user profile/preferences, Requests, or the dashboard.
+## Files
+
+- [`dinkflix.css`](./dinkflix.css) — the complete theme. This is the only file you need.
 
 ## Installation
 
-DINKFLIX is distributed as a normal Jellyfin plugin repository.
+### Option A — Load from GitHub (recommended, auto-updates)
 
-1. Open **Dashboard → Plugins → Repositories**.
-2. Add this repository:
-   `https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/manifest.json`
-3. Open **Catalog**, find **DINKFLIX**, install it, and restart Jellyfin.
+1. Push this repo to `https://github.com/Orvlyn/DinkFlix`.
+2. In Jellyfin, go to **Dashboard → General → Branding**.
+3. Paste the following into the **Custom CSS** box:
 
-Once the plugin is installed, **you do not need to paste an @import into Jellyfin Custom CSS**. DINKFLIX uses the File Transformation plugin to inject its embedded stylesheet and frontend into Jellyfin Web.
+   ```css
+   @import url("https://cdn.jsdelivr.net/gh/Orvlyn/DinkFlix@main/dinkflix.css");
+   ```
 
-The stylesheet is the standalone DINKFLIX theme; it does not depend on ElegantFin or another theme.
+4. Click **Save**, then hard-refresh your browser (Ctrl+Shift+R).
 
-## Plugin
+> jsDelivr caches the file for a few hours. If you push an update and don't see it, append `@main/dinkflix.css?v=2` (bump the number) to bust the cache, or wait for the CDN to refresh.
 
-Target: Jellyfin 12.x / .NET 10 / ABI 12.0.0.0.
+### Option B — Self-hosted / offline
 
-The plugin includes:
+1. Copy `dinkflix.css` to your Jellyfin server (e.g. next to your other custom assets).
+2. Serve it via a static path reachable by your browser, or paste its full contents directly into **Dashboard → Branding → Custom CSS**.
 
-- a cinematic DINKFLIX home page with hero, content rows, My List and six-card pagination
-- the DINKFLIX navigation and detail presentation
-- grouping of resumed TV episodes by series
-- local estimated end time on details pages
-- compact video/audio/subtitle information where Jellyfin already exposes it
-- coloured rating, quality, HDR, age and genre/tag badges
+## Replacing the logo
 
-Everything is always enabled. There is no DINKFLIX feature toggle page.
+The header logo is forced via CSS to:
 
-## Build
-
-```bash
-dotnet restore src/Jellyfin.Plugin.DinkFlix/Jellyfin.Plugin.DinkFlix.csproj
-dotnet build src/Jellyfin.Plugin.DinkFlix/Jellyfin.Plugin.DinkFlix.csproj -c Release
+```
+https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dnk.png
 ```
 
-CI performs the same build after static checks.
+To use your own image, replace the `background-image` URL in the **"DinkFlix forced header logo"** section near the top of `dinkflix.css`, or upload your own `dnk.png` to the repo root.
+
+## Customization
+
+All colors are driven by CSS variables defined in `:root` at the top of `dinkflix.css`:
+
+| Variable | Purpose |
+|---|---|
+| `--accentColor` | Primary cyan accent (buttons, focus rings, progress bars, hover states) |
+| `--accentHoverColor` | Lighter cyan used on hover |
+| `--darkerGradientPoint` / `--lighterGradientPoint` | Background gradient stops |
+| `--osdSeekBarPlayedColor` / `--cardResumeProgressColor` | Progress bar fill colors |
+
+Change `--accentColor` and `--accentHoverColor` to retint the whole theme without touching anything else.
+
+## Credits
+
+- Built on [ElegantFin](https://github.com/lscambo13/ElegantFin) by lscambo13 (MIT-style license terms carried over).
+- DinkFlix modifications and branding by [Orvlyn](https://github.com/Orvlyn).
