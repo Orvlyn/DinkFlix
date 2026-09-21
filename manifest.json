@@ -8,6 +8,15 @@
     "category": "General",
     "versions": [
       {
+        "version": "7.0.0.4",
+        "changelog": "DINKFLIX 7.0.0.4: Jellyfin-native theme and lightweight enhancements.",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/Orvlyn/DinkFlix/releases/download/v7.0.0.4/DinkFlix_7.0.0.4.zip",
+        "checksum": "9fccc1e0d407eabf8e671b0a96190c4e",
+        "timestamp": "2026-09-21T16:04:05Z",
+        "framework": "net10.0"
+      },
+      {
         "version": "7.0.0.3",
         "changelog": "DINKFLIX 7.0.0.3: Jellyfin-native theme and lightweight enhancements.",
         "targetAbi": "12.0.0.0",
