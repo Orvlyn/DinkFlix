@@ -3,12 +3,12 @@
 (() => {
   'use strict';
 
-  if (window.__DINKFLIX_WEB_84__) {
+  if (window.__DINKFLIX_WEB_85__) {
     return;
   }
-  window.__DINKFLIX_WEB_84__ = true;
+  window.__DINKFLIX_WEB_85__ = true;
 
-  const VERSION = '8.4.0';
+  const VERSION = '8.5.0';
   const state = {
     user: null,
     userId: null,
@@ -491,7 +491,8 @@
     nav.id = 'dinkflix-nav';
     nav.setAttribute('aria-label', 'DINKFLIX navigation');
     nav.innerHTML = `<div class="df-nav-inner"><a href="#/home" class="df-brand" data-df-home aria-label="DINKFLIX home"><span>DINK</span><span>FLIX</span></a><div class="df-nav-links" id="df-nav-links"></div><div class="df-nav-spacer"></div><div class="df-nav-tools"><button class="df-icon-btn" id="df-random-btn" aria-label="Surprise me" title="Surprise me">${svg('dice')}</button><button class="df-icon-btn" id="df-search-btn" aria-label="Search" title="Search">${svg('search')}</button><button class="df-icon-btn" id="df-tools-btn" aria-label="Playback and tools" title="Playback and tools">${svg('tools')}</button><button class="df-icon-btn" id="df-user-btn" aria-label="User menu" title="User menu"><span class="df-avatar" id="df-avatar">?</span></button></div></div>`;
-    document.body.appendChild(nav);
+    const shell = ensureShell();
+    shell.appendChild(nav);
     state.nav = nav;
     nav.querySelector('[data-df-home]').addEventListener('click', (event) => {
       event.preventDefault();
@@ -867,40 +868,60 @@
   }
 
   async function playItem(item) {
-    try {
-      const manager = window.playbackManager;
-      if (manager?.play) {
-        await manager.play({ items: [item], fullscreen: true, enableRemotePlayers: true });
-        return;
-      }
-    } catch (error) {
-      console.warn('[DINKFLIX] playbackManager failed.', error);
-    }
-    sessionStorage.setItem('dinkflix-autoplay', item.Id);
-    nativeHash('/details', { id: item.Id, serverId: state.serverId, dfnative: 1 });
-  }
-
-  function autoPlayFallback() {
-    const id = sessionStorage.getItem('dinkflix-autoplay');
-    if (!id) {
+    if (!item?.Id) {
       return;
     }
+
+    // Jellyfin 12 keeps PlaybackManager inside its module graph instead of
+    // exposing it as window.playbackManager. Use Jellyfin's real details/play
+    // pipeline as a hidden bridge, then let the native player take over.
+    sessionStorage.setItem('dinkflix-play-bridge', JSON.stringify({
+      id: item.Id,
+      serverId: item.ServerId || state.serverId || ''
+    }));
+    document.documentElement.classList.add('df-dinkflix-launching');
+    nativeHash('/details', {
+      id: item.Id,
+      serverId: item.ServerId || state.serverId || ''
+    });
+  }
+  function autoPlayFallback() {
+    const raw = sessionStorage.getItem('dinkflix-play-bridge');
+    if (!raw) {
+      document.documentElement.classList.remove('df-dinkflix-launching');
+      return;
+    }
+
+    let bridge;
+    try {
+      bridge = JSON.parse(raw);
+    } catch {
+      sessionStorage.removeItem('dinkflix-play-bridge');
+      document.documentElement.classList.remove('df-dinkflix-launching');
+      return;
+    }
+
     let attempts = 0;
     const timer = setInterval(() => {
       attempts += 1;
-      const buttons = [...document.querySelectorAll('button, a, [role="button"]')];
-      const playButton = buttons.find((button) => /^(play|resume)$/i.test(String(button.textContent || '').trim()) || /\bplay\b/i.test(button.getAttribute('aria-label') || ''));
+      const playButton = document.querySelector(
+        '#itemDetailPage .btnPlay:not(.hide), #itemDetailPage .btnReplay:not(.hide)'
+      );
+
       if (playButton) {
-        sessionStorage.removeItem('dinkflix-autoplay');
+        sessionStorage.removeItem('dinkflix-play-bridge');
         clearInterval(timer);
         playButton.click();
+        return;
       }
-      if (attempts > 24) {
-        clearInterval(timer);
-      }
-    }, 400);
-  }
 
+      if (attempts > 40 || !bridge?.id) {
+        clearInterval(timer);
+        sessionStorage.removeItem('dinkflix-play-bridge');
+        document.documentElement.classList.remove('df-dinkflix-launching');
+      }
+    }, 250);
+  }
   async function openCardMenu(anchor, id) {
     closeMenus();
     const item = state.cardData.get(id) || await getItem(id).catch(() => null);
@@ -1093,14 +1114,18 @@
     document.body.classList.toggle('df-df-native-public', !custom && !admin && !playback);
     document.body.classList.toggle('df-df-native-playback', playback);
     document.body.classList.toggle('df-df-admin', admin);
+
     if (!custom) {
       state.shell?.replaceChildren();
+      state.nav = null;
     }
+
     if (!playback) {
       document.getElementById('dinkflix-playback-overlay')?.remove();
+    } else {
+      document.documentElement.classList.remove('df-dinkflix-launching');
     }
   }
-
   async function getContinueWatching() {
     const [episodes, movies] = await Promise.all([
       getItems({
@@ -1584,6 +1609,13 @@
       await loadViews();
       updateNav();
     }, 30000);
+
+    // Keep DINKFLIX responsive to Jellyfin 12's React route changes.
+    setInterval(() => {
+      if (state.renderKey !== location.hash) {
+        void renderRoute();
+      }
+    }, 350);
   }
 
   if (document.readyState === 'loading') {
