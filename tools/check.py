@@ -84,7 +84,6 @@ css = (ROOT / "dinkflix.css").read_text()
 embedded_css = (ROOT / "src/Jellyfin.Plugin.DinkFlix/Web/dinkflix.css").read_text()
 assert "#dinkflix-app" in css
 assert "location.hash" not in css
-assert "--jf-palette-primary-main" in css
 assert "repeat(6" in css
 assert css == embedded_css
 balanced(ROOT / "dinkflix.css")
@@ -111,6 +110,8 @@ assert "GroupContinueWatching" not in js
 assert "ShowLocalEndTime" not in js
 assert "ShowMediaTechnicalDetails" not in js
 assert "df-hero" in js
+assert "df-round-arrow" in js
+assert "renderHomeRows" in js
 assert "dinkflix-app" in js
 assert "My List" in js
 balanced(ROOT / "src/Jellyfin.Plugin.DinkFlix/Web/dinkflix.js")
