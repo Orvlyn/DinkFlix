@@ -1564,16 +1564,25 @@
     document.body.dataset.dinkflixBooted = '1';
     await waitForJellyfin();
     if (!await loadUser()) {
+      document.documentElement.classList.add('df-dinkflix-boot-ready');
       document.body.dataset.dinkflixBooted = '0';
       setTimeout(boot, 700);
       return;
     }
     await loadViews();
     migrateLegacyOuterQuery();
-    normalizeLegacyHash();
+    const migrated = normalizeLegacyHash();
+    if (migrated) {
+      document.documentElement.classList.add('df-dinkflix-boot-ready');
+      return;
+    }
     buildNav();
     bindGlobal();
-    await renderRoute();
+    try {
+      await renderRoute();
+    } finally {
+      document.documentElement.classList.add('df-dinkflix-boot-ready');
+    }
     setInterval(async () => {
       await loadViews();
       updateNav();
