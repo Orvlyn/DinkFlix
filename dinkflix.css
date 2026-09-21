@@ -50,3 +50,104 @@ body.df-df-native-public{background:#07090c!important}body.df-df-native-public .
 @media (max-width:1500px){:root{--df-card-w:224px}.df-nav-inner{width:calc(100% - 34px)}.df-nav-link{padding:0 10px}.df-nav-link.df-active:after{left:10px;right:10px}}
 @media (max-width:1180px){body{min-width:0}.df-nav-links{max-width:44vw}.df-nav-link{font-size:12px;padding:0 8px}.df-nav-link.df-active:after{left:8px;right:8px}:root{--df-card-w:214px}.df-detail-content{grid-template-columns:210px minmax(0,1fr);gap:26px}.df-about-grid{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* DINKFLIX 8.4: native-route integration, six-card rows, and first-load cover. */
+html:not(.df-dinkflix-boot-ready)::before{
+  content:"DINKFLIX";
+  position:fixed;
+  inset:0;
+  z-index:2147483647;
+  display:grid;
+  place-items:center;
+  background:#07090c;
+  color:#eef3f4;
+  font-size:18px;
+  font-weight:700;
+  letter-spacing:.24em;
+  pointer-events:all;
+}
+#dinkflix-nav{
+  position:fixed!important;
+  top:0!important;
+  left:0!important;
+  right:0!important;
+  bottom:auto!important;
+  width:100%!important;
+}
+.df-row-shell{
+  position:relative;
+  min-width:0;
+}
+.df-row{
+  overflow-x:hidden!important;
+  overflow-y:hidden!important;
+  display:grid!important;
+  grid-auto-flow:column!important;
+  grid-template-rows:1fr!important;
+  grid-auto-columns:calc((100% - (5 * var(--df-gap))) / 6)!important;
+  scroll-snap-type:none!important;
+  scroll-behavior:smooth;
+  margin:0!important;
+  padding-left:3px!important;
+  padding-right:3px!important;
+}
+.df-row-arrow{
+  position:absolute;
+  top:50%;
+  z-index:15;
+  transform:translateY(-50%);
+  width:40px;
+  height:40px;
+  padding:0;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:rgba(7,9,12,.88);
+  color:#f4f6f7;
+  box-shadow:0 12px 30px rgba(0,0,0,.28);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  cursor:pointer;
+  font:inherit;
+  font-size:28px;
+  line-height:1;
+  opacity:.9;
+  transition:opacity .16s ease,transform .16s ease,background .16s ease;
+}
+.df-row-arrow:hover:not(:disabled){
+  opacity:1;
+  background:#151b21;
+  transform:translateY(-50%) scale(1.04);
+}
+.df-row-arrow:disabled{
+  opacity:0;
+  pointer-events:none;
+}
+.df-row-prev{left:-7px}
+.df-row-next{right:-7px}
+.df-row-shell.df-has-overflow .df-row-prev:not(:disabled),
+.df-row-shell.df-has-overflow .df-row-next:not(:disabled){
+  opacity:.94;
+}
+.df-card-continue{
+  margin-top:6px;
+  color:#9fa8af;
+  font-size:10.5px;
+  line-height:1.25;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.df-detail-section .df-row{
+  margin-right:0;
+}
+@media (max-width:1500px){
+  .df-row{grid-auto-columns:calc((100% - (5 * var(--df-gap))) / 6)!important}
+  .df-row-arrow{width:38px;height:38px}
+}
+@media (max-width:1180px){
+  .df-row{grid-auto-columns:calc((100% - (5 * var(--df-gap))) / 6)!important}
+  .df-row-prev{left:-3px}
+  .df-row-next{right:-3px}
+}
