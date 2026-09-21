@@ -93,7 +93,7 @@ for token in [
     "path === '/details'",
     "path === '/movies' || path === '/tv' || path === '/tvshows'",
     "path === '/search'",
-    "df === 'dinkflix-list'",
+    "dinkflix-list",
     "df === 'about'",
     "tab: 2",
     "tab: 3",
