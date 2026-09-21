@@ -15,6 +15,7 @@ public sealed class DinkFlixIndexMiddleware
 {
     private const string ScriptResource = "Jellyfin.Plugin.DinkFlix.Web.dinkflix.js";
     private const string Marker = "dinkflix-boot";
+    private const string ThemeUrl = "https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/dinkflix.css?v=7.0.0.3";
 
     private readonly RequestDelegate _next;
     public DinkFlixIndexMiddleware(RequestDelegate next)
@@ -31,7 +32,7 @@ public sealed class DinkFlixIndexMiddleware
         }
 
         var plugin = Plugin.Instance;
-        if (plugin is null || !plugin.Configuration.EnableEnhancements)
+        if (plugin is null)
         {
             await _next(context);
             return;
@@ -75,7 +76,9 @@ public sealed class DinkFlixIndexMiddleware
                 if (!string.IsNullOrWhiteSpace(script))
                 {
                     var configJson = JsonSerializer.Serialize(plugin.Configuration);
-                    var bootstrap = BuildBootstrap(script, configJson);
+                    var bootstrap = BuildBootstrap(
+                        plugin.Configuration.EnableEnhancements ? script : string.Empty,
+                        configJson);
                     var headEnd = html.IndexOf("</head>", StringComparison.OrdinalIgnoreCase);
                     transformed = html.Insert(headEnd, bootstrap);
                 }
@@ -157,8 +160,15 @@ public sealed class DinkFlixIndexMiddleware
         var safeConfig = configuration.Replace("</script>", "<\\/script>", StringComparison.OrdinalIgnoreCase);
         var safeScript = script.Replace("</script>", "<\\/script>", StringComparison.OrdinalIgnoreCase);
 
+        var readinessScript =
+            "document.documentElement.classList.add('df-booting');"
+            + "document.addEventListener('DOMContentLoaded',function(){document.documentElement.classList.remove('df-booting');document.documentElement.classList.add('df-ready');},{once:true});"
+            + "window.setTimeout(function(){document.documentElement.classList.remove('df-booting');document.documentElement.classList.add('df-ready');},3000);";
+
         return "<style id=\"dinkflix-boot\">html.df-booting body{visibility:hidden !important;}html.df-ready body{visibility:visible !important;}</style>"
+            + "<link id=\"dinkflix-theme\" rel=\"stylesheet\" href=\"" + ThemeUrl + "\">"
             + "<script id=\"dinkflix-config\">window.__DINKFLIX_CONFIG__=" + safeConfig + ";</script>"
-            + "<script id=\"dinkflix-boot-script\">document.documentElement.classList.add('df-booting');" + safeScript + "</script>";
+            + "<script id=\"dinkflix-bootstrap\">" + readinessScript + "</script>"
+            + (string.IsNullOrWhiteSpace(safeScript) ? string.Empty : "<script id=\"dinkflix-enhancements\">" + safeScript + "</script>");
     }
 }
