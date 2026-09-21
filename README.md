@@ -1,145 +1,123 @@
-# DINKFLIX Web v2.0.0
+# DINKFLIX Web
 
-DINKFLIX Web is a desktop-first Jellyfin Web frontend layer. It is intentionally more than a CSS theme: CSS handles the visual system, while a small JavaScript frontend uses Jellyfin's existing APIs for the hero, discovery rows, metadata and My List.
+A desktop-first Jellyfin Web experience built to make a personal media server feel like a polished streaming service.
 
-## Important: this archive is repo-ready, not a precompiled plugin binary
+DINKFLIX is not just a colour skin. The Web plugin injects a lightweight frontend that owns the desktop browsing experience while leaving Jellyfin's server administration and native video player intact.
 
-The current working environment does not have the .NET 10 SDK, so this archive contains the complete source project and GitHub Actions build/release pipeline rather than pretending a DLL was compiled and tested here. Push it to your existing `Orvlyn/DinkFlix` repository, tag a release, and GitHub Actions builds the Jellyfin 12.1 plugin and updates `manifest.json`.
+## What is new in 2.1
 
-The package also contains the standalone `dinkflix.css` and `dinkflix.js` for an immediate JS Injector test before you install the actual plugin.
+- Custom DINKFLIX navigation instead of the stock desktop navigation
+- Cinematic Recently Added hero with automatic rotation and pause-on-hover
+- Continue Watching and Recently Played rows
+- Separate Movies and TV Shows discovery
+- Dedicated library grids with search, sorting and practical filters
+- Account-linked My List using Jellyfin favourites
+- Custom title/detail presentation with ratings, genres, tags and media badges
+- Lightweight motion with reduced-motion support
+- Custom DINKFLIX About page
+- No external fonts, libraries, CSS imports or frontend framework runtime
+- Desktop browser focus; mobile/TV clients are intentionally not the target
 
-## Compatibility baseline
+## Design goals
 
-- Jellyfin Web 12.1.x
-- .NET 10.0
-- File Transformation 3.0.1.x with its Jellyfin 12.1 build
-- Desktop web browsers
+DINKFLIX is designed for friends and family using a shared personal server. The interface should feel premium without becoming busy, and attractive without sacrificing speed.
 
-The DINKFLIX plugin does **not** require Home Screen Sections or JavaScript Injector.
+The visual system uses a dark obsidian base, DINKFLIX cyan as the primary identity colour, and restrained supporting colours for ratings, HDR, age ratings and other metadata.
 
-## What to keep on your server
+## Requirements
 
-Keep File Transformation. Keep Jellyfin Enhanced and Intro Skipper if you use them. Keep JavaScript Injector for unrelated scripts, but disable any old DINKFLIX script once the DINKFLIX Web plugin is installed. Kefin Tweaks can coexist, but if it modifies the same header/home DOM, test it separately to avoid double modifications.
+- Jellyfin Server 12.1.x
+- Jellyfin Web using the desktop/legacy web presentation that supports custom web transformations
+- File Transformation 3.x compatible with Jellyfin 12.1
 
-Do not install Home Screen Sections for the DINKFLIX rollout. DINKFLIX owns the desktop home layout and adding another section-replacement plugin creates an unnecessary second owner.
+JavaScript Injector can remain installed for other scripts, but DINKFLIX Web is designed to register itself through File Transformation so the DINKFLIX assets do not need to be pasted into Custom CSS or JS Injector after installation.
 
-## 1. Make sure File Transformation is on the Jellyfin 12.1 build
+## Installing DINKFLIX from the GitHub repository
 
-Jellyfin: **Dashboard -> Plugins -> Repositories -> +**
+This project is designed so a beginner can manage it from the GitHub website without using Git commands.
 
-Add:
+### 1. Upload the project to GitHub
 
-- Repository name: `File Transformation`
-- Repository URL: `https://www.iamparadox.dev/jellyfin/plugins/manifest.json`
+Download the latest DINKFLIX Web source ZIP from the repository release or from the project package supplied with this repository.
 
-Then open **Plugins -> Catalog**, find **File Transformation**, and install/update it. On Jellyfin 12.1, the repository currently publishes the 12.1-compatible build. Restart Jellyfin after installing/updating a plugin.
+Extract the ZIP on your computer. In the extracted folder you should see `.github`, `src`, `manifest.json`, `build.yaml`, `dinkflix.css` and `dinkflix.js`.
 
-## 2. Put this package into your existing DinkFlix GitHub repository
+In your GitHub repository, choose **Add file → Upload files** and drag the **contents of the extracted folder** into the upload area. Do not upload the ZIP itself.
 
-Your existing repository is:
+Commit the changes to `main`.
 
-`https://github.com/Orvlyn/DinkFlix`
+### 2. Wait for validation
 
-The cleanest approach is:
+Open the repository's **Actions** tab. The **Validate DINKFLIX Web** workflow should finish with a green check.
 
-1. Make a backup of your current repo and your current Custom CSS/JS Injector DINKFLIX setup.
-2. Unzip this archive.
-3. Copy the contents of the **`plugin/`** folder into the root of your `Orvlyn/DinkFlix` repository, replacing conflicting files if you are ready to make v2 the new branch.
-4. Keep the root `dinkflix.css` and `dinkflix.js` from this archive as the new frontend source.
-5. Commit and push.
+Do not create a release if validation is red.
 
-Example Git commands:
+### 3. Create a release
 
-```bash
-git clone https://github.com/Orvlyn/DinkFlix.git
-cd DinkFlix
-# copy the contents of the plugin/ folder from this archive into this folder
-git add .
-git commit -m "feat: DINKFLIX Web v2"
-git push origin main
-git tag v2.0.0
-git push origin v2.0.0
-```
+Open **Releases → Draft a new release**.
 
-GitHub Actions will then:
+Create a new tag such as:
 
-- build against Jellyfin 12.1 / .NET 10
-- create `DinkFlix.Web_12.1.0.zip`
-- publish the GitHub Release
-- calculate the MD5 checksum
-- update the root `manifest.json` with the release URL/checksum
+`v2.1.0.0`
 
-Check the **Actions** tab in GitHub. Do not add the DINKFLIX repository to Jellyfin until that workflow has completed successfully.
+Use the same tag as the release title version, then publish the release.
 
-## 3. Add the DINKFLIX plugin repository to Jellyfin
+The release workflow builds the Jellyfin plugin ZIP, uploads it to the release and updates `manifest.json` with the release URL and checksum. Re-running the same tag is safe because the workflow updates an existing release asset rather than trying to create the release again.
 
-After the GitHub Action succeeds:
+### 4. Add the DINKFLIX repository to Jellyfin
 
-**Dashboard -> Plugins -> Repositories -> +**
+In Jellyfin go to:
 
-Add:
+**Dashboard → Plugins → Repositories → +**
 
-- Repository name: `DINKFLIX`
-- Repository URL: `https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/manifest.json`
+Repository name:
 
-Save it. Then go to:
+`DINKFLIX`
 
-**Plugins -> Catalog**
+Repository URL:
 
-Search for **DINKFLIX Web**, select it, and install it. Restart Jellyfin.
+`https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/manifest.json`
 
-## 4. Turn off the old DINKFLIX injector/theme
+Save it, then open the **Catalog** and install **DINKFLIX Web**.
 
-Once the plugin is installed, do not run the same frontend twice.
+Restart Jellyfin after installation.
 
-In **Dashboard -> General -> Branding -> Custom CSS**, remove the old ElegantFin/DinkFlix stylesheet.
+## Existing Jellyfin plugins
 
-In **Dashboard -> Plugins -> JavaScript Injector**, disable the old DINKFLIX script. Keep JavaScript Injector itself if you use other scripts.
+DINKFLIX is designed to coexist with:
 
-Hard refresh the browser with `Ctrl + Shift + R`.
+- File Transformation — required for the normal plugin frontend path
+- Jellyfin Enhanced — recommended and independently useful
+- Intro Skipper — independent
+- JavaScript Injector — optional for other scripts; do not duplicate the DINKFLIX frontend there once the plugin is installed
+- Kefin Tweaks — optional; disable conflicting header/home modifications if you see duplicated navigation
 
-## 5. Emergency rollback
+Home Screen Sections is not required for DINKFLIX Web 2.1 because DINKFLIX owns its own desktop home experience.
 
-If something looks wrong, disable/uninstall **DINKFLIX Web**, remove the DINKFLIX custom CSS, re-enable your old JS Injector script if you still have it saved, and hard refresh. Jellyfin's original Web UI remains underneath the transformation.
+## Custom CSS / JavaScript after installation
 
-## 6. Immediate test mode (before installing the compiled plugin)
+Remove the old ElegantFin/DINKFLIX stylesheet from **Dashboard → General → Branding → Custom CSS** after the plugin has been confirmed working.
 
-The root `dinkflix.css` and `dinkflix.js` can be tested with your existing JavaScript Injector. This is optional and is useful for checking the visual layer before doing the GitHub release step.
+Do not paste the DINKFLIX frontend into JavaScript Injector after the plugin is installed. Keeping both versions active can result in duplicate navigation or duplicate home content.
 
-Use:
+## Performance
 
-- Custom CSS: contents of `dinkflix.css`
-- JavaScript Injector: contents of `dinkflix.js`
+DINKFLIX avoids an application framework at runtime. It uses Jellyfin's existing browser API client, lazy-loaded images, compact DOM reconciliation, CSS `transform`/`opacity` transitions, limited blur and reduced-motion support.
 
-Do **not** use test mode and the actual DINKFLIX Web plugin at the same time.
+The theme deliberately avoids animated full-page gradients, constant JavaScript animation loops, external font loading and heavy per-card filters.
 
-## Current DINKFLIX v2 feature set
+## Project identity
 
-- minimal floating navigation
-- recently-added cinematic hero
-- automatic hero rotation with hover/focus/page-visibility pause
-- Continue Watching
-- Recently Played
-- Recently Added
-- Movies and TV Shows split into their own rows
-- My List based on Jellyfin favourites
-- rating / quality / HDR / age-rating / year badges
-- progress bars on resumable items
-- hover metadata and actions
-- detail-page My List action
-- DINKFLIX About page
-- desktop-first responsive fallback
-- reduced-motion support
-- framework-free frontend runtime
+DINKFLIX started as a way to make a personal Jellyfin server feel less like server software and more like a streaming service.
 
-## Design intent
+The point is simple: make it easier for friends and family to open the server, understand what they are looking at, find something they want to watch and press play.
 
-DINKFLIX is built for the people who actually use the server: friends and family should be able to sit down, find something good and press play without needing to understand Jellyfin's internals. The visual system uses DINKFLIX cyan as an identity accent while keeping the rest of the palette restrained. Animation is used for feedback and polish rather than constant motion.
+DINKFLIX is an independent project by **Orvlyn** and is built around Jellyfin.
 
-## Credits
+## Credits and inspiration
 
-DINKFLIX began as a customization of ElegantFin by lscambo13. This v2 frontend is an original DINKFLIX implementation; SleekFin by varunaditya-plus was used as a design/architecture reference for research, not as the source of the DINKFLIX implementation. DINKFLIX uses File Transformation by IAmParadox27.
+DINKFLIX began from an ElegantFin-based theme and takes visual inspiration from modern streaming interfaces, including the clarity and cinematic presentation found in projects such as SleekFin. The DINKFLIX frontend is now maintained as its own implementation rather than as a thin colour override.
 
 ## License
 
-DINKFLIX retains the GPLv2 license posture of the existing project. See `LICENSE`.
+See [LICENSE](LICENSE).

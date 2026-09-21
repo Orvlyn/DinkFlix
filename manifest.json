@@ -2,8 +2,8 @@
   {
     "guid": "9b8e4d39-6a4c-4b5d-b6aa-d2b1c4f3c9e8",
     "name": "DINKFLIX Web",
-    "overview": "A lightweight, cinematic redesign for Jellyfin Web, built for desktop browsers.",
-    "description": "DINKFLIX Web replaces the desktop Jellyfin Web presentation with a custom navigation, recently-added hero, functional discovery rows, My List, metadata badges, and polished detail-page actions.",
+    "overview": "A premium, lightweight desktop redesign for Jellyfin Web.",
+    "description": "DINKFLIX Web replaces the desktop Jellyfin Web browsing experience with custom navigation, a recently-added cinematic hero, discovery rows, dedicated Movies and TV Shows grids, My List, search, rich title details and a human project page.",
     "owner": "Orvlyn",
     "category": "General",
     "versions": [],

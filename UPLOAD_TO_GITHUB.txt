@@ -1,0 +1,23 @@
+DINKFLIX Web 2.1 — GitHub website upload
+
+YOU DO NOT NEED TO USE COMMAND PROMPT, POWERSHELL OR GIT COMMANDS.
+
+1. Download the DINKFLIX Web 2.1 ZIP.
+2. Right-click the ZIP and choose Extract All.
+3. Open the extracted folder.
+4. Open https://github.com/Orvlyn/DinkFlix
+5. Click Add file → Upload files.
+6. Drag the CONTENTS of the extracted DINKFLIX folder into the upload area.
+   Important: include the .github folder and the src folder. Do not drag the ZIP itself.
+7. Click Commit changes.
+8. Open the Actions tab.
+9. Wait for Validate DINKFLIX Web to show a green check.
+10. Only after validation is green, open Releases → Draft a new release.
+11. Create the new tag: v2.1.0.0
+12. Publish the release.
+13. Wait for Build and Release DINKFLIX Web to finish.
+14. In Jellyfin add this repository:
+    https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/manifest.json
+15. Install DINKFLIX Web from the Jellyfin Catalog and restart Jellyfin.
+
+Do not delete v2.0.1.0. The release workflow can safely update an existing release if a tag needs to be rebuilt.
