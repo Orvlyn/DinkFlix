@@ -142,6 +142,7 @@ for p in (ROOT / "src/Jellyfin.Plugin.DinkFlix").rglob("*.cs"):
     balanced(p)
 
 assert not (ROOT / "src/Jellyfin.Plugin.DinkFlix/PluginConfiguration.cs").exists()
+assert not (ROOT / "src/Jellyfin.Plugin.DinkFlix/Configuration/configPage.html").exists()
 
 print("DINKFLIX static checks: PASS")
 print(f"version: {version}")
