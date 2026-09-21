@@ -9,12 +9,12 @@ using Jellyfin.Plugin.DinkFlix.Configuration;
 namespace Jellyfin.Plugin.DinkFlix;
 
 /// <summary>
-/// Provides the DINKFLIX Web Jellyfin plugin.
+/// DINKFLIX Web plugin entry point.
 /// </summary>
 public sealed class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 {
     /// <summary>
-    /// Gets the stable DINKFLIX Web plugin identifier.
+    /// Stable DINKFLIX Web plugin identifier.
     /// </summary>
     public static readonly Guid PluginGuid = Guid.Parse("9b8e4d39-6a4c-4b5d-b6aa-d2b1c4f3c9e8");
 

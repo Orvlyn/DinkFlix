@@ -1,0 +1,151 @@
+name: DINKFLIX Build and Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "DINKFLIX version"
+        required: true
+        default: "5.1.0.0"
+      publish_release:
+        description: "Create or update the GitHub release and plugin manifest"
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dinkflix-build
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Verify repository structure
+        shell: bash
+        run: |
+          set -euo pipefail
+          required=(
+            "src/Jellyfin.Plugin.DinkFlix/Jellyfin.Plugin.DinkFlix.csproj"
+            "src/Jellyfin.Plugin.DinkFlix/Plugin.cs"
+            "src/Jellyfin.Plugin.DinkFlix/Configuration/PluginConfiguration.cs"
+            "src/Jellyfin.Plugin.DinkFlix/Configuration/configPage.html"
+            "src/Jellyfin.Plugin.DinkFlix/Services/PluginServiceRegistrator.cs"
+            "src/Jellyfin.Plugin.DinkFlix/Services/DinkFlixStartupFilter.cs"
+            "src/Jellyfin.Plugin.DinkFlix/Web/dinkflix.js"
+            "src/Jellyfin.Plugin.DinkFlix/Web/dinkflix.css"
+            "manifest.json"
+          )
+          for file in "${required[@]}"; do
+            test -f "$file" || { echo "Missing required file: $file"; exit 1; }
+          done
+
+      - name: Validate JavaScript
+        shell: bash
+        run: node --check src/Jellyfin.Plugin.DinkFlix/Web/dinkflix.js
+
+      - name: Validate frontend copies
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmp -s dinkflix.js src/Jellyfin.Plugin.DinkFlix/Web/dinkflix.js
+          cmp -s dinkflix.css src/Jellyfin.Plugin.DinkFlix/Web/dinkflix.css
+
+      - name: Validate JSON
+        shell: bash
+        run: jq empty manifest.json
+
+      - name: Restore
+        run: dotnet restore src/Jellyfin.Plugin.DinkFlix/Jellyfin.Plugin.DinkFlix.csproj
+
+      - name: Publish plugin
+        env:
+          VERSION: ${{ inputs.version || '5.1.0.0' }}
+        run: >-
+          dotnet publish src/Jellyfin.Plugin.DinkFlix/Jellyfin.Plugin.DinkFlix.csproj
+          -c Release
+          -o artifacts/publish
+          /p:Version=${VERSION}
+          /p:DebugType=None
+          /p:DebugSymbols=false
+          /p:ContinuousIntegrationBuild=true
+          --no-restore
+
+      - name: Verify plugin output
+        shell: bash
+        run: test -s artifacts/publish/Jellyfin.Plugin.DinkFlix.dll
+
+      - name: Package plugin
+        env:
+          VERSION: ${{ inputs.version || '5.1.0.0' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/package
+          cd artifacts/publish
+          zip -q -r "../package/DinkFlix.Web_${VERSION}.zip" . -x "*.pdb"
+          test -s "../package/DinkFlix.Web_${VERSION}.zip"
+
+      - name: Create or update release and manifest
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_release }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="v${VERSION}"
+          asset="artifacts/package/DinkFlix.Web_${VERSION}.zip"
+          source_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${tag}/DinkFlix.Web_${VERSION}.zip"
+          checksum="$(md5sum "$asset" | awk '{print toupper($1)}')"
+          timestamp="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" "$asset" --clobber
+          else
+            gh release create "$tag" "$asset" --title "DINKFLIX Web ${VERSION}" --generate-notes
+          fi
+
+          tmp="$(mktemp)"
+          jq --arg guid "9b8e4d39-6a4c-4b5d-b6aa-d2b1c4f3c9e8" \
+             --arg version "$VERSION" \
+             --arg targetAbi "12.0.0.0" \
+             --arg sourceUrl "$source_url" \
+             --arg checksum "$checksum" \
+             --arg timestamp "$timestamp" \
+             --arg changelog "DINKFLIX Web ${VERSION}: premium desktop navigation, full-width hero, wider discovery cards, My List, search, richer title pages and native Jellyfin fallbacks." \
+             'map(if .guid == $guid then .versions = ([{"version":$version,"changelog":$changelog,"targetAbi":$targetAbi,"sourceUrl":$sourceUrl,"checksum":$checksum,"timestamp":$timestamp}] + [.versions[] | select(.version != $version)]) else . end)' \
+             manifest.json > "$tmp"
+          mv "$tmp" manifest.json
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add manifest.json
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: publish DINKFLIX ${VERSION} manifest"
+            git push
+          fi
+
+      - name: Build summary
+        shell: bash
+        run: |
+          echo "DINKFLIX build completed successfully."
+          find artifacts/package -maxdepth 1 -type f -print

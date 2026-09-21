@@ -1,12 +1,19 @@
-<div data-role="page" class="page type-interior pluginConfigurationPage">
-  <div data-role="content"><div class="content-primary">
-    <h2>DINKFLIX Web</h2>
-    <p class="secondary">Version 4.2.0 · a desktop-first Jellyfin Web experience.</p>
-    <div class="paperList">
-      <div class="listItem listItem-border"><div class="listItemBody"><div class="listItemBodyText">Frontend</div><div class="secondary">DINKFLIX injects its CSS and JavaScript directly into Jellyfin Web through File Transformation. No Custom CSS import is required.</div></div></div>
-      <div class="listItem listItem-border"><div class="listItemBody"><div class="listItemBodyText">Navigation</div><div class="secondary">DINKFLIX discovers your Jellyfin libraries and creates navigation entries automatically. Movies and TV use Jellyfin's normal hash routes; extra libraries use a DINKFLIX view route.</div></div></div>
-      <div class="listItem listItem-border"><div class="listItemBody"><div class="listItemBodyText">Plugins</div><div class="secondary">Keep File Transformation, Jellyfin Enhanced and Intro Skipper. JavaScript Injector can remain installed for unrelated scripts. Avoid a second home-screen replacement plugin while DINKFLIX is active.</div></div></div>
+<div data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button" data-controller="">
+  <div class="content-primary">
+    <div class="verticalSection verticalSection-extrabottompadding">
+      <div class="sectionTitleContainer flex align-items-center">
+        <h2 class="sectionTitle sectionTitle-cards">DINKFLIX Web</h2>
+      </div>
+      <p class="fieldDescription">DINKFLIX is a desktop-first Jellyfin Web experience designed to make your server feel like a polished streaming service without replacing Jellyfin's playback engine.</p>
+      <div class="paperList">
+        <div class="listItem listItem-border">
+          <div class="listItemBody"><div class="listItemBodyText">Frontend</div><div class="secondary listItemBodyText">Injected directly by the DINKFLIX plugin. JavaScript Injector is not required for DINKFLIX.</div></div>
+        </div>
+        <div class="listItem listItem-border">
+          <div class="listItemBody"><div class="listItemBodyText">Jellyfin compatibility</div><div class="secondary listItemBodyText">Built for Jellyfin 12.1 Web and uses the current web client session for API access.</div></div>
+        </div>
+      </div>
+      <p class="fieldDescription">Your existing File Transformation, Jellyfin Enhanced, Intro Skipper and other plugins can remain installed. DINKFLIX does not require Home Screen Sections.</p>
     </div>
-    <p style="margin-top:1rem"><a class="raised button-submit" href="https://github.com/Orvlyn/DinkFlix" target="_blank" rel="noopener noreferrer">Open DINKFLIX on GitHub</a></p>
-  </div></div>
+  </div>
 </div>

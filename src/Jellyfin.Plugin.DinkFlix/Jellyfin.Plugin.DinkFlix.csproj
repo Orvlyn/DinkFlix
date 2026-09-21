@@ -3,22 +3,23 @@
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>Jellyfin.Plugin.DinkFlix</RootNamespace>
     <AssemblyName>Jellyfin.Plugin.DinkFlix</AssemblyName>
-    <Version>4.2.0.0</Version>
+    <Version>5.1.0.0</Version>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <GenerateDocumentationFile>false</GenerateDocumentationFile>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <Deterministic>true</Deterministic>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Jellyfin.Common" Version="12.1.0"><ExcludeAssets>runtime</ExcludeAssets></PackageReference>
-    <PackageReference Include="Jellyfin.Controller" Version="12.1.0"><ExcludeAssets>runtime</ExcludeAssets></PackageReference>
-    <PackageReference Include="Jellyfin.Model" Version="12.1.0"><ExcludeAssets>runtime</ExcludeAssets></PackageReference>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Jellyfin.Common" Version="12.1.0" ExcludeAssets="runtime" />
+    <PackageReference Include="Jellyfin.Controller" Version="12.1.0" ExcludeAssets="runtime" />
+    <PackageReference Include="Jellyfin.Model" Version="12.1.0" ExcludeAssets="runtime" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Configuration\configPage.html" />
-    <EmbeddedResource Include="Web\dinkflix.css" />
-    <EmbeddedResource Include="Web\dinkflix.js" />
+    <EmbeddedResource Include="Configuration/configPage.html" />
+    <EmbeddedResource Include="Web/dinkflix.css" />
+    <EmbeddedResource Include="Web/dinkflix.js" />
   </ItemGroup>
 </Project>
