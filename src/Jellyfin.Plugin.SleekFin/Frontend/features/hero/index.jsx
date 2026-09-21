@@ -1,6 +1,6 @@
 import { dom, h, render } from '../../shared/runtime.js';
 import { Hero } from './Hero.jsx';
-import { applySettings } from './settings.js';
+import { applySettings, normalizeSettings } from './settings.js';
 import { loadEntries, loadSettings } from './source.js';
 
 const WINDOW_EVENTS = ['hashchange', 'popstate', 'pageshow'];
@@ -96,6 +96,7 @@ function mount(host) {
   const generation = ++state.generation;
   const root = createRoot(host);
   loadSettings(client)
+    .catch(() => normalizeSettings({}))
     .then((settings) => {
       if (generation !== state.generation || state.mount !== root || !dom.isConnected(root)) return null;
       state.enabled = settings.enabled;
@@ -108,16 +109,17 @@ function mount(host) {
     })
     .then((result) => {
       if (!result || generation !== state.generation) return;
-      if (result.entries.length) renderHero(root, result.entries, result.settings);
-      else {
+      if (result.entries.length) {
+        renderHero(root, result.entries, result.settings);
+      } else {
         state.failedHost = host;
-        removeMount();
+        finishLoading();
       }
     })
     .catch(() => {
       if (generation === state.generation) {
         state.failedHost = host;
-        removeMount();
+        finishLoading();
       }
     });
 }
