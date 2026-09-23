@@ -11,9 +11,23 @@
 }
 
 .sleekfin-details-season-select {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    box-sizing: border-box;
     display: inline-flex;
     max-width: min(54vw, 360px);
+    padding-left: 12px;
     position: relative;
+}
+
+.sleekfin-details-season-label {
+    color: var(--sleekfin-muted);
+    flex: 0 0 auto;
+    font: 600 11px/16px var(--sleekfin-font-family);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
 }
 
 .sleekfin-details-season-select::after {
@@ -23,9 +37,9 @@
     height: 7px;
     pointer-events: none;
     position: absolute;
-    right: 3px;
-    top: 9px;
-    transform: rotate(45deg);
+    right: 14px;
+    top: 50%;
+    transform: translateY(-65%) rotate(45deg);
     width: 7px;
 }
 
@@ -45,8 +59,8 @@
     background: transparent;
     border: 0;
     cursor: pointer;
-    max-width: 100%;
-    padding: 0 22px 0 0;
+    max-width: min(42vw, 300px);
+    padding: 9px 36px 9px 9px;
 }
 
 .sleekfin-details-episode-controls {
@@ -55,9 +69,30 @@
     gap: 8px;
 }
 
+.sleekfin-details-episode-nav {
+    align-items: center;
+    border-radius: 12px;
+    display: flex;
+    gap: 2px;
+    padding: 2px;
+}
+
 .sleekfin-details-control,
 .sleekfin-details-episode-download {
     transition: color 180ms ease;
+}
+
+.sleekfin-details-episode-nav .sleekfin-details-control {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none;
+    height: 32px;
+    width: 32px;
+}
+
+.sleekfin-details-episode-nav .sleekfin-details-control:disabled {
+    cursor: default;
+    opacity: 0.3;
 }
 
 .sleekfin-details-view-controls {
@@ -136,6 +171,7 @@
     margin-top: 20px;
     overflow-x: auto;
     padding: 0 0 5px;
+    scroll-behavior: smooth;
     scroll-snap-type: x proximity;
     scrollbar-width: none;
 }
@@ -283,6 +319,14 @@
     .sleekfin-details-season-title {
         font-size: 20px;
         line-height: 28px;
+    }
+
+    .sleekfin-details-season-select {
+        max-width: 78vw;
+    }
+
+    .sleekfin-details-season-native {
+        max-width: 55vw;
     }
 
     .sleekfin-details-episodes-header {

@@ -55,6 +55,7 @@ function Episodes({ client, list, mediaItem, seasons }) {
   const [sortDescending, setSortDescending] = useState(false);
   const [status, setStatus] = useState(firstSeason ? 'loading' : 'error');
   const [view, setView] = useState('grid');
+  const [scrollState, setScrollState] = useState({ left: false, right: false });
   const requestGeneration = useRef(0);
   const searchInput = useRef(null);
 
@@ -125,11 +126,40 @@ function Episodes({ client, list, mediaItem, seasons }) {
     }
   }, [client, list, view, visibleEpisodes]);
 
+  useEffect(() => {
+    const updateScrollState = () => {
+      if (view !== 'grid') {
+        setScrollState({ left: false, right: false });
+        return;
+      }
+      const maxScroll = Math.max(0, list.scrollWidth - list.clientWidth);
+      setScrollState({
+        left: list.scrollLeft > 2,
+        right: list.scrollLeft < maxScroll - 2,
+      });
+    };
+
+    updateScrollState();
+    list.addEventListener('scroll', updateScrollState, { passive: true });
+    window.addEventListener('resize', updateScrollState);
+    return () => {
+      list.removeEventListener('scroll', updateScrollState);
+      window.removeEventListener('resize', updateScrollState);
+    };
+  }, [list, view, visibleEpisodes]);
+
+  function scrollEpisodes(direction) {
+    const firstEpisode = list.querySelector('.sleekfin-details-episode');
+    const cardWidth = firstEpisode?.getBoundingClientRect().width || 380;
+    list.scrollBy({ left: direction * (cardWidth + 12), behavior: 'smooth' });
+  }
+
   const subtitle = status === 'loading' ? 'Loading episodes' : status === 'error' ? 'Episodes unavailable' : `${visibleEpisodes.length}${visibleEpisodes.length === 1 ? ' episode' : ' episodes'}`;
   let title;
   if (mediaItem.Type === 'Series') {
     title = (
       <span class="sleekfin-details-season-select">
+        <span class="sleekfin-details-season-label">Season</span>
         <select class="sleekfin-details-season-native" value={selectedSeasonId} onChange={(event) => setSelectedSeasonId(event.currentTarget.value)}>
           {seasons.map((season) => (
             <option value={season.Id} key={season.Id}>
@@ -157,6 +187,12 @@ function Episodes({ client, list, mediaItem, seasons }) {
     <Fragment>
       <SectionHeading title={title} subtitle={subtitle} />
       <div class="sleekfin-details-episode-controls">
+        {view === 'grid' && (
+          <span class="sleekfin-details-episode-nav sleekfin-control-3d">
+            <IconButton class="sleekfin-details-control" icon="chevron_left" label="Previous episodes" raised disabled={!scrollState.left} onClick={() => scrollEpisodes(-1)} />
+            <IconButton class="sleekfin-details-control" icon="chevron_right" label="Next episodes" raised disabled={!scrollState.right} onClick={() => scrollEpisodes(1)} />
+          </span>
+        )}
         <div class={`sleekfin-details-search sleekfin-control-3d${searchOpen ? ' sleekfin-details-search-open' : ''}`}>
           <IconButton icon="search" label="Search episodes" onClick={toggleSearch} />
           <input ref={searchInput} type="search" placeholder="Search episodes" value={query} onInput={(event) => setQuery(event.currentTarget.value)} />
