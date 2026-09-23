@@ -10,8 +10,9 @@ export function createActions(container, isEpisode) {
     buttons.forEach((element) => {
       const isFavorite = element.classList.contains('btnUserRating');
       const isDownload = element.classList.contains('btnDownload');
-      const icon = isFavorite ? (element.dataset.isfavorite === 'true' ? 'bookmarkCheck' : 'bookmark') : isDownload ? 'download' : 'play';
-      const label = isFavorite ? (element.dataset.isfavorite === 'true' ? 'In watchlist' : 'Add to watchlist') : isDownload ? 'Download' : element.dataset.action === 'resume' ? 'Resume' : 'Play';
+      const favoriteActive = isFavorite && element.dataset.isfavorite === 'true';
+      const icon = isFavorite ? 'heart' : isDownload ? 'download' : 'play';
+      const label = isFavorite ? (favoriteActive ? 'Remove from favorites' : 'Add to favorites') : isDownload ? 'Download' : element.dataset.action === 'resume' ? 'Resume' : 'Play';
 
       element.classList.toggle('sleekfin-details-suppressed-action', hasEpisodeResume && element.dataset.action === 'play');
       decorateNativeButton(element, {
@@ -20,6 +21,7 @@ export function createActions(container, isEpisode) {
         label,
         variant: icon === 'play' ? 'primary' : 'control',
       });
+      element.setAttribute('aria-pressed', isFavorite ? String(favoriteActive) : 'false');
       decorated.add(element);
     });
   }
@@ -36,6 +38,7 @@ export function createActions(container, isEpisode) {
       observer.disconnect();
       decorated.forEach((element) => {
         element.classList.remove('sleekfin-details-suppressed-action');
+        element.removeAttribute('aria-pressed');
         restoreNativeButton(element);
       });
       decorated.clear();
