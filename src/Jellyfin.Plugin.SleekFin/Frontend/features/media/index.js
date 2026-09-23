@@ -44,6 +44,70 @@ function syncUser() {
   return userId;
 }
 
+function findHomeResumeContainers() {
+  return Array.from(document.querySelectorAll('#indexPage #homeTab.is-active .sections .itemsContainer[data-monitor]'))
+    .filter((container) => container.querySelector('.card[data-id][data-positionticks]'));
+}
+
+function hideEmptyResumeSection(container) {
+  if (container.querySelector('.card[data-id][data-positionticks]')) return;
+  const section = container.closest('.verticalSection, .sectionContainer');
+  section?.classList.add('hide');
+}
+
+function removeFromContinueWatching(card, button) {
+  const client = window.ApiClient;
+  const itemId = card.dataset.id;
+  if (!client || typeof client.ajax !== 'function' || typeof client.getUrl !== 'function' || !itemId || button.disabled) {
+    return;
+  }
+
+  button.disabled = true;
+  button.setAttribute('aria-busy', 'true');
+
+  client.ajax({
+    type: 'POST',
+    url: client.getUrl('UserItems/' + encodeURIComponent(itemId) + '/UserData'),
+    data: JSON.stringify({ PlaybackPositionTicks: 0 }),
+    contentType: 'application/json'
+  }).then(() => {
+    const container = card.closest('.itemsContainer');
+    const cardBox = card.closest('.cardBox') || card;
+    cardBox.remove();
+    if (container) hideEmptyResumeSection(container);
+  }).catch(() => {
+    button.disabled = false;
+    button.removeAttribute('aria-busy');
+  });
+}
+
+function decorateResumeCards() {
+  findHomeResumeContainers().forEach((container) => {
+    container.querySelectorAll('.card[data-id][data-positionticks]').forEach((card) => {
+      if (card.querySelector('[data-sleekfin-resume-remove]')) return;
+
+      const buttonRow = card.querySelector('.cardOverlayButton-br.flex');
+      if (!buttonRow) return;
+
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'cardOverlayButton cardOverlayButton-hover paper-icon-button-light sleekfin-resume-remove';
+      button.dataset.sleekfinResumeRemove = 'true';
+      button.title = 'Remove from Continue Watching';
+      button.setAttribute('aria-label', 'Remove from Continue Watching');
+      button.innerHTML = '<span class="material-icons cardOverlayButtonIcon cardOverlayButtonIcon-hover close" aria-hidden="true"></span>';
+
+      button.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        removeFromContinueWatching(card, button);
+      });
+
+      buttonRow.appendChild(button);
+    });
+  });
+}
+
 function hideMyMedia() {
   const indexPage = document.querySelector('#indexPage');
   if (!indexPage) return;
@@ -129,6 +193,7 @@ function reconcile() {
     });
   });
   cleanupInactiveMetadata(activeCards);
+  decorateResumeCards();
 
   if (missing.length) {
     load(Array.from(new Set(missing)));
