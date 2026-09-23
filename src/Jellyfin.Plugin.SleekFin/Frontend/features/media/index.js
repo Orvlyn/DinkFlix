@@ -148,7 +148,19 @@ function decorateResumeCards() {
   });
 }
 
+function normalizeHomeSectionLinks() {
+  const links = document.querySelectorAll('#indexPage #homeTab.is-active a.sectionTitleTextButton[href*="tab=1"]');
+  links.forEach((link) => {
+    const href = link.getAttribute('href');
+    if (!href) return;
+
+    const nextHref = href.replace(/([?&])tab=1(?=(&|$))/, '$1tab=0');
+    if (nextHref !== href) link.setAttribute('href', nextHref);
+  });
+}
+
 function hideMyMedia() {
+  normalizeHomeSectionLinks();
   const indexPage = document.querySelector('#indexPage');
   if (!indexPage) return;
 
