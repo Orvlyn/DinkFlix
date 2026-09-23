@@ -68,6 +68,18 @@ export default {
   actionAttributes,
   formatRuntime,
   imageUrl,
+  removeFromContinueWatching,
   typeLabel,
   year,
 };
+
+export async function removeFromContinueWatching(client, itemId) {
+  if (!client || !itemId) throw new Error('Missing Jellyfin client or item id');
+  const endpoint = client.getUrl('UserItems/' + itemId + '/ExcludeFromResume');
+  return client.ajax({
+    type: 'POST',
+    url: endpoint,
+    dataType: 'json',
+  });
+}
+
