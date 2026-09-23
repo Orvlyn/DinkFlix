@@ -10,8 +10,8 @@ permissions:
 env:
   JELLYFIN_VERSION: "12.0.0"
   TARGET_ABI: "12.0.0.0"
-  CSPROJ: "src/Jellyfin.Plugin.DinkFlix/Jellyfin.Plugin.DinkFlix.csproj"
-  ASSEMBLY_INFO: "src/Jellyfin.Plugin.DinkFlix/Properties/AssemblyInfo.cs"
+  CSPROJ: "src/Jellyfin.Plugin.SleekFin/Jellyfin.Plugin.SleekFin.csproj"
+  ASSEMBLY_INFO: "src/Jellyfin.Plugin.SleekFin/Properties/AssemblyInfo.cs"
 
 jobs:
   release:
@@ -23,320 +23,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Apply DINKFLIX source rework
-        shell: bash
-        run: |
-          python3 <<'PY'
-          from pathlib import Path
-          import re, json
-
-          root = Path.cwd()
-
-          src = root / "src" / "Jellyfin.Plugin.SleekFin"
-          dst = root / "src" / "Jellyfin.Plugin.DinkFlix"
-          if src.exists() and not dst.exists():
-              src.rename(dst)
-
-          for p in sorted(root.rglob("*"), key=lambda x: len(x.parts), reverse=True):
-              if ".git" in p.parts or "node_modules" in p.parts or "dist" in p.parts:
-                  continue
-              if p == root / ".github" / "workflows" / "release.yml":
-                  continue
-              new_name = (p.name
-                  .replace("Jellyfin.Plugin.SleekFin", "Jellyfin.Plugin.DinkFlix")
-                  .replace("SleekFinPlugin", "DinkFlixPlugin")
-                  .replace("SleekFinFeatures", "DinkFlixFeatures")
-                  .replace("SleekFinRuntime", "DinkFlixRuntime")
-                  .replace("sleekfin", "dinkflix")
-                  .replace("SleekFin", "DinkFlix"))
-              if new_name != p.name:
-                  p.rename(p.with_name(new_name))
-
-          text_ext = {".cs",".js",".jsx",".css",".html",".json",".md",".csproj",".sln",".xml",".yml",".yaml",".txt"}
-          for p in root.rglob("*"):
-              if not p.is_file() or ".git" in p.parts or "node_modules" in p.parts or "dist" in p.parts:
-                  continue
-              if p == root / ".github" / "workflows" / "release.yml":
-                  continue
-              if p.suffix.lower() not in text_ext:
-                  continue
-              try:
-                  s = p.read_text(encoding="utf-8")
-              except UnicodeDecodeError:
-                  continue
-              s = (s.replace("Jellyfin.Plugin.SleekFin", "Jellyfin.Plugin.DinkFlix")
-                  .replace("SleekFinPlugin", "DinkFlixPlugin")
-                  .replace("SleekFinFeatures", "DinkFlixFeatures")
-                  .replace("SleekFinRuntime", "DinkFlixRuntime")
-                  .replace("sleekfin", "dinkflix")
-                  .replace("SleekFin", "DinkFlix"))
-              if p.suffix.lower() in {".cs",".js",".jsx"}:
-                  s = s.replace("DinkFlix/", "SleekFin/")
-              p.write_text(s, encoding="utf-8")
-
-          manifest = root / "manifest.json"
-          data = json.loads(manifest.read_text(encoding="utf-8"))
-          data[0]["name"] = "DINKFLIX"
-          data[0]["owner"] = "Orvlyn"
-          data[0]["description"] = "A premium DINKFLIX theme and UI enhancement plugin for Jellyfin."
-          data[0]["overview"] = "DINKFLIX: a dark, cinematic Jellyfin web experience with a mint accent."
-          data[0]["repositoryUrl"] = "https://github.com/Orvlyn/DinkFlix"
-          data[0]["imageUrl"] = "https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/Dinkflix%20New%20Icon.png"
-          manifest.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
-
-          item = root / "src/Jellyfin.Plugin.DinkFlix/Frontend/shared/item.js"
-          s = item.read_text(encoding="utf-8")
-          if "removeFromContinueWatching" not in s:
-              s += """
-export async function removeFromContinueWatching(client, itemId) {
-  if (!client || !itemId) throw new Error("Missing Jellyfin client or item id");
-  const endpoint = client.getUrl("UserItems/" + itemId + "/ExcludeFromResume");
-  return client.ajax({
-    type: "POST",
-    url: endpoint,
-    dataType: "json",
-  });
-}
-"""
-              s = s.replace(
-                  "export default {\n  actionAttributes,\n  formatRuntime,\n  imageUrl,\n  typeLabel,\n  year,\n};",
-                  "export default {\n  actionAttributes,\n  formatRuntime,\n  imageUrl,\n  removeFromContinueWatching,\n  typeLabel,\n  year,\n};"
-              )
-              item.write_text(s, encoding="utf-8")
-
-          metadata = root / "src/Jellyfin.Plugin.DinkFlix/Frontend/features/media/metadata.jsx"
-          s = metadata.read_text(encoding="utf-8")
-          if "removeFromContinueWatching" not in s:
-              s = re.sub(
-                  r"import \{([^}]+)\} from '../../shared/runtime\.js';",
-                  lambda m: "import {" + m.group(1).rstrip() + ", removeFromContinueWatching} from '../../shared/runtime.js';",
-                  s, count=1
-              )
-          if "dinkflix-continue-remove" not in s:
-              helper = """
-function addResumeRemoval(card) {
-  const sectionTitle = card.closest(".verticalSection")?.querySelector(".sectionTitle")?.textContent?.toLowerCase() || "";
-  if (!sectionTitle.includes("continue watching") && !sectionTitle.includes("resume")) return;
-  if (card.querySelector(".dinkflix-continue-remove")) return;
-  const button = document.createElement("button");
-  button.type = "button";
-  button.className = "dinkflix-continue-remove";
-  button.title = "Remove from Continue Watching";
-  button.setAttribute("aria-label", "Remove from Continue Watching");
-  button.textContent = "×";
-  button.addEventListener("click", async (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    const client = window.ApiClient;
-    const itemId = card.dataset.id || card.querySelector("[data-id]")?.dataset.id;
-    if (!client || !itemId) return;
-    button.disabled = true;
-    try {
-      await removeFromContinueWatching(client, itemId);
-      card.remove();
-    } catch {
-      button.disabled = false;
-    }
-  });
-  card.appendChild(button);
-}
-"""
-              s = s.replace("export function renderMetadata", helper + "\nexport function renderMetadata", 1)
-              s = re.sub(
-                  r"(render\(<Meta values=\{facts\(mediaItem, type, source\?\.textContent\.trim\(\) \|\| ''\)\} /\>, element\);)",
-                  r"\1\n  addResumeRemoval(card);",
-                  s, count=1
-              )
-          metadata.write_text(s, encoding="utf-8")
-
-          actions = root / "src/Jellyfin.Plugin.DinkFlix/Frontend/features/details/actions.js"
-          s = actions.read_text(encoding="utf-8")
-          s = s.replace(
-              "const icon = isFavorite ? (element.dataset.isfavorite === 'true' ? 'bookmarkCheck' : 'bookmark') : isDownload ? 'download' : 'play';",
-              "const icon = isFavorite ? 'heart' : isDownload ? 'download' : 'play';"
-          )
-          s = s.replace(
-              "const label = isFavorite ? (element.dataset.isfavorite === 'true' ? 'In watchlist' : 'Add to watchlist') : isDownload ? 'Download' : element.dataset.action === 'resume' ? 'Resume' : 'Play';",
-              "const label = isFavorite ? (element.dataset.isfavorite === 'true' ? 'Remove from favorites' : 'Add to favorites') : isDownload ? 'Download' : element.dataset.action === 'resume' ? 'Resume' : 'Play';"
-          )
-          actions.write_text(s, encoding="utf-8")
-
-          details = root / "src/Jellyfin.Plugin.DinkFlix/Frontend/features/details/index.js"
-          s = details.read_text(encoding="utf-8")
-          s = s.replace(
-              "client.getItem(userId, id)",
-              "client.getItem(userId, id, { Fields: 'Overview,Genres,People,Studios,MediaStreams,UserData' })"
-          )
-          details.write_text(s, encoding="utf-8")
-
-          hero = root / "src/Jellyfin.Plugin.DinkFlix/Frontend/features/details/hero.jsx"
-          s = hero.read_text(encoding="utf-8")
-          if "dinkflix-details-adjacent" not in s:
-              s = s.replace(
-                  "function factValues(mediaItem, seasons) {",
-                  """function episodeNavigation(client, mediaItem) {
-  if (!client || mediaItem.Type !== 'Episode' || !mediaItem.SeriesId || !mediaItem.SeasonId) return Promise.resolve(null);
-  return client.getEpisodes(mediaItem.SeriesId, {
-    seasonId: mediaItem.SeasonId,
-    userId: client.getCurrentUserId(),
-    Fields: 'Overview,MediaStreams,People,Studios',
-    EnableImages: false,
-    EnableUserData: true,
-  }).then((result) => {
-    const episodes = result.Items || [];
-    const index = episodes.findIndex((episode) => episode.Id === mediaItem.Id);
-    return {
-      previous: index > 0 ? episodes[index - 1] : null,
-      next: index >= 0 && index < episodes.length - 1 ? episodes[index + 1] : null,
-      index,
-      total: episodes.length,
-    };
-  }).catch(() => null);
-}
-
-function openDetail(mediaItem) {
-  if (!mediaItem || !mediaItem.Id) return;
-  const serverId = mediaItem.ServerId || (window.ApiClient && window.ApiClient.serverId ? window.ApiClient.serverId() : '');
-  window.location.hash = '#/details?id=' + encodeURIComponent(mediaItem.Id) + '&serverId=' + encodeURIComponent(serverId);
-}
-
-function factValues(mediaItem, seasons) {""",
-                  1
-              )
-              s = s.replace(
-                  '<div class="dinkflix-details-hero"><div></div><div class="dinkflix-details-stack">',
-                  '<div class="dinkflix-details-hero"><div class="dinkflix-details-hero-nav"></div><div class="dinkflix-details-stack">',
-                  1
-              )
-              s = s.replace("const backRoot = hero.firstElementChild;", "const navRoot = hero.firstElementChild;", 1)
-              navigation = """  function renderNavigation(mediaItem) {
-    render(
-      <div class="dinkflix-details-navigation">
-        <IconButton class="dinkflix-details-back" icon="arrowLeft" label="Back" raised onClick={goBack} />
-        {mediaItem.Type === 'Episode' && (
-          <div class="dinkflix-details-adjacent" aria-label="Episode navigation">
-            <IconButton class="dinkflix-details-adjacent-button" icon="arrowLeft" label="Previous episode" raised onClick={() => episodeNavigation(window.ApiClient, mediaItem).then((result) => result && result.previous && openDetail(result.previous))} />
-            <span class="dinkflix-details-episode-position"></span>
-            <IconButton class="dinkflix-details-adjacent-button" icon="arrowRight" label="Next episode" raised onClick={() => episodeNavigation(window.ApiClient, mediaItem).then((result) => result && result.next && openDetail(result.next))} />
-          </div>
-        )}
-      </div>,
-      navRoot,
-    );
-    if (mediaItem.Type === 'Episode') {
-      episodeNavigation(window.ApiClient, mediaItem).then((result) => {
-        const pos = navRoot.querySelector('.dinkflix-details-episode-position');
-        const buttons = navRoot.querySelectorAll('.dinkflix-details-adjacent-button');
-        if (!result) return;
-        if (pos) pos.textContent = result.index >= 0 ? String(result.index + 1) + ' / ' + String(result.total) : '';
-        if (buttons[0]) buttons[0].disabled = !result.previous;
-        if (buttons[1]) buttons[1].disabled = !result.next;
-      });
-    }
-  }
-
-"""
-              s = s.replace("  function renderHero(mediaItem, seasons) {", navigation + "  function renderHero(mediaItem, seasons) {", 1)
-              s = s.replace("  function renderHero(mediaItem, seasons) {", "  function renderHero(mediaItem, seasons) {\n    renderNavigation(mediaItem);", 1)
-              s = s.replace(
-                  "render(<IconButton class=\"dinkflix-details-back\" icon=\"arrowLeft\" label=\"Back\" raised onClick={goBack} />, backRoot);",
-                  ""
-              )
-              s = s.replace("render(null, backRoot);", "render(null, navRoot);")
-          hero.write_text(s, encoding="utf-8")
-
-          brand = root / "src/Jellyfin.Plugin.DinkFlix/Inject/zzzz-dinkflix-branding.css"
-          s = brand.read_text(encoding="utf-8")
-          if "dinkflix-continue-remove" not in s:
-              s += """
-/* DINKFLIX interaction polish */
-.btnUserRating[data-isfavorite="true"] .dinkflix-icon[data-dinkflix-icon="heart"] {
-    color: var(--dinkflix-accent) !important;
-    fill: currentColor !important;
-    stroke: currentColor !important;
-}
-.dinkflix-continue-remove {
-    align-items: center;
-    background: rgba(0, 0, 0, 0.72);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 999px;
-    color: var(--dinkflix-text);
-    cursor: pointer;
-    display: inline-flex;
-    height: 32px;
-    justify-content: center;
-    opacity: 0;
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    transition: opacity 160ms ease, color 160ms ease, background-color 160ms ease;
-    width: 32px;
-    z-index: 20;
-}
-.card:hover .dinkflix-continue-remove,
-.card:focus-within .dinkflix-continue-remove,
-.dinkflix-continue-remove:focus-visible {
-    opacity: 1;
-}
-.dinkflix-continue-remove:hover {
-    background: rgba(0, 0, 0, 0.9);
-    color: var(--dinkflix-accent);
-}
-.dinkflix-continue-remove:focus-visible {
-    outline: 2px solid var(--dinkflix-accent);
-    outline-offset: 2px;
-}
-#videoOsdPage .osdHeader,
-#videoOsdPage .osdTop,
-#videoOsdPage .btnBack,
-#videoOsdPage .btnClose {
-    pointer-events: auto !important;
-    position: relative !important;
-    z-index: 100000 !important;
-}
-"""
-          brand.write_text(s, encoding="utf-8")
-
-          detail_css = root / "src/Jellyfin.Plugin.DinkFlix/Inject/Details/dinkflix-details-hero.css"
-          s = detail_css.read_text(encoding="utf-8")
-          if ".dinkflix-details-hero-nav" not in s:
-              s += """
-.dinkflix-details-hero-nav {
-    align-items: flex-start;
-    inset: 0 0 auto;
-    padding: 24px var(--dinkflix-page-gutter);
-    pointer-events: none;
-    position: absolute;
-    z-index: 12;
-}
-.dinkflix-details-navigation {
-    align-items: center;
-    display: flex;
-    justify-content: space-between;
-    pointer-events: auto;
-    width: 100%;
-}
-.dinkflix-details-adjacent {
-    align-items: center;
-    display: flex;
-    gap: 6px;
-}
-.dinkflix-details-adjacent-button:disabled {
-    opacity: 0.32;
-    pointer-events: none;
-}
-.dinkflix-details-episode-position {
-    color: rgba(255,255,255,0.72);
-    font: 600 12px/1 var(--dinkflix-font-family);
-    min-width: 48px;
-    text-align: center;
-}
-"""
-          detail_css.write_text(s, encoding="utf-8")
-
-          print("DINKFLIX source rework applied.")
-          PY
-
       - name: Resolve version
         id: version
         shell: bash
@@ -347,6 +33,16 @@ function factValues(mediaItem, seasons) {""",
           else
             echo "No release version found"
             exit 1
+          fi
+
+      - name: Update version metadata
+        shell: bash
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          sed -i "s/<Version>[0-9.]*<\/Version>/<Version>${VERSION}<\/Version>/" "${{ env.CSPROJ }}"
+          if [ -f "${{ env.ASSEMBLY_INFO }}" ]; then
+            sed -i "s/\[assembly: AssemblyVersion(\"[0-9.]*\")\]/[assembly: AssemblyVersion(\"${VERSION}\")]/" "${{ env.ASSEMBLY_INFO }}"
+            sed -i "s/\[assembly: AssemblyFileVersion(\"[0-9.]*\")\]/[assembly: AssemblyFileVersion(\"${VERSION}\")]/" "${{ env.ASSEMBLY_INFO }}"
           fi
 
       - name: Setup .NET
@@ -368,18 +64,16 @@ function factValues(mediaItem, seasons) {""",
         shell: bash
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          OUT_DIR="${GITHUB_WORKSPACE}/src/Jellyfin.Plugin.DinkFlix/bin/Release/net10.0"
+          OUT_DIR="${GITHUB_WORKSPACE}/src/Jellyfin.Plugin.SleekFin/bin/Release/net10.0"
           DIST_DIR="${GITHUB_WORKSPACE}/dist"
-          DLL_NAME="Jellyfin.Plugin.DinkFlix.dll"
           ZIP_NAME="Jellyfin.Plugin.DINKFLIX_12.0.zip"
           mkdir -p "$DIST_DIR"
+          cp meta.json "$OUT_DIR/meta.json"
           jq --arg version "$VERSION" \
              --arg targetAbi "$TARGET_ABI" \
-             --arg assembly "$DLL_NAME" \
-             '.version=$version | .targetAbi=$targetAbi | .name="DINKFLIX" | .owner="Orvlyn" | .description="A premium DINKFLIX theme and UI enhancement plugin for Jellyfin." | .overview="DINKFLIX: a dark, cinematic Jellyfin web experience with a mint accent." | .assemblies=[$assembly]' \
+             '.version=$version | .targetAbi=$targetAbi | .name="DINKFLIX" | .owner="Orvlyn" | .description="A custom premium Jellyfin Web experience maintained by Orvlyn." | .overview="DINKFLIX: a dark, modern Jellyfin interface with a mint accent." | .assemblies=["Jellyfin.Plugin.SleekFin.dll"]' \
              meta.json > "$OUT_DIR/meta.json"
-          cp thumb.png "$OUT_DIR/thumb.png"
-          (cd "$OUT_DIR" && zip -j "$DIST_DIR/$ZIP_NAME" "$DLL_NAME" meta.json thumb.png)
+          (cd "$OUT_DIR" && zip -j "$DIST_DIR/$ZIP_NAME" Jellyfin.Plugin.SleekFin.dll meta.json thumb.png)
           echo "zip_name=$ZIP_NAME" >> "$GITHUB_OUTPUT"
           echo "checksum=$(md5sum "$DIST_DIR/$ZIP_NAME" | awk '{print toupper($1)}')" >> "$GITHUB_OUTPUT"
 
@@ -391,18 +85,16 @@ function factValues(mediaItem, seasons) {""",
              --arg sourceUrl "https://github.com/Orvlyn/DinkFlix/releases/download/$VERSION/Jellyfin.Plugin.DINKFLIX_12.0.zip" \
              --arg checksum "${{ steps.package.outputs.checksum }}" \
              --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%S.0000000Z)" \
-             '. as $root | $root[0].versions = ([{version:$version,changelog:"DINKFLIX 11.5 interaction and presentation rework",targetAbi:"12.0.0.0",sourceUrl:$sourceUrl,checksum:$checksum,timestamp:$timestamp,dependencies:[]}] + ($root[0].versions // [] | map(select(.version != $version))))' \
+             '. as $root | $root[0].versions = ([{version:$version,changelog:"DINKFLIX release",targetAbi:"12.0.0.0",sourceUrl:$sourceUrl,checksum:$checksum,timestamp:$timestamp,dependencies:[]}] + ($root[0].versions // [] | map(select(.version != $version))))' \
              manifest.json > manifest.json.tmp
           mv manifest.json.tmp manifest.json
 
-      - name: Commit finalized DINKFLIX source
-        shell: bash
+      - name: Commit manifest updates
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git reset -- dist 2>/dev/null || true
-          git diff --staged --quiet || git commit -m "chore: finalize DINKFLIX source for v${{ steps.version.outputs.version }}"
+          git add manifest.json meta.json "$CSPROJ"
+          git diff --staged --quiet || git commit -m "chore: update DINKFLIX release metadata"
           git push origin HEAD:main
 
       - name: Create release
@@ -410,6 +102,6 @@ function factValues(mediaItem, seasons) {""",
         with:
           tag_name: ${{ steps.version.outputs.version }}
           name: DINKFLIX ${{ steps.version.outputs.version }}
-          body: "DINKFLIX release — premium Jellyfin theme and UI rework. Original SleekFin foundation credited to varunaditya-plus and contributors."
+          body: "DINKFLIX release based on the SleekFin foundation, rebranded and maintained by Orvlyn."
           files: dist/${{ steps.package.outputs.zip_name }}
           fail_on_unmatched_files: true
