@@ -45,7 +45,7 @@ public static class TransformationPatches
             string url = $"../SleekFin/{asset.FileName}{cacheQuery}";
             string element = asset.IsStyle
                 ? $"<link rel=\"stylesheet\" href=\"{url}\" data-dinkflix-asset=\"{asset.FileName}\" />"
-                : $"<script{(asset.IsBlockingScript ? string.Empty : " defer")} src=\"{url}\" data-sleekfin-asset=\"{asset.FileName}\"></script>";
+                : $"<script{(asset.IsBlockingScript ? string.Empty : " defer")} src=\"{url}\" data-dinkflix-asset=\"{asset.FileName}\"></script>";
             string closingTag = asset.IsStyle || asset.IsBlockingScript ? "</head>" : "</body>";
             contents = contents.Replace(closingTag, $"{element}{closingTag}", StringComparison.Ordinal);
         }
@@ -65,7 +65,7 @@ public static class TransformationPatches
         string headerHeight = configuration.HeaderHeight.ToString(CultureInfo.InvariantCulture);
         string heroMobileHeight = configuration.HeroMobileHeight.ToString(CultureInfo.InvariantCulture);
         string heroDesktopHeight = configuration.HeroDesktopHeight.ToString(CultureInfo.InvariantCulture);
-        return $"<script data-dinkflix-boot>(function(){{'use strict';var r=document.documentElement,t=(location.hash.slice(1)||location.pathname+location.search).replace(/^!+/,''),i=t.search(/[?&]/),p=(i<0?t:t.slice(0,i)).replace(/^[!\\/]+/,'/'),d=p==='/dashboard'||p.indexOf('/dashboard/')===0||p==='/configurationpage'||p==='/metadata';r.dataset.dinkflixHeroEnabled='{heroEnabled}';r.style.setProperty('--dinkflix-header-height','{headerHeight}px');r.style.setProperty('--sleekfin-hero-mobile-height','{heroMobileHeight}vh');r.style.setProperty('--sleekfin-hero-desktop-height','{heroDesktopHeight}vh');if({headerEnabled}&&!d)r.classList.add('dinkflix-header-boot-loading');if({heroEnabled}&&(p==='/'||/(^|\\/)home\\/?$/.test(p)))r.classList.add('dinkflix-hero-boot-loading');setTimeout(function(){{r.classList.remove('sleekfin-header-boot-loading','sleekfin-hero-boot-loading');}},4000);}})();</script>";
+        return $"<script data-dinkflix-boot>(function(){{'use strict';var r=document.documentElement,t=(location.hash.slice(1)||location.pathname+location.search).replace(/^!+/,''),i=t.search(/[?&]/),p=(i<0?t:t.slice(0,i)).replace(/^[!\\/]+/,'/'),d=p==='/dashboard'||p.indexOf('/dashboard/')===0||p==='/configurationpage'||p==='/metadata';r.dataset.dinkflixHeroEnabled='{heroEnabled}';r.style.setProperty('--dinkflix-header-height','{headerHeight}px');r.style.setProperty('--dinkflix-hero-mobile-height','{heroMobileHeight}vh');r.style.setProperty('--dinkflix-hero-desktop-height','{heroDesktopHeight}vh');if({headerEnabled}&&!d)r.classList.add('dinkflix-header-boot-loading');if({heroEnabled}&&(p==='/'||/(^|\\/)home\\/?$/.test(p)))r.classList.add('dinkflix-hero-boot-loading');setTimeout(function(){{r.classList.remove('dinkflix-header-boot-loading','dinkflix-hero-boot-loading');}},4000);}})();</script>";
     }
 
     private static bool ShouldInject(FrontendAssets.Asset asset, PluginConfiguration configuration)
