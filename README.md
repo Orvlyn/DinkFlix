@@ -31,22 +31,22 @@ The goal is to make Jellyfin feel more like a polished personal streaming platfo
 - **Native Jellyfin foundation** — the project enhances Jellyfin rather than creating a separate streaming application.
 - **Plugin-aware interface** — support for integrations and navigation elements provided by compatible Jellyfin plugins.
 
-## Features and visual areas
+## Current DINKFLIX features
 
-DINKFLIX is an evolving theme and interface project. The current foundation includes work across the following areas:
+DINKFLIX currently includes:
 
-- Custom DINKFLIX branding and visual styling
-- Global dark theme and mint accent system
-- Jellyfin header and navigation styling
-- Home-page hero and content presentation
-- Media rows, cards and metadata presentation
-- Movie, series, season and episode detail-page styling
-- Playback and media-control visual adjustments
-- Responsive header behavior and mobile navigation support
-- UI customization controls inherited from the SleekFin foundation
-- Compatibility-focused integration with Jellyfin, SeerrFin and Jellyfin Enhanced navigation elements where available
+- Cinematic dark interface with the DINKFLIX mint accent `#00ffc6`
+- Multi-slide home hero with bottom-right indicator pills
+- Refined media cards and metadata
+- Richer movie and series detail information
+- Detail-page horizontal navigation improvements
+- In-page season selection and episode previous/next controls
+- Persistent removal from Continue Watching using Jellyfin user-data
+- Favorite heart styling using the active DINKFLIX accent
+- Scoped Jellyfin player back/exit hit-area protection
+- Responsive header and plugin-aware navigation support
 
-Some features depend on the Jellyfin version, enabled integrations and the current state of development. DINKFLIX should be considered an active project rather than a guarantee of compatibility with every plugin combination.
+DINKFLIX keeps Jellyfin's native routes, playback controller and server behavior intact.
 
 ## Required and recommended plugins
 
@@ -85,7 +85,7 @@ Then:
 The latest release packages are available here:
 
 - **[DINKFLIX Releases](https://github.com/Orvlyn/DinkFlix/releases)**
-- **[Latest DINKFLIX plugin package](https://github.com/Orvlyn/DinkFlix/releases/download/10.0.0.0/Jellyfin.Plugin.DINKFLIX_12.0.zip)**
+- **[Latest DINKFLIX plugin package](https://github.com/Orvlyn/DinkFlix/releases)**
 
 DINKFLIX targets the Jellyfin 12.x plugin environment used by the current build. Confirm the target ABI and release notes before installing on a different Jellyfin version.
 
