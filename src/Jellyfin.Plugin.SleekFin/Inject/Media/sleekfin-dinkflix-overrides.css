@@ -69,6 +69,11 @@ html.sleekfin-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecomm
     }
 }
 
+/* Homepage favorites use the DINKFLIX accent instead of Jellyfin's default error colour. */
+html.sleekfin-media-mounted #indexPage .cardOverlayButton .MuiSvgIcon-colorError {
+    color: var(--sleekfin-accent) !important;
+}
+
 /* Continue Watching: persistent remove action. */
 html.sleekfin-media-mounted #indexPage #homeTab.is-active .sleekfin-resume-remove {
     color: var(--sleekfin-text);
