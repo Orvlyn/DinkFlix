@@ -19,12 +19,17 @@ html.sleekfin-header-mounted {
     --sleekfin-header-name-color: #fff;
 }
 
-html:is(.sleekfin-header-boot-loading, .sleekfin-header-loading) :is(header.MuiAppBar-root, .skinHeader):not(.osdHeader) {
+html:is(.sleekfin-header-boot-loading, .sleekfin-header-loading) :is(header.MuiAppBar-root, .skinHeader) {
     height: var(--sleekfin-header-height) !important;
     inset: 0 0 auto !important;
     opacity: 0;
     position: fixed !important;
     width: 100% !important;
+}
+
+/* The video player has its own OSD header. Restore Jellyfin's native height so the back button is not pushed down. */
+html:is(.sleekfin-header-boot-loading, .sleekfin-header-loading) body:has(.videoPlayerContainer) :is(header.MuiAppBar-root, .skinHeader) {
+    height: revert !important;
 }
 
 @keyframes sleekfin-header-enter {
@@ -38,7 +43,7 @@ html:is(.sleekfin-header-boot-loading, .sleekfin-header-loading) :is(header.MuiA
 }
 
 /* The video player has its own OSD header/back button. Do not render the DINKFLIX site header over the player. */
-html.sleekfin-header-mounted body:has(.osdHeader) :is([data-sleekfin-header], .sleekfin-header-fallback-brand) {
+html.sleekfin-header-mounted body:has(.videoPlayerContainer) :is([data-sleekfin-header], .sleekfin-header-fallback-brand) {
     display: none !important;
 }
 
