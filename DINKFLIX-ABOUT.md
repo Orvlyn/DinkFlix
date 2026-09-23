@@ -111,3 +111,6 @@ Optional integrations such as Jellyfin Enhanced and SeerrFin remain separate thi
 DINKFLIX is an ongoing project. Jellyfin's web client and third-party plugins can change over time, so compatibility should always be checked against the version running on your server.
 
 The design goal is simple: **make Jellyfin feel better without taking Jellyfin away.**
+
+
+<!-- Release marker: v11.5.0.0 -->
