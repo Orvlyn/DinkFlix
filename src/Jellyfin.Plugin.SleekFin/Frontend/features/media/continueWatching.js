@@ -13,23 +13,16 @@ function sections() {
 }
 
 async function clearResumePosition(client, itemId) {
-  const userId = typeof client.getCurrentUserId === 'function' ? client.getCurrentUserId() : '';
-  const userData = { PlaybackPositionTicks: 0 };
+  if (typeof client.ajax !== 'function' || typeof client.getUrl !== 'function' || !itemId) return false;
 
-  for (const name of ['updateUserItemData', 'updateItemUserData', 'setItemUserData']) {
-    if (typeof client[name] !== 'function') continue;
-    try {
-      await client[name](itemId, userData);
-      return true;
-    } catch {}
-  }
-
-  if (typeof client.ajax !== 'function' || !userId) return false;
   try {
     await client.ajax({
       type: 'POST',
-      url: `${client.getUrl?.('') || ''}/Users/${encodeURIComponent(userId)}/Items/${encodeURIComponent(itemId)}/UserData`,
-      data: JSON.stringify(userData),
+      url: client.getUrl(`UserItems/${encodeURIComponent(itemId)}/UserData`),
+      data: JSON.stringify({
+        ItemId: itemId,
+        PlaybackPositionTicks: 0,
+      }),
       contentType: 'application/json',
       processData: false,
     });

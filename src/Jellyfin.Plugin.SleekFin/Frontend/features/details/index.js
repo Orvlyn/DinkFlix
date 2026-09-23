@@ -202,6 +202,21 @@ function load(id, serverId) {
 
   client.getItem(userId, id)
     .then((mediaItem) => {
+      if (typeof client.getItems !== 'function') return mediaItem;
+      return client.getItems(userId, {
+        EnableTotalRecordCount: false,
+        Ids: id,
+        Fields: 'Genres,MediaSources,MediaStreams,People,Studios',
+        EnableImages: true,
+        EnableUserData: true,
+      })
+        .then((response) => {
+          const detailedItem = (response.Items || []).find((item) => item.Id === id);
+          return detailedItem ? { ...mediaItem, ...detailedItem } : mediaItem;
+        })
+        .catch(() => mediaItem);
+    })
+    .then((mediaItem) => {
       if (!isCurrent()) return;
       state.item = mediaItem;
       state.loadingId = '';

@@ -36,20 +36,46 @@ function firstStream(mediaItem, type) {
 
 function richInfo(mediaItem) {
   const info = [];
+  const streams = technicalStreams(mediaItem);
   const video = firstStream(mediaItem, 'video');
-  const subtitles = technicalStreams(mediaItem).filter((stream) => String(stream.Type || '').toLowerCase() === 'subtitle');
+  const subtitles = streams.filter((stream) => String(stream.Type || '').toLowerCase() === 'subtitle');
+  const primarySource = Array.isArray(mediaItem.MediaSources) ? mediaItem.MediaSources[0] : null;
+
   const resolution = video?.Height >= 2100 || video?.Width >= 3800 ? '4K'
     : video?.Height >= 1050 || video?.Width >= 1900 ? '1080p'
     : video?.Height >= 700 || video?.Width >= 1200 ? '720p'
     : video?.Height ? `${video.Height}p` : '';
   const codec = video?.DisplayTitle || video?.Codec || '';
+  const sourceType = primarySource?.VideoType || primarySource?.Container || '';
   const videoValue = [resolution, codec].filter(Boolean).join(' · ');
   if (videoValue) info.push({ label: 'Video', value: videoValue });
-  if (subtitles.length) info.push({ label: 'Subtitles', value: subtitles.length === 1 ? (subtitles[0].DisplayTitle || 'Available') : `${subtitles.length} tracks` });
+  if (sourceType) info.push({ label: 'Source', value: String(sourceType).replace(/([a-z])([A-Z])/g, '$1 $2') });
+
+  if (subtitles.length) {
+    const subtitleLanguages = [...new Set(
+      subtitles.map((stream) => stream.Language || stream.DisplayLanguage || stream.DisplayTitle).filter(Boolean),
+    )];
+    info.push({
+      label: 'Subtitles',
+      value: subtitleLanguages.length ? subtitleLanguages.join(' · ') : `${subtitles.length} tracks`,
+    });
+  }
+
   if (mediaItem.Genres?.length) info.push({ label: 'Genres', value: mediaItem.Genres.join(' · ') });
-  if (mediaItem.Director) info.push({ label: 'Director', value: mediaItem.Director });
-  if (mediaItem.Writer) info.push({ label: 'Writer', value: mediaItem.Writer });
-  if (mediaItem.Studios?.length) info.push({ label: 'Studio', value: mediaItem.Studios.map((studio) => studio.Name || studio).join(' · ') });
+
+  const people = Array.isArray(mediaItem.People) ? mediaItem.People : [];
+  const directors = people.filter((person) => String(person.Type || '').toLowerCase() === 'director').map((person) => person.Name).filter(Boolean);
+  const writers = people.filter((person) => ['writer', 'screenwriter'].includes(String(person.Type || '').toLowerCase())).map((person) => person.Name).filter(Boolean);
+  const directorsValue = [...new Set([mediaItem.Director, ...directors].filter(Boolean))].join(' · ');
+  const writersValue = [...new Set([mediaItem.Writer, ...writers].filter(Boolean))].join(' · ');
+  if (directorsValue) info.push({ label: 'Director', value: directorsValue });
+  if (writersValue) info.push({ label: 'Writer', value: writersValue });
+
+  if (mediaItem.Studios?.length) {
+    const studios = mediaItem.Studios.map((studio) => studio.Name || studio).filter(Boolean);
+    if (studios.length) info.push({ label: 'Studio', value: [...new Set(studios)].join(' · ') });
+  }
+
   return info;
 }
 
