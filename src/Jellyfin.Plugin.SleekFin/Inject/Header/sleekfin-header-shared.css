@@ -37,6 +37,11 @@ html:is(.sleekfin-header-boot-loading, .sleekfin-header-loading) :is(header.MuiA
     }
 }
 
+/* The video player has its own OSD header/back button. Do not render the DINKFLIX site header over the player. */
+html.sleekfin-header-mounted body:has(.osdHeader) :is([data-sleekfin-header], .sleekfin-header-fallback-brand) {
+    display: none !important;
+}
+
 html.sleekfin-header-mounted [data-sleekfin-header] {
     animation: sleekfin-header-enter 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
     background: transparent !important;
