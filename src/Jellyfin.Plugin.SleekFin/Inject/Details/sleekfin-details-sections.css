@@ -88,3 +88,10 @@ html.sleekfin-details-mounted #castCollapsible .cardText a {
         width: 132px !important;
     }
 }
+
+
+html.sleekfin-details-mounted #itemDetailPage[data-sleekfin-details] .emby-scrollbuttons,
+html.sleekfin-details-mounted #itemDetailPage[data-sleekfin-details] .emby-scrollbuttons-button {
+    pointer-events: auto !important;
+    z-index: 5;
+}
