@@ -1,0 +1,98 @@
+#indexPage.homePage.libraryPage:has(.dinkflix-hero),
+html:is(.dinkflix-hero-boot-loading, .dinkflix-hero-loading) #indexPage.homePage.libraryPage {
+    background: var(--dinkflix-background);
+    /* Jellyfin's wide absolute-tab rule might load after Modern home override. */
+    padding-top: 0 !important;
+}
+
+html:is(.dinkflix-hero-boot-loading, .dinkflix-hero-loading) #indexPage #homeTab.is-active > .sections::before {
+    animation: dinkflix-skeleton-pulse 1.4s ease-in-out infinite alternate;
+    background:
+        linear-gradient(var(--dinkflix-skeleton-line-strong, rgba(226, 229, 234, 0.28)) 0 0) var(--dinkflix-page-gutter) calc(100% - 244px) / min(340px, 52vw) 76px no-repeat,
+        linear-gradient(var(--dinkflix-skeleton-line, rgba(211, 215, 221, 0.16)) 0 0) var(--dinkflix-page-gutter) calc(100% - 150px) / min(430px, 68vw) 14px no-repeat,
+        linear-gradient(var(--dinkflix-skeleton-line, rgba(211, 215, 221, 0.16)) 0 0) var(--dinkflix-page-gutter) calc(100% - 122px) / min(360px, 58vw) 14px no-repeat,
+        linear-gradient(var(--dinkflix-skeleton-line-strong, rgba(226, 229, 234, 0.28)) 0 0) var(--dinkflix-page-gutter) calc(100% - 70px) / 120px 40px no-repeat,
+        linear-gradient(115deg, var(--dinkflix-surface, #101113) 15%, var(--dinkflix-surface-raised, #1a1c20) 42%, var(--dinkflix-surface, #101113) 70%);
+    content: "";
+    display: block;
+    height: var(--dinkflix-hero-mobile-height, 70vh);
+    min-height: min(420px, var(--dinkflix-hero-mobile-height, 70vh));
+}
+
+.dinkflix-hero {
+    background: var(--dinkflix-background);
+    box-sizing: border-box;
+    color: #fff;
+    font-family: var(--dinkflix-font-family);
+    height: var(--dinkflix-hero-mobile-height, 70vh);
+    margin-top: 0;
+    min-height: min(420px, var(--dinkflix-hero-mobile-height, 70vh));
+    overflow: hidden;
+    position: relative;
+    touch-action: auto;
+    width: 100%;
+}
+
+.dinkflix-hero[data-swipe-enabled="true"] {
+    touch-action: pan-y;
+}
+
+.dinkflix-hero::before,
+.dinkflix-hero::after {
+    content: "";
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    transition: opacity 320ms ease;
+    z-index: 2;
+}
+
+.dinkflix-hero::before {
+    background:
+        linear-gradient(var(--dinkflix-skeleton-line-strong, rgba(226, 229, 234, 0.28)) 0 0) var(--dinkflix-page-gutter) calc(100% - 244px) / min(340px, 52vw) 76px no-repeat,
+        linear-gradient(var(--dinkflix-skeleton-line, rgba(211, 215, 221, 0.16)) 0 0) var(--dinkflix-page-gutter) calc(100% - 150px) / min(430px, 68vw) 14px no-repeat,
+        linear-gradient(var(--dinkflix-skeleton-line, rgba(211, 215, 221, 0.16)) 0 0) var(--dinkflix-page-gutter) calc(100% - 122px) / min(360px, 58vw) 14px no-repeat,
+        linear-gradient(var(--dinkflix-skeleton-line-strong, rgba(226, 229, 234, 0.28)) 0 0) var(--dinkflix-page-gutter) calc(100% - 70px) / 120px 40px no-repeat,
+        linear-gradient(115deg, var(--dinkflix-surface, #101113) 15%, var(--dinkflix-surface-raised, #1a1c20) 42%, var(--dinkflix-surface, #101113) 70%);
+}
+
+.dinkflix-hero::after {
+    animation: dinkflix-skeleton-shimmer 1.6s linear infinite;
+    background: linear-gradient(105deg, transparent 35%, var(--dinkflix-skeleton-shimmer, rgba(226, 229, 234, 0.1)) 50%, transparent 65%);
+    transform: translateX(-100%);
+}
+
+.dinkflix-hero[data-state="loading"]::before,
+.dinkflix-hero[data-state="loading"]::after {
+    opacity: 1;
+}
+
+@keyframes dinkflix-skeleton-pulse {
+    from {
+        opacity: 0.62;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes dinkflix-skeleton-shimmer {
+    to {
+        transform: translateX(100%);
+    }
+}
+
+html:is(.dinkflix-header-boot-loading, .dinkflix-header-loading) .dinkflix-hero,
+html.dinkflix-header-mounted .dinkflix-hero {
+    margin-top: calc(-1 * var(--dinkflix-header-height));
+}
+
+@media (min-width: 768px) {
+    html:is(.dinkflix-hero-boot-loading, .dinkflix-hero-loading) #indexPage #homeTab.is-active > .sections::before,
+    .dinkflix-hero {
+        height: var(--dinkflix-hero-desktop-height, 85vh);
+        min-height: min(420px, var(--dinkflix-hero-desktop-height, 85vh));
+    }
+}

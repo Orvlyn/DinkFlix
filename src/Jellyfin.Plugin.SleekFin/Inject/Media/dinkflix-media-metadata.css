@@ -1,0 +1,9 @@
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .dinkflix-media-meta-source {
+    display: none !important;
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardText-secondary[data-dinkflix-media-meta] {
+    line-height: 1;
+    margin-top: 4px;
+    padding: 0 2px;
+}

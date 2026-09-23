@@ -5,25 +5,25 @@
  * This selector is (0,2,1) against Jellyfin's (0,2,0), so an !important background here wins
  * and the layer covers the player in opaque black while audio keeps playing.
  */
-html.sleekfin-main-ui,
-html.sleekfin-main-ui body,
-html.sleekfin-main-ui .nowPlayingPlaylist,
-html.sleekfin-main-ui .wizardStartForm,
-html.sleekfin-main-ui .dialog {
-    background-color: var(--sleekfin-background) !important;
+html.dinkflix-main-ui,
+html.dinkflix-main-ui body,
+html.dinkflix-main-ui .nowPlayingPlaylist,
+html.dinkflix-main-ui .wizardStartForm,
+html.dinkflix-main-ui .dialog {
+    background-color: var(--dinkflix-background) !important;
     background-image: none !important;
 }
 
-html.sleekfin-main-ui .collapseContent,
-html.sleekfin-main-ui .formDialogFooter:not(.formDialogFooter-clear),
-html.sleekfin-main-ui .formDialogHeader:not(.formDialogHeader-clear),
-html.sleekfin-main-ui .paperList,
-html.sleekfin-main-ui .visualCardBox,
-html.sleekfin-main-ui .cardBox:not(.visualCardBox) .cardPadder {
+html.dinkflix-main-ui .collapseContent,
+html.dinkflix-main-ui .formDialogFooter:not(.formDialogFooter-clear),
+html.dinkflix-main-ui .formDialogHeader:not(.formDialogHeader-clear),
+html.dinkflix-main-ui .paperList,
+html.dinkflix-main-ui .visualCardBox,
+html.dinkflix-main-ui .cardBox:not(.visualCardBox) .cardPadder {
     background-color: var(--jf-palette-background-paper) !important;
 }
 
-html.sleekfin-main-ui .cardPadder .cardImageIcon {
+html.dinkflix-main-ui .cardPadder .cardImageIcon {
     color: var(--jf-palette-background-paper) !important;
 }
 

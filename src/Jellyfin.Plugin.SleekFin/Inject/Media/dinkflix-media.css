@@ -1,0 +1,389 @@
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) {
+    background: var(--dinkflix-background) !important;
+    color: var(--dinkflix-text);
+    font-family: var(--dinkflix-font-family);
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .padded-left {
+    padding-inline-start: var(--dinkflix-page-gutter) !important;
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .padded-right {
+    padding-inline-end: var(--dinkflix-page-gutter) !important;
+}
+
+html.dinkflix-media-mounted.dinkflix-header-mounted :is(#moviesPage, #tvshowsPage, #tvRecommendedPage) {
+    padding-top: 72px !important;
+}
+
+@media (max-width: 599px) {
+    html.dinkflix-media-mounted.dinkflix-header-mounted :is(#moviesPage, #tvshowsPage, #tvRecommendedPage) {
+        padding-top: 112px !important;
+    }
+}
+
+html.dinkflix-media-mounted header.MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root {
+    box-sizing: border-box;
+    color: var(--dinkflix-text);
+    font-family: var(--dinkflix-font-family);
+    min-height: 48px;
+    padding-inline: var(--dinkflix-page-gutter) !important;
+    pointer-events: auto;
+}
+
+html.dinkflix-media-mounted header.MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root > button:first-child {
+    background: transparent;
+    border-radius: 8px;
+    color: var(--dinkflix-text);
+    gap: 10px;
+    min-width: 0;
+    padding: 4px 6px 4px 0;
+    text-transform: none;
+}
+
+html.dinkflix-media-mounted header.MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root > button:first-child::before,
+html.dinkflix-media-mounted #indexPage .sectionTitle.sectionTitle-cards::before {
+    align-self: stretch;
+    background: var(--dinkflix-accent);
+    border-radius: 999px;
+    content: "";
+    flex: 0 0 3px;
+    margin-top: 2px;
+    min-height: 1.15em;
+}
+
+html.dinkflix-media-mounted header.MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root > button:first-child .MuiTypography-root,
+html.dinkflix-media-mounted #indexPage .sectionTitle.sectionTitle-cards {
+    font: 600 24px/32px var(--dinkflix-font-family);
+}
+
+html.dinkflix-media-mounted header.MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root > button:first-child .MuiButton-endIcon {
+    color: var(--dinkflix-muted);
+    margin-left: -4px;
+}
+
+html.dinkflix-media-mounted header.MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root .MuiChip-root {
+    background: var(--dinkflix-surface-raised);
+    border: 1px solid var(--dinkflix-border);
+    color: var(--dinkflix-muted);
+    font: 500 11px/1 var(--dinkflix-font-family);
+    height: 24px;
+}
+
+html.dinkflix-media-mounted header.MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root .MuiButtonGroup-root {
+    border-radius: 8px;
+}
+
+html.dinkflix-media-mounted header.MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root .MuiButton-root {
+    border-color: var(--dinkflix-border);
+    font: 500 13px/1 var(--dinkflix-font-family);
+    text-transform: none;
+    transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+html.dinkflix-media-mounted header.MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root .MuiButton-contained {
+    background: var(--dinkflix-text);
+    color: var(--dinkflix-background);
+}
+
+html.dinkflix-media-mounted header.MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root .MuiButton-contained:hover {
+    background: #fff;
+}
+
+html.dinkflix-media-mounted header.MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root .MuiButton-text {
+    color: var(--dinkflix-muted);
+}
+
+html.dinkflix-media-mounted header.MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root .MuiButton-text:hover {
+    background: var(--dinkflix-surface-raised);
+    color: var(--dinkflix-text);
+}
+
+@media (max-width: 599px) {
+    html.dinkflix-media-mounted header.MuiAppBar-root > .MuiToolbar-root + .MuiToolbar-root > button:first-child .MuiTypography-root,
+    html.dinkflix-media-mounted #indexPage .sectionTitle.sectionTitle-cards {
+        font-size: 20px;
+        line-height: 28px;
+    }
+}
+
+html.dinkflix-media-mounted #indexPage .verticalSection {
+    margin-bottom: 44px;
+}
+
+@keyframes dinkflix-media-enter {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+html.dinkflix-media-mounted #indexPage .verticalSection:not(:empty),
+html.dinkflix-media-mounted :is(#moviesPage, #tvshowsPage, #tvRecommendedPage) .itemsContainer:not(:empty) {
+    animation: dinkflix-media-enter 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+html.dinkflix-media-mounted #indexPage .sectionTitleContainer-cards {
+    margin: 0 0 20px;
+    max-width: none !important;
+    padding-top: 28px;
+    width: 100%;
+}
+
+html.dinkflix-media-mounted #indexPage :not(.sectionTitleContainer-cards):not(.sectionTitleTextButton) > .sectionTitle-cards {
+    margin: 0 0 20px;
+    padding-block: 28px 0;
+}
+
+html.dinkflix-media-mounted #indexPage .emby-scroller {
+    padding-inline: var(--dinkflix-page-gutter) !important;
+}
+
+html.dinkflix-media-mounted #indexPage .sectionTitle.sectionTitle-cards {
+    align-items: flex-start;
+    color: var(--dinkflix-text);
+    display: flex;
+    gap: 10px;
+}
+
+html.dinkflix-media-mounted #indexPage .sectionTitleTextButton {
+    color: var(--dinkflix-text) !important;
+    flex: 0 0 auto;
+    max-width: none !important;
+    text-decoration: none;
+    white-space: nowrap;
+    width: max-content !important;
+}
+
+html.dinkflix-media-mounted #indexPage .sectionTitleTextButton > .material-icons {
+    color: var(--dinkflix-muted);
+    font-size: 20px;
+    transition: color 180ms ease, transform 180ms ease;
+}
+
+html.dinkflix-media-mounted #indexPage .sectionTitleTextButton:hover > .material-icons {
+    color: var(--dinkflix-accent);
+    transform: translateX(2px);
+}
+
+html.dinkflix-media-mounted #indexPage .homeLibraryButtonContainer {
+    margin-inline: 0;
+}
+
+html.dinkflix-media-mounted #indexPage .homeLibraryButton {
+    background: var(--dinkflix-surface) !important;
+    border: 1px solid var(--dinkflix-border);
+    border-radius: 10px;
+    box-shadow: none;
+    color: var(--dinkflix-text);
+    font: 500 13px/1 var(--dinkflix-font-family);
+    transition: background-color 180ms ease, border-color 180ms ease;
+}
+
+html.dinkflix-media-mounted #indexPage .homeLibraryButton:hover {
+    background: var(--dinkflix-surface-raised) !important;
+    border-color: var(--dinkflix-border-hover);
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardBox {
+    margin: 0 !important;
+    margin-inline-end: 12px !important;
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) {
+    max-width: 320px;
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowPortraitCard, .portraitCard) {
+    max-width: 200px;
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardBox.cardBox-bottompadded {
+    margin-bottom: 32px !important;
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardScalable {
+    background: var(--dinkflix-surface);
+    border: 1px solid var(--dinkflix-border);
+    border-radius: 10px;
+    box-sizing: border-box;
+    overflow: hidden;
+    transition: border-color 220ms ease;
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardScalable:has(.cardImageContainer.lazy-hidden)::after {
+    animation: dinkflix-card-skeleton 1.5s linear infinite;
+    background: linear-gradient(105deg, transparent 30%, var(--dinkflix-skeleton-shimmer) 50%, transparent 70%);
+    content: "";
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
+    transform: translateX(-100%);
+    z-index: 1;
+}
+
+@keyframes dinkflix-card-skeleton {
+    to {
+        transform: translateX(100%);
+    }
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardBox:not(.visualCardBox) :is(.cardContent, .cardImageContainer, .cardOverlayContainer, .blurhash-canvas) {
+    border-radius: 9px;
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardContent {
+    transform-origin: center;
+    transition: transform 550ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:hover .cardContent {
+    transform: scale(1.06);
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:hover .cardBox:not(.visualCardBox) .cardScalable,
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:hover .visualCardBox {
+    border-color: var(--dinkflix-border-hover);
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .visualCardBox {
+    background: var(--dinkflix-surface) !important;
+    border: 1px solid var(--dinkflix-border) !important;
+    border-radius: 10px;
+    box-shadow: none;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .visualCardBox .cardScalable {
+    border: 0;
+    border-radius: 0;
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .visualCardBox :is(.cardContent, .cardImageContainer, .cardOverlayContainer, .blurhash-canvas) {
+    border-radius: 9px 9px 0 0;
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardOverlayContainer {
+    background: transparent;
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) :is(.cardOverlayButtonIcon, .cardOverlayButton-centered, .cardOverlayFab-primary) {
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
+    backdrop-filter: blur(14px) saturate(130%);
+    background: rgba(16, 17, 19, 0.82) !important;
+    border-color: rgba(241, 242, 244, 0.24);
+    color: var(--dinkflix-text);
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardText {
+    color: var(--dinkflix-text);
+    font: 500 13px/1.375 var(--dinkflix-font-family);
+    letter-spacing: 0;
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardText-first {
+    padding: 10px 2px 0;
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardText-secondary {
+    color: var(--dinkflix-muted);
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1.2;
+    padding: 4px 2px 0;
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) :is(.cardTextCentered, .cardTextCentered > .textActionButton) {
+    text-align: start !important;
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardText a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 180ms ease;
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:hover .cardText-first a {
+    color: var(--dinkflix-accent);
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .innerCardFooter {
+    -webkit-backdrop-filter: blur(12px) saturate(120%);
+    backdrop-filter: blur(12px) saturate(120%);
+    background: rgba(0, 0, 0, 0.78);
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .innerCardFooter > .cardText {
+    padding: 8px 10px;
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .itemProgressBar {
+    background: rgba(150, 154, 161, 0.28);
+    height: 3px;
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .itemProgressBarForeground {
+    background: var(--dinkflix-accent) !important;
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) :is(.countIndicator, .playedIndicator, .mediaSourceIndicator) {
+    background: rgba(16, 17, 19, 0.86) !important;
+    border: 1px solid rgba(241, 242, 244, 0.18);
+    box-shadow: none;
+    color: var(--dinkflix-text);
+}
+
+.mdl-spinner__layer-1,
+.mdl-spinner__layer-2,
+.mdl-spinner__layer-3,
+.mdl-spinner__layer-4 {
+    border-color: var(--dinkflix-accent) !important;
+}
+
+
+@media (max-width: 599px) {
+    html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardBox {
+        margin-inline-end: 10px !important;
+    }
+
+    html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardBox.cardBox-bottompadded {
+        margin-bottom: 24px !important;
+    }
+}
+
+
+.dinkflix-continue-remove {
+    align-items: center;
+    appearance: none;
+    background: rgba(5, 8, 16, 0.82);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 999px;
+    color: rgba(255,255,255,0.84);
+    cursor: pointer;
+    display: inline-flex;
+    height: 30px;
+    justify-content: center;
+    position: absolute;
+    right: 9px;
+    top: 9px;
+    transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+    width: 30px;
+    z-index: 20;
+}
+
+.dinkflix-continue-remove:hover,
+.dinkflix-continue-remove:focus-visible {
+    background: var(--dinkflix-accent);
+    color: #04110d;
+    transform: scale(1.04);
+}
+
+.dinkflix-continue-removed {
+    opacity: 0;
+    transform: scale(0.985);
+    transition: opacity 180ms ease, transform 180ms ease;
+}

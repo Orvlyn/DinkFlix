@@ -1,0 +1,84 @@
+/* DINKFLIX focused presentation fixes.
+   Loaded after dinkflix-media.css. No global page/player/settings rules. */
+
+/* Hide only Jellyfin's My Media shortcut section.
+   Jellyfin renders it as #indexPage .verticalSection.section0 with a
+   direct h2.sectionTitle labelled My Media. The previous selector relied
+   on a homeLibraryButtonContainer that does not exist in this markup. */
+#indexPage #homeTab .verticalSection.section0:has(> h2.sectionTitle.sectionTitle-cards),
+#indexPage .homePage .verticalSection.section0:has(> h2.sectionTitle.sectionTitle-cards),
+#indexPage .verticalSection.section0:has(> h2.sectionTitle) {
+    display: none !important;
+}
+
+#indexPage .dinkflix-hide-my-media {
+    display: none !important;
+}
+
+html.dinkflix-media-mounted #indexPage .verticalSection:has(.homeLibraryButtonContainer),
+html.dinkflix-media-mounted #indexPage .sectionContainer:has(.homeLibraryButtonContainer),
+html.dinkflix-media-mounted #indexPage .sections > :is(div, section):has(.homeLibraryButtonContainer) {
+    display: none !important;
+}
+
+/* Jellyfin's cardBox controls the visible flex width, so both the wrapper
+   and the card itself are explicitly sized. */
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardBox:has(.card:is(.overflowPortraitCard, .portraitCard)) {
+    flex: 0 0 280px !important;
+    width: 280px !important;
+    max-width: 280px !important;
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardBox:has(.card:is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard)) {
+    flex: 0 0 460px !important;
+    width: 460px !important;
+    max-width: 460px !important;
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowPortraitCard, .portraitCard) {
+    flex: 0 0 280px !important;
+    width: 280px !important;
+    max-width: 280px !important;
+    min-width: 280px !important;
+}
+
+html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) {
+    flex: 0 0 460px !important;
+    width: 460px !important;
+    max-width: 460px !important;
+    min-width: 460px !important;
+}
+
+@media (max-width: 900px) {
+    html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardBox:has(.card:is(.overflowPortraitCard, .portraitCard)),
+    html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowPortraitCard, .portraitCard) {
+        flex-basis: 220px !important;
+        width: 220px !important;
+        max-width: 220px !important;
+        min-width: 220px !important;
+    }
+
+    html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardBox:has(.card:is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard)),
+    html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) {
+        flex-basis: 340px !important;
+        width: 340px !important;
+        max-width: 340px !important;
+    }
+}
+
+@media (max-width: 599px) {
+    html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardBox:has(.card:is(.overflowPortraitCard, .portraitCard)),
+    html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowPortraitCard, .portraitCard) {
+        flex-basis: 170px !important;
+        width: 170px !important;
+        max-width: 170px !important;
+        min-width: 170px !important;
+    }
+
+    html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .cardBox:has(.card:is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard)),
+    html.dinkflix-media-mounted :is(#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage) .card:is(.overflowBackdropCard, .overflowSmallBackdropCard, .backdropCard) {
+        flex-basis: 280px !important;
+        width: 280px !important;
+        max-width: 280px !important;
+    }
+}
