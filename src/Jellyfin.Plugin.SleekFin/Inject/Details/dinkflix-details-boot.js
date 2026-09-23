@@ -2,11 +2,11 @@
     'use strict';
 
     var root = document.documentElement;
-    var concealedClass = 'sleekfin-details-concealed';
-    var concealEvent = 'sleekfin:details-conceal';
+    var concealedClass = 'dinkflix-details-concealed';
+    var concealEvent = 'dinkflix:details-conceal';
 
-    if (!root || root.hasAttribute('data-sleekfin-details-boot')) return;
-    root.setAttribute('data-sleekfin-details-boot', 'true');
+    if (!root || root.hasAttribute('data-dinkflix-details-boot')) return;
+    root.setAttribute('data-dinkflix-details-boot', 'true');
 
     var failsafe = 0;
     var concealed = false;

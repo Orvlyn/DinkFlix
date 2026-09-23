@@ -1,15 +1,15 @@
-.sleekfin-fact {
+.dinkflix-fact {
     align-items: center;
     display: inline-flex;
     gap: 4px;
 }
 
-.sleekfin-fact > .sleekfin-icon {
+.dinkflix-fact > .dinkflix-icon {
     height: 13px;
     width: 13px;
 }
 
-.sleekfin-fact-dot {
+.dinkflix-fact-dot {
     color: rgba(255, 255, 255, 0.42);
     margin: 0 8px;
 }

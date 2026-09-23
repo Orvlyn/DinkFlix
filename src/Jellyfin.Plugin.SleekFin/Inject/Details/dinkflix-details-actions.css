@@ -1,0 +1,50 @@
+.dinkflix-details-stack > .mainDetailButtons {
+    align-items: center;
+    display: flex !important;
+    gap: 12px;
+    margin: 18px 0 0 !important;
+}
+
+.dinkflix-details-stack > .mainDetailButtons > * {
+    display: none !important;
+}
+
+.dinkflix-details-stack > .mainDetailButtons > :is(.btnPlay, .btnReplay, .btnDownload, .btnUserRating):not(.hide) {
+    display: inline-flex !important;
+    margin: 0 !important;
+}
+
+.dinkflix-details-stack > .mainDetailButtons > :is(.btnPlay, .btnReplay).dinkflix-details-suppressed-action {
+    display: none !important;
+}
+
+.dinkflix-details-stack > .mainDetailButtons > :is(.btnPlay, .btnReplay):not(.hide) {
+    order: 1;
+}
+
+.dinkflix-details-stack > .mainDetailButtons > .btnUserRating:not(.hide) {
+    order: 2;
+}
+
+.dinkflix-details-stack > .mainDetailButtons > .btnDownload:not(.hide) {
+    order: 3;
+}
+
+.dinkflix-details-stack > .mainDetailButtons .detailButton-content {
+    flex-direction: row !important;
+    height: auto;
+}
+
+.dinkflix-details-stack > .mainDetailButtons .material-icons {
+    display: none !important;
+}
+
+
+.dinkflix-details-stack > .mainDetailButtons > .btnUserRating[data-isfavorite="true"] {
+    color: var(--dinkflix-accent) !important;
+}
+
+.dinkflix-details-stack > .mainDetailButtons > .btnUserRating[data-isfavorite="true"] .dinkflix-icon {
+    fill: currentColor !important;
+    filter: drop-shadow(0 0 6px rgba(0, 255, 198, 0.22));
+}

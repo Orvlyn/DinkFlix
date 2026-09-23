@@ -1,7 +1,7 @@
-const runtime = window.SleekFinRuntime;
+const runtime = window.DinkFlixRuntime;
 
 if (!runtime) {
-  throw new Error('SleekFin runtime must load before feature bundles.');
+  throw new Error('DinkFlix runtime must load before feature bundles.');
 }
 
 export const Fragment = runtime.Fragment;

@@ -1,24 +1,24 @@
-.sleekfin-details-episodes {
+.dinkflix-details-episodes {
     box-sizing: border-box;
-    padding: 36px var(--sleekfin-page-gutter) 0;
+    padding: 36px var(--dinkflix-page-gutter) 0;
 }
 
-.sleekfin-details-episodes-header {
+.dinkflix-details-episodes-header {
     align-items: center;
     display: flex;
     justify-content: space-between;
     min-height: 52px;
 }
 
-.sleekfin-details-season-select {
+.dinkflix-details-season-select {
     display: inline-flex;
     max-width: min(54vw, 360px);
     position: relative;
 }
 
-.sleekfin-details-season-select::after {
-    border-bottom: 2px solid var(--sleekfin-muted);
-    border-right: 2px solid var(--sleekfin-muted);
+.dinkflix-details-season-select::after {
+    border-bottom: 2px solid var(--dinkflix-muted);
+    border-right: 2px solid var(--dinkflix-muted);
     content: "";
     height: 7px;
     pointer-events: none;
@@ -29,17 +29,17 @@
     width: 7px;
 }
 
-.sleekfin-details-season-native,
-.sleekfin-details-season-title {
-    color: var(--sleekfin-text);
-    font: 600 24px/32px var(--sleekfin-font-family);
+.dinkflix-details-season-native,
+.dinkflix-details-season-title {
+    color: var(--dinkflix-text);
+    font: 600 24px/32px var(--dinkflix-font-family);
 }
 
-.sleekfin-details-season-title {
+.dinkflix-details-season-title {
     margin: 0;
 }
 
-.sleekfin-details-season-native {
+.dinkflix-details-season-native {
     -webkit-appearance: none;
     appearance: none;
     background: transparent;
@@ -49,25 +49,25 @@
     padding: 0 22px 0 0;
 }
 
-.sleekfin-details-episode-controls {
+.dinkflix-details-episode-controls {
     align-items: center;
     display: flex;
     gap: 8px;
 }
 
-.sleekfin-details-control,
-.sleekfin-details-episode-download {
+.dinkflix-details-control,
+.dinkflix-details-episode-download {
     transition: color 180ms ease;
 }
 
-.sleekfin-details-view-controls {
+.dinkflix-details-view-controls {
     border-radius: 12px;
     display: flex;
     height: 36px;
     padding: 2px;
 }
 
-.sleekfin-details-view-controls .sleekfin-details-control {
+.dinkflix-details-view-controls .dinkflix-details-control {
     background: transparent !important;
     border: 0 !important;
     border-radius: 10px;
@@ -76,12 +76,12 @@
     width: 32px;
 }
 
-.sleekfin-details-view-controls .sleekfin-details-control[data-active="true"] {
+.dinkflix-details-view-controls .dinkflix-details-control[data-active="true"] {
     background: rgba(255, 255, 255, 0.1) !important;
-    color: var(--sleekfin-text);
+    color: var(--dinkflix-text);
 }
 
-.sleekfin-details-search {
+.dinkflix-details-search {
     align-items: center;
     border-radius: 12px;
     display: flex;
@@ -92,12 +92,12 @@
     width: 36px;
 }
 
-.sleekfin-details-search input {
+.dinkflix-details-search input {
     background: transparent;
     border: 0;
     box-sizing: border-box;
-    color: var(--sleekfin-text);
-    font: 400 13px/1 var(--sleekfin-font-family);
+    color: var(--dinkflix-text);
+    font: 400 13px/1 var(--dinkflix-font-family);
     height: 36px;
     inset: 0;
     opacity: 0;
@@ -108,16 +108,16 @@
     width: 100%;
 }
 
-.sleekfin-details-search-open {
+.dinkflix-details-search-open {
     width: 190px;
 }
 
-.sleekfin-details-search-open input {
+.dinkflix-details-search-open input {
     opacity: 1;
     pointer-events: auto;
 }
 
-.sleekfin-details-search .sleekfin-icon-button {
+.dinkflix-details-search .dinkflix-icon-button {
     background: transparent !important;
     border: 0 !important;
     box-shadow: none;
@@ -128,7 +128,7 @@
     z-index: 1;
 }
 
-.sleekfin-details-episode-list {
+.dinkflix-details-episode-list {
     display: grid;
     gap: 12px;
     grid-auto-columns: 380px;
@@ -140,11 +140,11 @@
     scrollbar-width: none;
 }
 
-.sleekfin-details-episode-list::-webkit-scrollbar {
+.dinkflix-details-episode-list::-webkit-scrollbar {
     display: none;
 }
 
-.sleekfin-details-episode {
+.dinkflix-details-episode {
     aspect-ratio: 16 / 9;
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 16px;
@@ -154,10 +154,10 @@
     scroll-snap-align: start;
 }
 
-.sleekfin-details-episode-action {
-    background: var(--sleekfin-surface);
+.dinkflix-details-episode-action {
+    background: var(--dinkflix-surface);
     border: 0;
-    color: var(--sleekfin-text);
+    color: var(--dinkflix-text);
     cursor: pointer;
     display: block;
     height: 100%;
@@ -166,7 +166,7 @@
     width: 100%;
 }
 
-.sleekfin-details-episode-action > img {
+.dinkflix-details-episode-action > img {
     height: 100%;
     inset: 0;
     object-fit: cover;
@@ -175,13 +175,13 @@
     width: 100%;
 }
 
-.sleekfin-details-episode-shade {
+.dinkflix-details-episode-shade {
     background: linear-gradient(180deg, rgba(0, 0, 0, 0.08) 32%, rgba(0, 0, 0, 0.92) 100%);
     inset: 0;
     position: absolute;
 }
 
-.sleekfin-details-episode-copy {
+.dinkflix-details-episode-copy {
     bottom: 0;
     display: flex;
     flex-direction: column;
@@ -191,53 +191,53 @@
     right: 0;
 }
 
-.sleekfin-details-episode-number {
+.dinkflix-details-episode-number {
     color: rgba(241, 242, 244, 0.68);
-    font: 600 10px/14px var(--sleekfin-font-family);
+    font: 600 10px/14px var(--dinkflix-font-family);
     letter-spacing: 0.16em;
     text-transform: uppercase;
 }
 
-.sleekfin-details-episode-title {
-    font: 600 17px/22px var(--sleekfin-font-family);
+.dinkflix-details-episode-title {
+    font: 600 17px/22px var(--dinkflix-font-family);
     margin-top: 2px;
 }
 
-.sleekfin-details-episode-overview {
+.dinkflix-details-episode-overview {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
     color: rgba(241, 242, 244, 0.72);
     display: -webkit-box;
-    font: 400 13px/18px var(--sleekfin-font-family);
+    font: 400 13px/18px var(--dinkflix-font-family);
     margin-top: 4px;
     overflow: hidden;
 }
 
-.sleekfin-details-episode-footer {
+.dinkflix-details-episode-footer {
     align-items: center;
     color: rgba(241, 242, 244, 0.7);
     display: flex;
-    font: 400 12px/16px var(--sleekfin-font-family);
+    font: 400 12px/16px var(--dinkflix-font-family);
     justify-content: space-between;
     margin-top: 9px;
 }
 
-.sleekfin-details-episode-footer > :where(span) {
+.dinkflix-details-episode-footer > :where(span) {
     align-items: center;
     display: inline-flex;
     gap: 6px;
 }
 
-.sleekfin-details-episode-score {
-    color: var(--sleekfin-text);
+.dinkflix-details-episode-score {
+    color: var(--dinkflix-text);
 }
 
-.sleekfin-details-episode-footer > :where(span) .sleekfin-icon {
+.dinkflix-details-episode-footer > :where(span) .dinkflix-icon {
     height: 11px;
     width: 11px;
 }
 
-.sleekfin-details-episode-download {
+.dinkflix-details-episode-download {
     height: 32px;
     position: absolute;
     right: 10px;
@@ -246,32 +246,32 @@
     z-index: 2;
 }
 
-.sleekfin-details-episode:hover .sleekfin-details-episode-action > img {
+.dinkflix-details-episode:hover .dinkflix-details-episode-action > img {
     filter: brightness(1.08);
     transform: scale(1.035);
 }
 
-.sleekfin-details-episode-list[data-view="list"] {
+.dinkflix-details-episode-list[data-view="list"] {
     display: flex;
     flex-direction: column;
     overflow: visible;
 }
 
-.sleekfin-details-episode-list[data-view="list"] .sleekfin-details-episode {
+.dinkflix-details-episode-list[data-view="list"] .dinkflix-details-episode {
     aspect-ratio: auto;
     height: 150px;
     width: 100%;
 }
 
-.sleekfin-details-episode-list[data-view="list"] .sleekfin-details-episode-action > img {
+.dinkflix-details-episode-list[data-view="list"] .dinkflix-details-episode-action > img {
     width: 268px;
 }
 
-.sleekfin-details-episode-list[data-view="list"] .sleekfin-details-episode-shade {
+.dinkflix-details-episode-list[data-view="list"] .dinkflix-details-episode-shade {
     background: linear-gradient(90deg, transparent 0, rgba(0, 0, 0, 0.78) 268px, rgba(0, 0, 0, 0.96) 55%);
 }
 
-.sleekfin-details-episode-list[data-view="list"] .sleekfin-details-episode-copy {
+.dinkflix-details-episode-list[data-view="list"] .dinkflix-details-episode-copy {
     bottom: auto;
     left: 268px;
     top: 50%;
@@ -279,52 +279,52 @@
 }
 
 @media (max-width: 767px) {
-    .sleekfin-details-season-native,
-    .sleekfin-details-season-title {
+    .dinkflix-details-season-native,
+    .dinkflix-details-season-title {
         font-size: 20px;
         line-height: 28px;
     }
 
-    .sleekfin-details-episodes-header {
+    .dinkflix-details-episodes-header {
         align-items: flex-start;
         flex-direction: column;
         gap: 12px;
     }
 
-    .sleekfin-details-episode-controls {
+    .dinkflix-details-episode-controls {
         align-self: flex-end;
     }
 
-    .sleekfin-details-episode-list {
+    .dinkflix-details-episode-list {
         grid-auto-columns: min(84vw, 380px);
     }
 
-    .sleekfin-details-episode-list[data-view="list"] .sleekfin-details-episode {
+    .dinkflix-details-episode-list[data-view="list"] .dinkflix-details-episode {
         height: 126px;
     }
 
-    .sleekfin-details-episode-list[data-view="list"] .sleekfin-details-episode-action > img {
+    .dinkflix-details-episode-list[data-view="list"] .dinkflix-details-episode-action > img {
         width: 42%;
     }
 
-    .sleekfin-details-episode-list[data-view="list"] .sleekfin-details-episode-copy {
+    .dinkflix-details-episode-list[data-view="list"] .dinkflix-details-episode-copy {
         left: 42%;
         padding: 12px;
     }
 
-    .sleekfin-details-episode-list[data-view="list"] .sleekfin-details-episode-overview {
+    .dinkflix-details-episode-list[data-view="list"] .dinkflix-details-episode-overview {
         display: none;
     }
 }
 
 
-.sleekfin-details-episode-nav {
+.dinkflix-details-episode-nav {
     display: flex;
     gap: 2px;
     padding: 2px;
 }
 
-.sleekfin-details-episode-nav .sleekfin-details-control {
+.dinkflix-details-episode-nav .dinkflix-details-control {
     background: transparent !important;
     border: 0 !important;
     box-shadow: none;
@@ -332,7 +332,7 @@
     width: 32px;
 }
 
-.sleekfin-details-season-select {
+.dinkflix-details-season-select {
     background: rgba(255, 255, 255, 0.055);
     border: 1px solid rgba(255, 255, 255, 0.09);
     border-radius: 999px;
@@ -341,7 +341,7 @@
     padding: 7px 14px;
 }
 
-.sleekfin-details-season-select:focus-within {
+.dinkflix-details-season-select:focus-within {
     border-color: rgba(0, 255, 198, 0.44);
     box-shadow: 0 0 0 2px rgba(0, 255, 198, 0.14), 0 8px 24px rgba(0, 0, 0, 0.18);
 }

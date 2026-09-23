@@ -1,37 +1,37 @@
-.sleekfin-meta {
+.dinkflix-meta {
     align-items: center;
-    color: var(--sleekfin-muted);
+    color: var(--dinkflix-muted);
     display: flex;
-    font: 400 11px/1 var(--sleekfin-font-family);
+    font: 400 11px/1 var(--dinkflix-font-family);
     gap: 6px;
     overflow: hidden;
     white-space: nowrap;
 }
 
-.sleekfin-meta-item,
-.sleekfin-meta-content {
+.dinkflix-meta-item,
+.dinkflix-meta-content {
     align-items: center;
     display: inline-flex;
 }
 
-.sleekfin-meta-item {
+.dinkflix-meta-item {
     flex: 0 0 auto;
     gap: 6px;
 }
 
-.sleekfin-meta-content {
+.dinkflix-meta-content {
     gap: 4px;
 }
 
-.sleekfin-meta-separator {
+.dinkflix-meta-separator {
     color: rgba(255, 255, 255, 0.2);
 }
 
-.sleekfin-meta-accent {
+.dinkflix-meta-accent {
     color: rgba(220, 38, 38, 0.8);
 }
 
-.sleekfin-meta-content > .sleekfin-icon {
+.dinkflix-meta-content > .dinkflix-icon {
     height: 10px;
     width: 10px;
 }
