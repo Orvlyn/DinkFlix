@@ -4,10 +4,10 @@
     "name": "SleekFin",
     "description": "The ultimate Jellyfin Web revamp, with new elements, styles, plus compatible with the most popular plugins.",
     "overview": "The ultimate Jellyfin Web revamp, with new elements, styles, plus compatible with the most popular plugins.",
-    "owner": "varunaditya-plus",
+    "owner": "Orvlyn",
     "category": "General",
     "imageUrl": "https://raw.githubusercontent.com/varunaditya-plus/SleekFin/main/thumb.png",
-    "repositoryUrl": "https://github.com/varunaditya-plus/SleekFin",
+    "repositoryUrl": "https://github.com/Orvlyn/DinkFlix",
     "versions": [
       {
         "version": "11.5.0.4",
