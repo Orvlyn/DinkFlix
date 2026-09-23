@@ -45,8 +45,7 @@ function syncUser() {
 }
 
 function findHomeResumeContainers() {
-  return Array.from(document.querySelectorAll('#indexPage #homeTab.is-active .sections .itemsContainer[data-monitor]'))
-    .filter((container) => container.querySelector('.card[data-id][data-positionticks]'));
+  return Array.from(document.querySelectorAll('#indexPage #homeTab.is-active .sections .itemsContainer[data-monitor]'));
 }
 
 function hideEmptyResumeSection(container) {
@@ -86,12 +85,13 @@ function decorateResumeCards() {
     container.querySelectorAll('.card[data-id][data-positionticks]').forEach((card) => {
       if (card.querySelector('[data-sleekfin-resume-remove]')) return;
 
-      const buttonRow = card.querySelector('.cardOverlayButton-br.flex');
+      const overlay = card.querySelector('.cardOverlayContainer');
+      const buttonRow = overlay?.querySelector('.cardOverlayButton-br.flex') || overlay;
       if (!buttonRow) return;
 
       const button = document.createElement('button');
       button.type = 'button';
-      button.className = 'cardOverlayButton cardOverlayButton-hover paper-icon-button-light sleekfin-resume-remove';
+      button.className = 'cardOverlayButton cardOverlayButton-hover itemAction paper-icon-button-light sleekfin-resume-remove';
       button.dataset.sleekfinResumeRemove = 'true';
       button.title = 'Remove from Continue Watching';
       button.setAttribute('aria-label', 'Remove from Continue Watching');
