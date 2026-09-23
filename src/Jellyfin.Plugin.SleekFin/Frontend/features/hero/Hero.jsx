@@ -27,6 +27,12 @@ export function Hero({ entries, root, settings }) {
     return stopRotation;
   }, [entries.length, settings.autoRotateSeconds]);
 
+  function selectSlide(index) {
+    if (index < 0 || index >= entries.length || index === activeIndex) return;
+    setActiveIndex(index);
+    startRotation();
+  }
+
   function onPointerDown(event) {
     if (event.pointerType !== 'mouse' || event.button === 0) {
       pointerStartX.current = event.clientX;
@@ -38,8 +44,7 @@ export function Hero({ entries, root, settings }) {
     const distance = event.clientX - pointerStartX.current;
     pointerStartX.current = null;
     if (Math.abs(distance) >= 72) {
-      setActiveIndex((index) => (index + (distance < 0 ? 1 : entries.length - 1)) % entries.length);
-      startRotation();
+      selectSlide((activeIndex + (distance < 0 ? 1 : entries.length - 1)) % entries.length);
     }
   }
 
@@ -63,7 +68,34 @@ export function Hero({ entries, root, settings }) {
       window.removeEventListener('blur', onPointerCancel);
       onPointerCancel();
     };
-  }, [entries.length, root, settings.autoRotateSeconds, settings.swipeEnabled]);
+  }, [activeIndex, entries.length, root, settings.swipeEnabled]);
 
-  return entries.map((entry, index) => <HeroSlide key={`${entry.display.Id || index}-${entry.play.Id || index}`} entry={entry} active={index === activeIndex} settings={settings} />);
+  return (
+    <>
+      {entries.map((entry, index) => (
+        <HeroSlide
+          key={`${entry.display.Id || index}-${entry.play.Id || index}`}
+          entry={entry}
+          active={index === activeIndex}
+          settings={settings}
+        />
+      ))}
+      {entries.length > 1 && (
+        <nav class="sleekfin-hero-indicators" aria-label="Featured titles">
+          {entries.map((entry, index) => (
+            <button
+              key={entry.display.Id || index}
+              class="sleekfin-hero-indicator"
+              type="button"
+              data-active={index === activeIndex ? 'true' : 'false'}
+              aria-label={`Show featured title ${index + 1}`}
+              aria-current={index === activeIndex ? 'true' : undefined}
+              title={entry.display.Name || `Featured title ${index + 1}`}
+              onClick={() => selectSlide(index)}
+            />
+          ))}
+        </nav>
+      )}
+    </>
+  );
 }
