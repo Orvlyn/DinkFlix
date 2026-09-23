@@ -1,5 +1,6 @@
 import { dom } from '../../shared/runtime.js';
 import { cleanupInactiveMetadata, cleanupMetadata, renderMetadata } from './metadata.jsx';
+import { createContinueWatchingControls } from './continueWatching.js';
 
 const MAIN_ROOT_CLASS = 'dinkflix-main-ui';
 const ROOT_CLASS = 'dinkflix-media-mounted';
@@ -15,6 +16,7 @@ const state = {
   stopped: true,
   stopWatching: null,
   mediaObserver: null,
+  stopContinueWatching: null,
   timer: 0,
   userId: '',
 };
@@ -163,6 +165,7 @@ function start() {
   state.stopped = false;
   state.stopWatching = dom.watchSpa(schedule, { events: ['hashchange'] });
   startMyMediaHider();
+  state.stopContinueWatching = createContinueWatchingControls();
   schedule();
 }
 
@@ -173,6 +176,8 @@ function stop() {
   state.stopWatching?.();
   state.stopWatching = null;
   stopMyMediaHider();
+  state.stopContinueWatching?.();
+  state.stopContinueWatching = null;
   deactivate();
 }
 
