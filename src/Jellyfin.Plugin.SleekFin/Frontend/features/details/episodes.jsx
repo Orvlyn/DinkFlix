@@ -51,7 +51,8 @@ function Episodes({ client, list, mediaItem, seasons }) {
   const [episodes, setEpisodes] = useState([]);
   const [query, setQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
-  const [selectedSeasonId, setSelectedSeasonId] = useState(firstSeason?.Id || '');
+  const initialSeasonId = mediaItem.Type === 'Season' ? mediaItem.Id : mediaItem.SeasonId || firstSeason?.Id || '';
+  const [selectedSeasonId, setSelectedSeasonId] = useState(initialSeasonId);
   const [sortDescending, setSortDescending] = useState(false);
   const [status, setStatus] = useState(firstSeason ? 'loading' : 'error');
   const [view, setView] = useState('grid');
@@ -144,6 +145,11 @@ function Episodes({ client, list, mediaItem, seasons }) {
     title = <h2 class="sleekfin-details-season-title">{mediaItem.Type === 'Episode' ? `More from ${currentSeason?.Name || 'this season'}` : currentSeason?.Name || 'Episodes'}</h2>;
   }
 
+  function scrollEpisodes(direction) {
+    const amount = Math.max(list.clientWidth * 0.82, 320);
+    list.scrollBy({ left: direction * amount, behavior: 'smooth' });
+  }
+
   function toggleSearch() {
     setSearchOpen((open) => {
       if (open) {
@@ -161,6 +167,10 @@ function Episodes({ client, list, mediaItem, seasons }) {
           <IconButton icon="search" label="Search episodes" onClick={toggleSearch} />
           <input ref={searchInput} type="search" placeholder="Search episodes" value={query} onInput={(event) => setQuery(event.currentTarget.value)} />
         </div>
+        <span class="sleekfin-details-episode-nav sleekfin-control-3d">
+          <IconButton class="sleekfin-details-control" icon="arrowLeft" label="Previous episodes" onClick={() => scrollEpisodes(-1)} />
+          <IconButton class="sleekfin-details-control" icon="arrowRight" label="Next episodes" onClick={() => scrollEpisodes(1)} />
+        </span>
         <IconButton class="sleekfin-details-control" icon={sortDescending ? 'arrowUpAz' : 'arrowDownAz'} label="Reverse episode order" raised data-active={sortDescending ? 'true' : 'false'} onClick={() => setSortDescending((descending) => !descending)} />
         <span class="sleekfin-details-view-controls sleekfin-control-3d">
           <IconButton class="sleekfin-details-control" icon="grid" label="Grid view" data-view="grid" data-active={view === 'grid' ? 'true' : 'false'} onClick={() => setView('grid')} />
