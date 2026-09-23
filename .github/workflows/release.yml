@@ -15,7 +15,7 @@ env:
 
 jobs:
   release:
-    if: contains(github.event.head_commit.message, '(v')
+    if: startsWith(github.event.head_commit.message, 'Release DINKFLIX v')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,7 +28,7 @@ jobs:
         shell: bash
         run: |
           MSG=$(jq -r '.head_commit.message' "$GITHUB_EVENT_PATH" | head -n1)
-          if [[ "$MSG" =~ \(v([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)\) ]]; then
+          if [[ "$MSG" =~ ^Release\ DINKFLIX\ v([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
             echo "version=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
           else
             echo "No release version found"
@@ -71,7 +71,7 @@ jobs:
           cp meta.json "$OUT_DIR/meta.json"
           jq --arg version "$VERSION" \
              --arg targetAbi "$TARGET_ABI" \
-             '.version=$version | .targetAbi=$targetAbi | .name="DINKFLIX" | .owner="Orvlyn" | .description="A custom premium Jellyfin experience based on SleekFin and maintained by Orvlyn." | .overview="DINKFLIX: a dark, modern Jellyfin interface with a mint accent." | .assemblies=["Jellyfin.Plugin.SleekFin.dll"]' \
+             '.version=$version | .targetAbi=$targetAbi | .name="DINKFLIX" | .owner="Orvlyn" | .description="A custom premium Jellyfin Web experience maintained by Orvlyn." | .overview="DINKFLIX: a dark, modern Jellyfin interface with a mint accent." | .assemblies=["Jellyfin.Plugin.SleekFin.dll"]' \
              meta.json > "$OUT_DIR/meta.json"
           (cd "$OUT_DIR" && zip -j "$DIST_DIR/$ZIP_NAME" Jellyfin.Plugin.SleekFin.dll meta.json thumb.png)
           echo "zip_name=$ZIP_NAME" >> "$GITHUB_OUTPUT"
