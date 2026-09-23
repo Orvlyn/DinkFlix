@@ -1,4 +1,4 @@
-import { h, useEffect, useRef, useState } from '../../shared/runtime.js';
+import { Fragment, h, useEffect, useRef, useState } from '../../shared/runtime.js';
 import { HeroSlide } from './HeroSlide.jsx';
 
 export function Hero({ entries, root, settings }) {
@@ -71,7 +71,7 @@ export function Hero({ entries, root, settings }) {
   }, [activeIndex, entries.length, root, settings.swipeEnabled]);
 
   return (
-    <>
+    <Fragment>
       {entries.map((entry, index) => (
         <HeroSlide
           key={`${entry.display.Id || index}-${entry.play.Id || index}`}
@@ -96,6 +96,6 @@ export function Hero({ entries, root, settings }) {
           ))}
         </nav>
       )}
-    </>
+    </Fragment>
   );
 }
