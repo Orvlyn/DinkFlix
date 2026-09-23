@@ -66,6 +66,32 @@ function RichInfo({ values }) {
   );
 }
 
+function episodeNavigation(client, mediaItem) {
+  if (!client || mediaItem.Type !== 'Episode' || !mediaItem.SeriesId || !mediaItem.SeasonId) return Promise.resolve(null);
+  return client.getEpisodes(mediaItem.SeriesId, {
+    seasonId: mediaItem.SeasonId,
+    userId: client.getCurrentUserId(),
+    Fields: 'Overview,MediaStreams,People,Studios',
+    EnableImages: false,
+    EnableUserData: true,
+  }).then((result) => {
+    const episodes = result.Items || [];
+    const index = episodes.findIndex((episode) => episode.Id === mediaItem.Id);
+    return {
+      previous: index > 0 ? episodes[index - 1] : null,
+      next: index >= 0 && index < episodes.length - 1 ? episodes[index + 1] : null,
+      index,
+      total: episodes.length,
+    };
+  }).catch(() => null);
+}
+
+function openDetail(mediaItem) {
+  if (!mediaItem || !mediaItem.Id) return;
+  const serverId = mediaItem.ServerId || (window.ApiClient && window.ApiClient.serverId ? window.ApiClient.serverId() : '');
+  window.location.hash = '#/details?id=' + encodeURIComponent(mediaItem.Id) + '&serverId=' + encodeURIComponent(serverId);
+}
+
 function factValues(mediaItem, seasons) {
   const values = [];
   const score = Number(mediaItem.CommunityRating || 0);
@@ -94,8 +120,8 @@ export function createHero(page) {
 
   let moved = [];
   const backdropOriginal = nativeBackdrop.style.backgroundImage;
-  const hero = dom.element('<div class="dinkflix-details-hero"><div></div><div class="dinkflix-details-stack"><div class="dinkflix-details-title"></div><div class="dinkflix-details-child-title" hidden></div><div class="dinkflix-details-facts"></div><div class="dinkflix-details-genres"></div></div></div>');
-  const backRoot = hero.firstElementChild;
+  const hero = dom.element('<div class="dinkflix-details-hero"><div class="dinkflix-details-hero-nav"></div><div class="dinkflix-details-stack"><div class="dinkflix-details-title"></div><div class="dinkflix-details-child-title" hidden></div><div class="dinkflix-details-facts"></div><div class="dinkflix-details-genres"></div></div></div>');
+  const navRoot = hero.firstElementChild;
   const stack = hero.querySelector('.dinkflix-details-stack');
   const title = stack.querySelector('.dinkflix-details-title');
   const childTitleRoot = stack.querySelector('.dinkflix-details-child-title');
@@ -124,7 +150,34 @@ export function createHero(page) {
     moved = [];
   }
 
+  function renderNavigation(mediaItem) {
+    render(
+      <div class="dinkflix-details-navigation">
+        <IconButton class="dinkflix-details-back" icon="arrowLeft" label="Back" raised onClick={goBack} />
+        {mediaItem.Type === 'Episode' && (
+          <div class="dinkflix-details-adjacent" aria-label="Episode navigation">
+            <IconButton class="dinkflix-details-adjacent-button" icon="arrowLeft" label="Previous episode" raised onClick={() => episodeNavigation(window.ApiClient, mediaItem).then((result) => result && result.previous && openDetail(result.previous))} />
+            <span class="dinkflix-details-episode-position"></span>
+            <IconButton class="dinkflix-details-adjacent-button" icon="arrowRight" label="Next episode" raised onClick={() => episodeNavigation(window.ApiClient, mediaItem).then((result) => result && result.next && openDetail(result.next))} />
+          </div>
+        )}
+      </div>,
+      navRoot,
+    );
+    if (mediaItem.Type === 'Episode') {
+      episodeNavigation(window.ApiClient, mediaItem).then((result) => {
+        const pos = navRoot.querySelector('.dinkflix-details-episode-position');
+        const buttons = navRoot.querySelectorAll('.dinkflix-details-adjacent-button');
+        if (!result) return;
+        if (pos) pos.textContent = result.index >= 0 ? String(result.index + 1) + ' / ' + String(result.total) : '';
+        if (buttons[0]) buttons[0].disabled = !result.previous;
+        if (buttons[1]) buttons[1].disabled = !result.next;
+      });
+    }
+  }
+
   function renderHero(mediaItem, seasons) {
+    renderNavigation(mediaItem);
     const backdropUrl = item.imageUrl(mediaItem, 'Backdrop', { maxWidth: Math.max(960, window.innerWidth), inherit: true, quality: 90 });
     const isChild = mediaItem.Type === 'Season' || mediaItem.Type === 'Episode';
     childTitleRoot.hidden = !isChild;
@@ -149,7 +202,7 @@ export function createHero(page) {
     hero.classList.toggle('dinkflix-details-has-logo', Boolean(logo && window.getComputedStyle(logo).backgroundImage !== 'none'));
   }
 
-  render(<IconButton class="dinkflix-details-back" icon="arrowLeft" label="Back" raised onClick={goBack} />, backRoot);
+  
   move(logo, title);
   move(page.querySelector('.nameContainer'), title);
   move(page.querySelector('.overview'), stack);
@@ -163,7 +216,7 @@ export function createHero(page) {
     actions,
     destroy() {
       actions.querySelector('.btnDownload')?.classList.toggle('hide', downloadWasHidden);
-      render(null, backRoot);
+      render(null, navRoot);
       render(null, childTitleRoot);
       render(null, factsRoot);
       render(null, genresRoot);
