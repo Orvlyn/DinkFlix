@@ -1,4 +1,4 @@
-import { dom, h, item, Meta, render } from '../../shared/runtime.js';
+import { dom, h, item, Meta, render, removeFromContinueWatching } from '../../shared/runtime.js';
 
 function facts(mediaItem, type, original) {
   const values = [];
@@ -79,6 +79,34 @@ function metadataElement(card, source) {
   return element;
 }
 
+
+function addResumeRemoval(card) {
+  const sectionTitle = card.closest('.verticalSection')?.querySelector('.sectionTitle')?.textContent?.toLowerCase() || '';
+  if (!sectionTitle.includes('continue watching') && !sectionTitle.includes('resume')) return;
+  if (card.querySelector('.dinkflix-continue-remove')) return;
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'dinkflix-continue-remove';
+  button.title = 'Remove from Continue Watching';
+  button.setAttribute('aria-label', 'Remove from Continue Watching');
+  button.textContent = '×';
+  button.addEventListener('click', async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const client = window.ApiClient;
+    const itemId = card.dataset.id || card.querySelector('[data-id]')?.dataset.id;
+    if (!client || !itemId) return;
+    button.disabled = true;
+    try {
+      await removeFromContinueWatching(client, itemId);
+      card.remove();
+    } catch {
+      button.disabled = false;
+    }
+  });
+  card.appendChild(button);
+}
+
 export function renderMetadata(card, mediaItem) {
   const type = mediaItem?.Type || card.dataset.type || '';
   if (!item.typeLabel(type) || type === 'CollectionFolder') {
@@ -91,4 +119,5 @@ export function renderMetadata(card, mediaItem) {
   if (!dom.isConnected(element)) return;
 
   render(<Meta values={facts(mediaItem, type, source?.textContent.trim() || '')} />, element);
+  addResumeRemoval(card);
 }
