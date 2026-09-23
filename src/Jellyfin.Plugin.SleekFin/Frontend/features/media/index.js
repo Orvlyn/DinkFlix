@@ -56,28 +56,30 @@ function hideEmptyResumeSection(container) {
 
 function removeFromContinueWatching(card, button) {
   const client = window.ApiClient;
+  const userId = currentUserId();
   const itemId = card.dataset.id;
-  if (!client || typeof client.ajax !== 'function' || typeof client.getUrl !== 'function' || !itemId || button.disabled) {
+  if (!client || typeof client.markUnplayed !== 'function' || !itemId || !userId || button.disabled) {
     return;
   }
 
   button.disabled = true;
   button.setAttribute('aria-busy', 'true');
 
-  client.ajax({
-    type: 'POST',
-    url: client.getUrl('UserItems/' + encodeURIComponent(itemId) + '/UserData'),
-    data: JSON.stringify({ PlaybackPositionTicks: 0 }),
-    contentType: 'application/json'
-  }).then(() => {
-    const container = card.closest('.itemsContainer');
-    const cardBox = card.closest('.cardBox') || card;
-    cardBox.remove();
-    if (container) hideEmptyResumeSection(container);
-  }).catch(() => {
-    button.disabled = false;
-    button.removeAttribute('aria-busy');
-  });
+  client.markUnplayed(userId, itemId, new Date())
+    .then((userData) => {
+      if (Number(userData?.PlaybackPositionTicks || 0) !== 0) {
+        throw new Error('Jellyfin did not clear the playback position.');
+      }
+
+      const container = card.closest('.itemsContainer');
+      const cardBox = card.closest('.cardBox') || card;
+      cardBox.remove();
+      if (container) hideEmptyResumeSection(container);
+    })
+    .catch(() => {
+      button.disabled = false;
+      button.removeAttribute('aria-busy');
+    });
 }
 
 function decorateResumeCards() {
