@@ -49,7 +49,7 @@ function findHomeResumeContainers() {
     .filter((container) => {
       const section = container.closest('.verticalSection, .sectionContainer');
       const heading = section?.querySelector('h2.sectionTitle, .sectionTitleContainer .sectionTitle');
-      const text = heading?.textContent?.replace(/\\s+/g, ' ').trim().toLowerCase() || '';
+      const text = heading?.textContent?.replace(/\s+/g, ' ').trim().toLowerCase() || '';
       return text.includes('continue') && text.includes('watch');
     });
 }
