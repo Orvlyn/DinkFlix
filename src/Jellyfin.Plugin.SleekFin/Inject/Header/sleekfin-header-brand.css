@@ -44,6 +44,11 @@ html.sleekfin-header-mounted .sleekfin-header-fallback-brand {
     z-index: 1101;
 }
 
+/* Jellyfin's video OSD supplies its own top-layer back button. The fallback brand can otherwise sit over it on the player. */
+html.sleekfin-header-mounted body:has(.skinHeader.osdHeader) .sleekfin-header-fallback-brand {
+    pointer-events: none;
+}
+
 html.sleekfin-header-mounted[data-sleekfin-header-brand-position="left"] [data-sleekfin-header-brand],
 html.sleekfin-header-mounted[data-sleekfin-header-brand-position="left"] .sleekfin-header-fallback-brand {
     left: var(--sleekfin-page-gutter) !important;
