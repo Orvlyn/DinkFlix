@@ -1,13 +1,13 @@
 [
   {
     "guid": "da36c4ef-1d10-4169-8a68-26b194d5301a",
-    "name": "SleekFin",
-    "description": "The ultimate Jellyfin Web revamp, with new elements, styles, plus compatible with the most popular plugins.",
-    "overview": "The ultimate Jellyfin Web revamp, with new elements, styles, plus compatible with the most popular plugins.",
-    "owner": "varunaditya-plus",
+    "name": "DINKFLIX",
+    "description": "A cinematic, premium visual layer for Jellyfin Web — redesigned and maintained by Orvlyn as DINKFLIX, with enhanced hero, browsing, detail pages and navigation.",
+    "overview": "A cinematic, premium visual layer for Jellyfin Web — redesigned and maintained by Orvlyn as DINKFLIX, with enhanced hero, browsing, detail pages and navigation.",
+    "owner": "Orvlyn",
     "category": "General",
-    "imageUrl": "https://raw.githubusercontent.com/varunaditya-plus/SleekFin/main/thumb.png",
-    "repositoryUrl": "https://github.com/varunaditya-plus/SleekFin",
+    "imageUrl": "https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/assets/logo_dark.png",
+    "repositoryUrl": "https://github.com/Orvlyn/DinkFlix",
     "versions": [
       {
         "version": "11.4.0.0",
