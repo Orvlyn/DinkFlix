@@ -45,13 +45,48 @@ function syncUser() {
 }
 
 function findHomeResumeContainers() {
-  return Array.from(document.querySelectorAll('#indexPage #homeTab.is-active .sections .itemsContainer'));
+  return Array.from(document.querySelectorAll('#indexPage #homeTab.is-active .sections .itemsContainer'))
+    .filter((container) => {
+      const section = container.closest('.verticalSection, .sectionContainer');
+      const heading = section?.querySelector('h2.sectionTitle, .sectionTitleContainer .sectionTitle');
+      const text = heading?.textContent?.replace(/\\s+/g, ' ').trim().toLowerCase() || '';
+      return text.includes('continue') && text.includes('watch');
+    });
 }
 
 function hideEmptyResumeSection(container) {
   if (container.querySelector('.card[data-id]:has(.cardOverlayFab-primary[data-action="resume"])')) return;
   const section = container.closest('.verticalSection, .sectionContainer');
   section?.classList.add('hide');
+}
+
+function getFreshResumeItems(container) {
+  const client = window.ApiClient;
+  if (!client || typeof client.ajax !== 'function' || typeof client.getUrl !== 'function') {
+    return Promise.resolve({ Items: [] });
+  }
+
+  const limit = container.classList.contains('scrollSlider') ? 12 : 5;
+  return client.ajax({
+    type: 'GET',
+    dataType: 'json',
+    url: client.getUrl('UserItems/Resume', {
+      Limit: limit,
+      Fields: 'PrimaryImageAspectRatio',
+      ImageTypeLimit: 1,
+      EnableImageTypes: 'Primary,Backdrop,Thumb',
+      EnableTotalRecordCount: false,
+      MediaTypes: 'Video'
+    })
+  });
+}
+
+function makeContinueWatchingFresh(container) {
+  if (container.dataset.sleekfinFreshResume === 'true') return;
+  if (!container.getItemsHtml) return;
+
+  container.dataset.sleekfinFreshResume = 'true';
+  container.fetchData = () => getFreshResumeItems(container);
 }
 
 function removeFromContinueWatching(card, button) {
@@ -72,9 +107,11 @@ function removeFromContinueWatching(card, button) {
       }
 
       const container = card.closest('.itemsContainer');
-      const cardBox = card.closest('.cardBox') || card;
-      cardBox.remove();
-      if (container) hideEmptyResumeSection(container);
+      if (container) {
+        makeContinueWatchingFresh(container);
+        return container.refreshItems();
+      }
+      return undefined;
     })
     .catch(() => {
       button.disabled = false;
@@ -84,6 +121,7 @@ function removeFromContinueWatching(card, button) {
 
 function decorateResumeCards() {
   findHomeResumeContainers().forEach((container) => {
+    makeContinueWatchingFresh(container);
     container.querySelectorAll('.card[data-id]:has(.cardOverlayFab-primary[data-action="resume"])').forEach((card) => {
       if (card.querySelector('[data-sleekfin-resume-remove]')) return;
 
