@@ -38,3 +38,13 @@
 .sleekfin-details-stack > .mainDetailButtons .material-icons {
     display: none !important;
 }
+
+
+.sleekfin-details-stack > .mainDetailButtons > .btnUserRating[data-isfavorite="true"] {
+    color: var(--sleekfin-accent) !important;
+}
+
+.sleekfin-details-stack > .mainDetailButtons > .btnUserRating[data-isfavorite="true"] .sleekfin-icon {
+    fill: currentColor !important;
+    filter: drop-shadow(0 0 6px rgba(0, 255, 198, 0.22));
+}
