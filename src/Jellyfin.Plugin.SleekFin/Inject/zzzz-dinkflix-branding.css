@@ -60,3 +60,49 @@ html.sleekfin-details-mounted #castCollapsible .card {
 html.sleekfin-details-mounted #similarCollapsible .similarContent {
     grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)) !important;
 }
+
+/* DINKFLIX interaction polish */
+.btnUserRating[data-isfavorite="true"] .dinkflix-icon[data-dinkflix-icon="heart"] {
+    color: var(--dinkflix-accent) !important;
+    fill: currentColor !important;
+    stroke: currentColor !important;
+}
+.dinkflix-continue-remove {
+    align-items: center;
+    background: rgba(0, 0, 0, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    color: var(--dinkflix-text);
+    cursor: pointer;
+    display: inline-flex;
+    height: 32px;
+    justify-content: center;
+    opacity: 0;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    transition: opacity 160ms ease, color 160ms ease, background-color 160ms ease;
+    width: 32px;
+    z-index: 20;
+}
+.card:hover .dinkflix-continue-remove,
+.card:focus-within .dinkflix-continue-remove,
+.dinkflix-continue-remove:focus-visible {
+    opacity: 1;
+}
+.dinkflix-continue-remove:hover {
+    background: rgba(0, 0, 0, 0.9);
+    color: var(--dinkflix-accent);
+}
+.dinkflix-continue-remove:focus-visible {
+    outline: 2px solid var(--dinkflix-accent);
+    outline-offset: 2px;
+}
+#videoOsdPage .osdHeader,
+#videoOsdPage .osdTop,
+#videoOsdPage .btnBack,
+#videoOsdPage .btnClose {
+    pointer-events: auto !important;
+    position: relative !important;
+    z-index: 100000 !important;
+}
