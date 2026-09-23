@@ -26,6 +26,46 @@ function childTitle(mediaItem) {
   );
 }
 
+function technicalStreams(mediaItem) {
+  return Array.isArray(mediaItem.MediaStreams) ? mediaItem.MediaStreams : [];
+}
+
+function firstStream(mediaItem, type) {
+  return technicalStreams(mediaItem).find((stream) => String(stream.Type || '').toLowerCase() === type);
+}
+
+function richInfo(mediaItem) {
+  const info = [];
+  const video = firstStream(mediaItem, 'video');
+  const subtitles = technicalStreams(mediaItem).filter((stream) => String(stream.Type || '').toLowerCase() === 'subtitle');
+  const resolution = video?.Height >= 2100 || video?.Width >= 3800 ? '4K'
+    : video?.Height >= 1050 || video?.Width >= 1900 ? '1080p'
+    : video?.Height >= 700 || video?.Width >= 1200 ? '720p'
+    : video?.Height ? `${video.Height}p` : '';
+  const codec = video?.DisplayTitle || video?.Codec || '';
+  const videoValue = [resolution, codec].filter(Boolean).join(' · ');
+  if (videoValue) info.push({ label: 'Video', value: videoValue });
+  if (subtitles.length) info.push({ label: 'Subtitles', value: subtitles.length === 1 ? (subtitles[0].DisplayTitle || 'Available') : `${subtitles.length} tracks` });
+  if (mediaItem.Genres?.length) info.push({ label: 'Genres', value: mediaItem.Genres.join(' · ') });
+  if (mediaItem.Director) info.push({ label: 'Director', value: mediaItem.Director });
+  if (mediaItem.Writer) info.push({ label: 'Writer', value: mediaItem.Writer });
+  if (mediaItem.Studios?.length) info.push({ label: 'Studio', value: mediaItem.Studios.map((studio) => studio.Name || studio).join(' · ') });
+  return info;
+}
+
+function RichInfo({ values }) {
+  return (
+    <div class="sleekfin-details-rich-info">
+      {values.map((entry) => (
+        <span class="sleekfin-details-rich-info-item" key={`${entry.label}-${entry.value}`}>
+          <strong>{entry.label}</strong>
+          <span>{entry.value}</span>
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function factValues(mediaItem, seasons) {
   const values = [];
   const score = Number(mediaItem.CommunityRating || 0);
@@ -61,6 +101,8 @@ export function createHero(page) {
   const childTitleRoot = stack.querySelector('.sleekfin-details-child-title');
   const factsRoot = stack.querySelector('.sleekfin-details-facts');
   const genresRoot = stack.querySelector('.sleekfin-details-genres');
+  const richRoot = document.createElement('div');
+  richRoot.className = 'sleekfin-details-rich-info-root';
   const downloadWasHidden = actions.querySelector('.btnDownload')?.classList.contains('hide');
   const logo = page.querySelector('.detailLogo');
 
@@ -90,6 +132,7 @@ export function createHero(page) {
     render(childTitle(mediaItem), childTitleRoot);
     render(<Facts values={factValues(mediaItem, seasons)} />, factsRoot);
     render(<Facts values={(mediaItem.Genres || []).map((genre) => ({ text: genre }))} />, genresRoot);
+    render(<RichInfo values={richInfo(mediaItem)} />, richRoot);
 
     actions.querySelector('.btnDownload')?.classList.toggle('hide', !['Movie', 'Episode'].includes(mediaItem.Type) || !mediaItem.CanDownload);
     if (backdropUrl) {
@@ -111,6 +154,7 @@ export function createHero(page) {
   move(page.querySelector('.nameContainer'), title);
   move(page.querySelector('.overview'), stack);
   move(page.querySelector('.overview-controls'), stack);
+  stack.appendChild(richRoot);
   move(actions, stack);
   page.insertBefore(hero, wrapper);
   sync();
@@ -123,6 +167,7 @@ export function createHero(page) {
       render(null, childTitleRoot);
       render(null, factsRoot);
       render(null, genresRoot);
+      richRoot.remove();
       restoreMoved();
       hero.remove();
       nativeBackdrop.style.backgroundImage = backdropOriginal;
