@@ -316,3 +316,32 @@
         display: none;
     }
 }
+
+
+.sleekfin-details-episode-nav {
+    display: flex;
+    gap: 2px;
+    padding: 2px;
+}
+
+.sleekfin-details-episode-nav .sleekfin-details-control {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none;
+    height: 32px;
+    width: 32px;
+}
+
+.sleekfin-details-season-select {
+    background: rgba(255, 255, 255, 0.055);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 999px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    max-width: min(54vw, 380px);
+    padding: 7px 14px;
+}
+
+.sleekfin-details-season-select:focus-within {
+    border-color: rgba(0, 255, 198, 0.44);
+    box-shadow: 0 0 0 2px rgba(0, 255, 198, 0.14), 0 8px 24px rgba(0, 0, 0, 0.18);
+}
