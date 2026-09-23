@@ -21,12 +21,12 @@ const result = await build({
   charset: 'utf8',
   define: { 'process.env.NODE_ENV': '"production"' },
   entryPoints: {
-    'sleekfin-runtime': path.join(frontendRoot, 'runtime/index.jsx'),
-    'sleekfin-theme': path.join(frontendRoot, 'features/theme/index.js'),
-    'sleekfin-header': path.join(frontendRoot, 'features/header/index.js'),
-    'sleekfin-hero': path.join(frontendRoot, 'features/hero/index.jsx'),
-    'sleekfin-media': path.join(frontendRoot, 'features/media/index.js'),
-    'sleekfin-details': path.join(frontendRoot, 'features/details/index.js'),
+    'dinkflix-runtime': path.join(frontendRoot, 'runtime/index.jsx'),
+    'dinkflix-theme': path.join(frontendRoot, 'features/theme/index.js'),
+    'dinkflix-header': path.join(frontendRoot, 'features/header/index.js'),
+    'dinkflix-hero': path.join(frontendRoot, 'features/hero/index.jsx'),
+    'dinkflix-media': path.join(frontendRoot, 'features/media/index.js'),
+    'dinkflix-details': path.join(frontendRoot, 'features/details/index.js'),
   },
   format: 'iife',
   jsxFactory: 'h',
@@ -50,7 +50,7 @@ const outputs = await Promise.all(result.outputFiles.map(async (output) => {
 
   if (!transformed?.code) throw new Error(`Babel did not produce ${path.relative(root, output.path)}.`);
 
-  const notice = path.basename(output.path) === 'sleekfin-runtime.js' ? preactNotice : '\n';
+  const notice = path.basename(output.path) === 'dinkflix-runtime.js' ? preactNotice : '\n';
   return { contents: Buffer.from(`(function(){${transformed.code}}());${notice}`), path: output.path };
 }));
 
