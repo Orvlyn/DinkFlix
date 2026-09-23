@@ -5,8 +5,8 @@ import { createHero } from './hero.jsx';
 import { createSections } from './sections.jsx';
 import { createSimilar } from './similar.jsx';
 
-const CONCEALED_CLASS = 'sleekfin-details-concealed';
-const CONCEAL_EVENT = 'sleekfin:details-conceal';
+const CONCEALED_CLASS = 'dinkflix-details-concealed';
+const CONCEAL_EVENT = 'dinkflix:details-conceal';
 const DETAIL_PATH = /(^|\/)details\/?$/;
 const HISTORY_METHODS = ['pushState', 'replaceState'];
 const SUPPORTED_TYPES = ['Movie', 'Series', 'Season', 'Episode'];
@@ -14,7 +14,7 @@ const SUPPORTED_TYPES = ['Movie', 'Series', 'Season', 'Episode'];
 // element it just made current, so event.target identifies the page Jellyfin is showing.
 const VIEW_EVENTS = ['viewinit', 'viewbeforeshow', 'viewshow'];
 const WINDOW_EVENTS = ['hashchange', 'popstate', 'pageshow'];
-const features = (window.SleekFinFeatures = window.SleekFinFeatures || {});
+const features = (window.DinkFlixFeatures = window.DinkFlixFeatures || {});
 
 features.details?.stop?.();
 
@@ -143,10 +143,10 @@ function destroyMount() {
   state.mount.sections.destroy();
   state.mount.actions.destroy();
   state.mount.hero.destroy();
-  state.mount.page.classList.remove('sleekfin-details-entering');
-  state.mount.page.removeAttribute('data-sleekfin-details');
+  state.mount.page.classList.remove('dinkflix-details-entering');
+  state.mount.page.removeAttribute('data-dinkflix-details');
   state.mount = null;
-  document.documentElement.classList.remove('sleekfin-details-mounted');
+  document.documentElement.classList.remove('dinkflix-details-mounted');
 }
 
 function mount() {
@@ -172,7 +172,7 @@ function mount() {
     similar,
   };
   state.page.dataset.sleekfinDetails = 'true';
-  document.documentElement.classList.add('sleekfin-details-mounted');
+  document.documentElement.classList.add('dinkflix-details-mounted');
   hero.render(state.item, state.seasons);
   actions.reconcile();
   similar.render();
@@ -314,11 +314,11 @@ function concealUntilAlone(except) {
     if (shownDetailPages(except).length) return;
     stopHiddenWatch();
     if (state.mount?.page === except) {
-      except.classList.add('sleekfin-details-entering');
+      except.classList.add('dinkflix-details-entering');
       const finish = (event) => {
-        if (event.target !== except || event.animationName !== 'sleekfin-details-enter') return;
+        if (event.target !== except || event.animationName !== 'dinkflix-details-enter') return;
         except.removeEventListener('animationend', finish);
-        except.classList.remove('sleekfin-details-entering');
+        except.classList.remove('dinkflix-details-entering');
       };
       except.addEventListener('animationend', finish);
     }

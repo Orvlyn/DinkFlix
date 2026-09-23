@@ -14,7 +14,7 @@ export function createActions(container, isEpisode) {
       const icon = isFavorite ? 'heart' : isDownload ? 'download' : 'play';
       const label = isFavorite ? (favoriteActive ? 'Remove from favorites' : 'Add to favorites') : isDownload ? 'Download' : element.dataset.action === 'resume' ? 'Resume' : 'Play';
 
-      element.classList.toggle('sleekfin-details-suppressed-action', hasEpisodeResume && element.dataset.action === 'play');
+      element.classList.toggle('dinkflix-details-suppressed-action', hasEpisodeResume && element.dataset.action === 'play');
       decorateNativeButton(element, {
         content: element.querySelector('.detailButton-content') || element,
         icon,
@@ -37,7 +37,7 @@ export function createActions(container, isEpisode) {
     destroy() {
       observer.disconnect();
       decorated.forEach((element) => {
-        element.classList.remove('sleekfin-details-suppressed-action');
+        element.classList.remove('dinkflix-details-suppressed-action');
         element.removeAttribute('aria-pressed');
         restoreNativeButton(element);
       });

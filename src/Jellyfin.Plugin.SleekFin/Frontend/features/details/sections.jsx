@@ -2,7 +2,7 @@ import { h, render, SectionHeading } from '../../shared/runtime.js';
 
 function createHeading(title, subtitle) {
   const root = document.createElement('div');
-  root.className = 'sleekfin-section-heading';
+  root.className = 'dinkflix-section-heading';
   render(<SectionHeading title={title} subtitle={subtitle} contentsOnly />, root);
   return root;
 }
@@ -24,12 +24,12 @@ export function createSections(page) {
     if (record && record.heading.parentElement === section && record.original === original) return;
     if (record) {
       removeHeading(record.heading);
-      record.original?.classList.remove('sleekfin-details-original-heading');
+      record.original?.classList.remove('dinkflix-details-original-heading');
     }
 
     const heading = createHeading(title, subtitle);
     section.insertBefore(heading, original || section.firstChild);
-    original?.classList.add('sleekfin-details-original-heading');
+    original?.classList.add('dinkflix-details-original-heading');
     records.set(section, { heading, original });
   }
 
@@ -43,7 +43,7 @@ export function createSections(page) {
     destroy() {
       records.forEach((record) => {
         removeHeading(record.heading);
-        record.original?.classList.remove('sleekfin-details-original-heading');
+        record.original?.classList.remove('dinkflix-details-original-heading');
       });
       records.clear();
     },

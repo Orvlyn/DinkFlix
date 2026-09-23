@@ -17,21 +17,21 @@ function EpisodeCard({ client, episode }) {
   delete action.class;
 
   return (
-    <article class="sleekfin-details-episode">
-      <button {...action} type="button" class={`sleekfin-details-episode-action ${actionClass}`}>
+    <article class="dinkflix-details-episode">
+      <button {...action} type="button" class={`dinkflix-details-episode-action ${actionClass}`}>
         {imageUrl && <img src={imageUrl} />}
-        <span class="sleekfin-details-episode-shade" />
-        <span class="sleekfin-details-episode-copy">
-          <span class="sleekfin-details-episode-number">{`Episode ${episode.IndexNumber || ''}`}</span>
-          <span class="sleekfin-details-episode-title">{episode.Name || ''}</span>
-          <span class="sleekfin-details-episode-overview">{episode.Overview || ''}</span>
-          <span class="sleekfin-details-episode-footer">
+        <span class="dinkflix-details-episode-shade" />
+        <span class="dinkflix-details-episode-copy">
+          <span class="dinkflix-details-episode-number">{`Episode ${episode.IndexNumber || ''}`}</span>
+          <span class="dinkflix-details-episode-title">{episode.Name || ''}</span>
+          <span class="dinkflix-details-episode-overview">{episode.Overview || ''}</span>
+          <span class="dinkflix-details-episode-footer">
             <span>
               <Icon name="play" />
               {item.formatRuntime(episode.RunTimeTicks)}
             </span>
             {score > 0 && (
-              <span class="sleekfin-details-episode-score">
+              <span class="dinkflix-details-episode-score">
                 <Icon name="star" />
                 {score.toFixed(1)}
               </span>
@@ -40,7 +40,7 @@ function EpisodeCard({ client, episode }) {
         </span>
       </button>
       {episode.CanDownload && typeof client.getItemDownloadUrl === 'function' && (
-        <IconButton class="sleekfin-details-episode-download" icon="download" label="Download" raised strokeWidth={1.75} onClick={() => downloadEpisode(client, episode)} />
+        <IconButton class="dinkflix-details-episode-download" icon="download" label="Download" raised strokeWidth={1.75} onClick={() => downloadEpisode(client, episode)} />
       )}
     </article>
   );
@@ -130,8 +130,8 @@ function Episodes({ client, list, mediaItem, seasons }) {
   let title;
   if (mediaItem.Type === 'Series') {
     title = (
-      <span class="sleekfin-details-season-select">
-        <select class="sleekfin-details-season-native" value={selectedSeasonId} onChange={(event) => setSelectedSeasonId(event.currentTarget.value)}>
+      <span class="dinkflix-details-season-select">
+        <select class="dinkflix-details-season-native" value={selectedSeasonId} onChange={(event) => setSelectedSeasonId(event.currentTarget.value)}>
           {seasons.map((season) => (
             <option value={season.Id} key={season.Id}>
               {season.Name || `Season ${season.IndexNumber || ''}`}
@@ -142,7 +142,7 @@ function Episodes({ client, list, mediaItem, seasons }) {
     );
   } else {
     const currentSeason = seasons[0];
-    title = <h2 class="sleekfin-details-season-title">{mediaItem.Type === 'Episode' ? `More from ${currentSeason?.Name || 'this season'}` : currentSeason?.Name || 'Episodes'}</h2>;
+    title = <h2 class="dinkflix-details-season-title">{mediaItem.Type === 'Episode' ? `More from ${currentSeason?.Name || 'this season'}` : currentSeason?.Name || 'Episodes'}</h2>;
   }
 
   function scrollEpisodes(direction) {
@@ -162,19 +162,19 @@ function Episodes({ client, list, mediaItem, seasons }) {
   return (
     <Fragment>
       <SectionHeading title={title} subtitle={subtitle} />
-      <div class="sleekfin-details-episode-controls">
-        <div class={`sleekfin-details-search sleekfin-control-3d${searchOpen ? ' sleekfin-details-search-open' : ''}`}>
+      <div class="dinkflix-details-episode-controls">
+        <div class={`dinkflix-details-search dinkflix-control-3d${searchOpen ? ' dinkflix-details-search-open' : ''}`}>
           <IconButton icon="search" label="Search episodes" onClick={toggleSearch} />
           <input ref={searchInput} type="search" placeholder="Search episodes" value={query} onInput={(event) => setQuery(event.currentTarget.value)} />
         </div>
-        <span class="sleekfin-details-episode-nav sleekfin-control-3d">
-          <IconButton class="sleekfin-details-control" icon="arrowLeft" label="Previous episodes" onClick={() => scrollEpisodes(-1)} />
-          <IconButton class="sleekfin-details-control" icon="arrowRight" label="Next episodes" onClick={() => scrollEpisodes(1)} />
+        <span class="dinkflix-details-episode-nav dinkflix-control-3d">
+          <IconButton class="dinkflix-details-control" icon="arrowLeft" label="Previous episodes" onClick={() => scrollEpisodes(-1)} />
+          <IconButton class="dinkflix-details-control" icon="arrowRight" label="Next episodes" onClick={() => scrollEpisodes(1)} />
         </span>
-        <IconButton class="sleekfin-details-control" icon={sortDescending ? 'arrowUpAz' : 'arrowDownAz'} label="Reverse episode order" raised data-active={sortDescending ? 'true' : 'false'} onClick={() => setSortDescending((descending) => !descending)} />
-        <span class="sleekfin-details-view-controls sleekfin-control-3d">
-          <IconButton class="sleekfin-details-control" icon="grid" label="Grid view" data-view="grid" data-active={view === 'grid' ? 'true' : 'false'} onClick={() => setView('grid')} />
-          <IconButton class="sleekfin-details-control" icon="list" label="List view" data-view="list" data-active={view === 'list' ? 'true' : 'false'} onClick={() => setView('list')} />
+        <IconButton class="dinkflix-details-control" icon={sortDescending ? 'arrowUpAz' : 'arrowDownAz'} label="Reverse episode order" raised data-active={sortDescending ? 'true' : 'false'} onClick={() => setSortDescending((descending) => !descending)} />
+        <span class="dinkflix-details-view-controls dinkflix-control-3d">
+          <IconButton class="dinkflix-details-control" icon="grid" label="Grid view" data-view="grid" data-active={view === 'grid' ? 'true' : 'false'} onClick={() => setView('grid')} />
+          <IconButton class="dinkflix-details-control" icon="list" label="List view" data-view="list" data-active={view === 'list' ? 'true' : 'false'} onClick={() => setView('list')} />
         </span>
       </div>
     </Fragment>
@@ -187,7 +187,7 @@ export function createEpisodes(page, mediaItem, seasons) {
   const secondary = page.querySelector('.detailPageSecondaryContainer');
   if (!client || !wrapper || !secondary) return null;
 
-  const section = dom.element('<section class="sleekfin-details-episodes"><div class="sleekfin-details-episodes-header"></div><div is="emby-itemscontainer" class="sleekfin-details-episode-list" data-contextmenu="false" data-multiselect="false" data-view="grid"></div></section>');
+  const section = dom.element('<section class="dinkflix-details-episodes"><div class="dinkflix-details-episodes-header"></div><div is="emby-itemscontainer" class="dinkflix-details-episode-list" data-contextmenu="false" data-multiselect="false" data-view="grid"></div></section>');
   const header = section.firstElementChild;
   const list = section.lastElementChild;
   let destroyed = false;

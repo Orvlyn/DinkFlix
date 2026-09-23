@@ -20,8 +20,8 @@ function childTitle(mediaItem) {
 
   return (
     <>
-      <span class="sleekfin-details-child-kicker">{kicker}</span>
-      <h1 class="sleekfin-details-child-name">{mediaItem.Name || ''}</h1>
+      <span class="dinkflix-details-child-kicker">{kicker}</span>
+      <h1 class="dinkflix-details-child-name">{mediaItem.Name || ''}</h1>
     </>
   );
 }
@@ -55,9 +55,9 @@ function richInfo(mediaItem) {
 
 function RichInfo({ values }) {
   return (
-    <div class="sleekfin-details-rich-info">
+    <div class="dinkflix-details-rich-info">
       {values.map((entry) => (
-        <span class="sleekfin-details-rich-info-item" key={`${entry.label}-${entry.value}`}>
+        <span class="dinkflix-details-rich-info-item" key={`${entry.label}-${entry.value}`}>
           <strong>{entry.label}</strong>
           <span>{entry.value}</span>
         </span>
@@ -70,7 +70,7 @@ function factValues(mediaItem, seasons) {
   const values = [];
   const score = Number(mediaItem.CommunityRating || 0);
   if (score > 0) {
-    values.push({ className: 'sleekfin-details-score', icon: 'star', text: score.toFixed(1) });
+    values.push({ className: 'dinkflix-details-score', icon: 'star', text: score.toFixed(1) });
   }
   values.push({ text: item.year(mediaItem) });
   if (mediaItem.Type === 'Series') {
@@ -82,7 +82,7 @@ function factValues(mediaItem, seasons) {
   } else {
     values.push({ text: item.formatRuntime(mediaItem.RunTimeTicks) });
   }
-  values.push({ className: 'sleekfin-details-certification', text: mediaItem.OfficialRating });
+  values.push({ className: 'dinkflix-details-certification', text: mediaItem.OfficialRating });
   return values;
 }
 
@@ -94,15 +94,15 @@ export function createHero(page) {
 
   let moved = [];
   const backdropOriginal = nativeBackdrop.style.backgroundImage;
-  const hero = dom.element('<div class="sleekfin-details-hero"><div></div><div class="sleekfin-details-stack"><div class="sleekfin-details-title"></div><div class="sleekfin-details-child-title" hidden></div><div class="sleekfin-details-facts"></div><div class="sleekfin-details-genres"></div></div></div>');
+  const hero = dom.element('<div class="dinkflix-details-hero"><div></div><div class="dinkflix-details-stack"><div class="dinkflix-details-title"></div><div class="dinkflix-details-child-title" hidden></div><div class="dinkflix-details-facts"></div><div class="dinkflix-details-genres"></div></div></div>');
   const backRoot = hero.firstElementChild;
-  const stack = hero.querySelector('.sleekfin-details-stack');
-  const title = stack.querySelector('.sleekfin-details-title');
-  const childTitleRoot = stack.querySelector('.sleekfin-details-child-title');
-  const factsRoot = stack.querySelector('.sleekfin-details-facts');
-  const genresRoot = stack.querySelector('.sleekfin-details-genres');
+  const stack = hero.querySelector('.dinkflix-details-stack');
+  const title = stack.querySelector('.dinkflix-details-title');
+  const childTitleRoot = stack.querySelector('.dinkflix-details-child-title');
+  const factsRoot = stack.querySelector('.dinkflix-details-facts');
+  const genresRoot = stack.querySelector('.dinkflix-details-genres');
   const richRoot = document.createElement('div');
-  richRoot.className = 'sleekfin-details-rich-info-root';
+  richRoot.className = 'dinkflix-details-rich-info-root';
   const downloadWasHidden = actions.querySelector('.btnDownload')?.classList.contains('hide');
   const logo = page.querySelector('.detailLogo');
 
@@ -128,7 +128,7 @@ export function createHero(page) {
     const backdropUrl = item.imageUrl(mediaItem, 'Backdrop', { maxWidth: Math.max(960, window.innerWidth), inherit: true, quality: 90 });
     const isChild = mediaItem.Type === 'Season' || mediaItem.Type === 'Episode';
     childTitleRoot.hidden = !isChild;
-    hero.classList.toggle('sleekfin-details-has-child-title', isChild);
+    hero.classList.toggle('dinkflix-details-has-child-title', isChild);
     render(childTitle(mediaItem), childTitleRoot);
     render(<Facts values={factValues(mediaItem, seasons)} />, factsRoot);
     render(<Facts values={(mediaItem.Genres || []).map((genre) => ({ text: genre }))} />, genresRoot);
@@ -146,10 +146,10 @@ export function createHero(page) {
     if (background && background !== 'none') {
       nativeBackdrop.style.backgroundImage = background;
     }
-    hero.classList.toggle('sleekfin-details-has-logo', Boolean(logo && window.getComputedStyle(logo).backgroundImage !== 'none'));
+    hero.classList.toggle('dinkflix-details-has-logo', Boolean(logo && window.getComputedStyle(logo).backgroundImage !== 'none'));
   }
 
-  render(<IconButton class="sleekfin-details-back" icon="arrowLeft" label="Back" raised onClick={goBack} />, backRoot);
+  render(<IconButton class="dinkflix-details-back" icon="arrowLeft" label="Back" raised onClick={goBack} />, backRoot);
   move(logo, title);
   move(page.querySelector('.nameContainer'), title);
   move(page.querySelector('.overview'), stack);

@@ -29,7 +29,7 @@ function values(name, strokeWidth) {
 
 function iconMarkup(name) {
   const icon = values(name);
-  return icon ? `<svg class="sleekfin-icon" data-sleekfin-icon="${name}" viewBox="0 0 24 24" fill="${icon.fill}" stroke="${icon.stroke}" stroke-width="${icon.strokeWidth}" stroke-linecap="round" stroke-linejoin="round">${icon.markup}</svg>` : '';
+  return icon ? `<svg class="dinkflix-icon" data-dinkflix-icon="${name}" viewBox="0 0 24 24" fill="${icon.fill}" stroke="${icon.stroke}" stroke-width="${icon.strokeWidth}" stroke-linecap="round" stroke-linejoin="round">${icon.markup}</svg>` : '';
 }
 
 function createIconElement(name) {
@@ -38,7 +38,7 @@ function createIconElement(name) {
 }
 
 export function setIcon(parent, name) {
-  const current = parent.querySelector(':scope > .sleekfin-icon');
+  const current = parent.querySelector(':scope > .dinkflix-icon');
   if (current?.dataset.sleekfinIcon === name) return;
 
   const icon = createIconElement(name);
@@ -54,6 +54,6 @@ export function Icon({ name, strokeWidth }) {
   if (!icon) return null;
 
   return (
-    <svg class="sleekfin-icon" data-sleekfin-icon={name} viewBox="0 0 24 24" fill={icon.fill} stroke={icon.stroke} stroke-width={icon.strokeWidth} stroke-linecap="round" stroke-linejoin="round" dangerouslySetInnerHTML={{ __html: icon.markup }} />
+    <svg class="dinkflix-icon" data-dinkflix-icon={name} viewBox="0 0 24 24" fill={icon.fill} stroke={icon.stroke} stroke-width={icon.strokeWidth} stroke-linecap="round" stroke-linejoin="round" dangerouslySetInnerHTML={{ __html: icon.markup }} />
   );
 }
