@@ -130,15 +130,24 @@ function Episodes({ client, list, mediaItem, seasons }) {
   let title;
   if (mediaItem.Type === 'Series') {
     title = (
-      <span class="dinkflix-details-season-select">
-        <select class="dinkflix-details-season-native" value={selectedSeasonId} onChange={(event) => setSelectedSeasonId(event.currentTarget.value)}>
-          {seasons.map((season) => (
-            <option value={season.Id} key={season.Id}>
-              {season.Name || `Season ${season.IndexNumber || ''}`}
-            </option>
-          ))}
-        </select>
-      </span>
+      <div class="dinkflix-details-season-picker" role="tablist" aria-label="Seasons">
+        {seasons.map((season) => {
+          const active = season.Id === selectedSeasonId;
+          const label = season.Name || `Season ${season.IndexNumber || ''}`;
+          return (
+            <button
+              type="button"
+              class="dinkflix-details-season-pill"
+              data-active={active ? 'true' : 'false'}
+              role="tab"
+              aria-selected={active}
+              onClick={() => setSelectedSeasonId(season.Id)}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
     );
   } else {
     const currentSeason = seasons[0];
