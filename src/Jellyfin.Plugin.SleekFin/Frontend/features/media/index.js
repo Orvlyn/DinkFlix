@@ -1,10 +1,10 @@
 import { dom } from '../../shared/runtime.js';
 import { cleanupInactiveMetadata, cleanupMetadata, renderMetadata } from './metadata.jsx';
 
-const MAIN_ROOT_CLASS = 'sleekfin-main-ui';
-const ROOT_CLASS = 'sleekfin-media-mounted';
+const MAIN_ROOT_CLASS = 'dinkflix-main-ui';
+const ROOT_CLASS = 'dinkflix-media-mounted';
 const PAGE_SELECTOR = '#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage';
-const features = (window.SleekFinFeatures = window.SleekFinFeatures || {});
+const features = (window.DinkFlixFeatures = window.DinkFlixFeatures || {});
 
 features.media?.stop?.();
 

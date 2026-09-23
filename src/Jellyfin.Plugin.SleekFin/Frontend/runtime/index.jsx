@@ -18,4 +18,4 @@ const runtime = {
   render,
 };
 
-window.SleekFinRuntime = runtime;
+window.DinkFlixRuntime = runtime;

@@ -4,10 +4,10 @@ import { applySettings } from './settings.js';
 import { loadEntries, loadSettings } from './source.js';
 
 const WINDOW_EVENTS = ['hashchange', 'popstate', 'pageshow'];
-const SETTINGS_EVENT = 'sleekfin:hero-settings-changed';
-const ROOT_BOOT_LOADING_CLASS = 'sleekfin-hero-boot-loading';
-const ROOT_LOADING_CLASS = 'sleekfin-hero-loading';
-const features = (window.SleekFinFeatures = window.SleekFinFeatures || {});
+const SETTINGS_EVENT = 'dinkflix:hero-settings-changed';
+const ROOT_BOOT_LOADING_CLASS = 'dinkflix-hero-boot-loading';
+const ROOT_LOADING_CLASS = 'dinkflix-hero-loading';
+const features = (window.DinkFlixFeatures = window.DinkFlixFeatures || {});
 
 features.hero?.stop?.();
 
@@ -66,7 +66,7 @@ function unmount() {
 
 function createRoot(host) {
   // Jellyfin's customized items container is upgraded only when its `is` attribute is parsed.
-  const root = dom.element('<div is="emby-itemscontainer" class="sleekfin-hero itemsContainer" data-contextmenu="false" data-multiselect="false" data-state="loading"></div>');
+  const root = dom.element('<div is="emby-itemscontainer" class="dinkflix-hero itemsContainer" data-contextmenu="false" data-multiselect="false" data-state="loading"></div>');
   host.parentNode.insertBefore(root, host);
   state.mount = root;
   finishLoading();

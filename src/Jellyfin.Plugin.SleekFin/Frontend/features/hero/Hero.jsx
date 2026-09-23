@@ -71,12 +71,12 @@ export function Hero({ entries, root, settings }) {
         <HeroSlide key={`${entry.display.Id || index}-${entry.play.Id || index}`} entry={entry} active={index === activeIndex} settings={settings} />
       ))}
       {entries.length > 1 && (
-        <div class="sleekfin-hero-pagination" role="tablist" aria-label="Hero slides">
+        <div class="dinkflix-hero-pagination" role="tablist" aria-label="Hero slides">
           {entries.map((entry, index) => (
             <button
               key={`hero-dot-${entry.display.Id || index}`}
               type="button"
-              class="sleekfin-hero-pagination-pill"
+              class="dinkflix-hero-pagination-pill"
               data-active={index === activeIndex ? 'true' : 'false'}
               role="tab"
               aria-label={`Show ${entry.display.Name || `slide ${index + 1}`}`}

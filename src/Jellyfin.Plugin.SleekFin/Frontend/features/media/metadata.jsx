@@ -28,45 +28,45 @@ function unmountMetadata(element) {
 }
 
 export function cleanupMetadata(scope = document) {
-  scope.querySelectorAll('[data-sleekfin-media-meta]').forEach(unmountMetadata);
-  scope.querySelectorAll('.sleekfin-media-meta-source').forEach((element) => {
-    element.classList.remove('sleekfin-media-meta-source');
+  scope.querySelectorAll('[data-dinkflix-media-meta]').forEach(unmountMetadata);
+  scope.querySelectorAll('.dinkflix-media-meta-source').forEach((element) => {
+    element.classList.remove('dinkflix-media-meta-source');
   });
 }
 
 export function cleanupInactiveMetadata(activeCards) {
-  document.querySelectorAll('[data-sleekfin-media-meta], .sleekfin-media-meta-source').forEach((element) => {
+  document.querySelectorAll('[data-dinkflix-media-meta], .dinkflix-media-meta-source').forEach((element) => {
     const card = element.closest('.card');
     if (!card || !activeCards.has(card)) {
-      if (element.matches('[data-sleekfin-media-meta]')) {
+      if (element.matches('[data-dinkflix-media-meta]')) {
         unmountMetadata(element);
       } else {
-        element.classList.remove('sleekfin-media-meta-source');
+        element.classList.remove('dinkflix-media-meta-source');
       }
     }
   });
 }
 
 function sourceElement(card) {
-  return Array.from(card.querySelectorAll('.cardText-secondary')).find((element) => !element.hasAttribute('data-sleekfin-media-meta')) || null;
+  return Array.from(card.querySelectorAll('.cardText-secondary')).find((element) => !element.hasAttribute('data-dinkflix-media-meta')) || null;
 }
 
 function metadataElement(card, source) {
-  let element = card.querySelector('[data-sleekfin-media-meta]');
+  let element = card.querySelector('[data-dinkflix-media-meta]');
   if (!element) {
     element = document.createElement('div');
-    element.className = 'cardText cardText-secondary sleekfin-meta';
+    element.className = 'cardText cardText-secondary dinkflix-meta';
     element.dataset.sleekfinMediaMeta = 'true';
   }
-  element.classList.add('sleekfin-meta');
+  element.classList.add('dinkflix-meta');
 
-  card.querySelectorAll('.sleekfin-media-meta-source').forEach((candidate) => {
+  card.querySelectorAll('.dinkflix-media-meta-source').forEach((candidate) => {
     if (candidate !== source) {
-      candidate.classList.remove('sleekfin-media-meta-source');
+      candidate.classList.remove('dinkflix-media-meta-source');
     }
   });
   if (source) {
-    source.classList.add('sleekfin-media-meta-source');
+    source.classList.add('dinkflix-media-meta-source');
     if (element.previousElementSibling !== source) {
       dom.insertAfter(source, element);
     }

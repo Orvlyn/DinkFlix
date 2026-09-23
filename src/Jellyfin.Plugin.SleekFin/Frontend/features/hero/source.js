@@ -5,7 +5,7 @@ const ITEM_FIELDS = 'Overview,Genres';
 export function loadSettings(client) {
   return client.ajax({
     type: 'GET',
-    url: client.getUrl('SleekFin/Hero/Settings'),
+    url: client.getUrl('DinkFlix/Hero/Settings'),
     dataType: 'json',
   }).then(normalizeSettings);
 }

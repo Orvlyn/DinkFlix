@@ -1,4 +1,4 @@
-const ROOT_CLASS = 'sleekfin-main-ui';
+const ROOT_CLASS = 'dinkflix-main-ui';
 const WINDOW_EVENTS = ['hashchange', 'pageshow', 'popstate'];
 
 function createThemeFeature() {
@@ -30,7 +30,7 @@ function createThemeFeature() {
   return { start, stop };
 }
 
-const features = (window.SleekFinFeatures = window.SleekFinFeatures || {});
+const features = (window.DinkFlixFeatures = window.DinkFlixFeatures || {});
 features.theme?.stop?.();
 features.theme = createThemeFeature();
 features.theme.start();
