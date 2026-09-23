@@ -26,3 +26,16 @@ html.sleekfin-main-ui .cardBox:not(.visualCardBox) .cardPadder {
 html.sleekfin-main-ui .cardPadder .cardImageIcon {
     color: var(--jf-palette-background-paper) !important;
 }
+
+
+/* Keep Jellyfin's native player controls above presentation layers. DINKFLIX does not replace the
+ * player route or playback controller; this only protects the native exit/back hit target. */
+:is(#videoOsdPage, #videoOsd, .videoOsdPage, .videoOsd) :is(.btnExitFullscreen, .btnBack, .btnClose, [data-action="back"]) {
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 10000001 !important;
+}
+
+:is(#videoOsdPage, #videoOsd, .videoOsdPage, .videoOsd) :is(.osdHeader, .videoOsdHeader, .videoOsdControls) {
+    pointer-events: auto;
+}
