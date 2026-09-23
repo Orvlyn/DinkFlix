@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/assets/logo_dark.png" alt="DINKFLIX" width="260" />
+<img src="[https://raw.githubusercontent.com/Orvlyn/DinkFlix/main/assets/logo_dark.png](https://raw.githubusercontent.com/Orvlyn/DinkFlix/refs/heads/main/assets/logo_dark.png)" alt="DINKFLIX" width="260" />
 
 # DINKFLIX
 
