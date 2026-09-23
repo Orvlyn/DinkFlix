@@ -212,3 +212,49 @@ html.sleekfin-details-mounted #itemDetailPage[data-sleekfin-details] > #itemBack
         line-height: 27px;
     }
 }
+
+
+.sleekfin-details-rich-info-root {
+    margin-top: 13px;
+    max-width: 760px;
+}
+
+.sleekfin-details-rich-info {
+    display: grid;
+    gap: 7px 18px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.sleekfin-details-rich-info-item {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.sleekfin-details-rich-info-item strong {
+    color: rgba(255, 255, 255, 0.5);
+    font: 600 9px/12px var(--sleekfin-font-family);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.sleekfin-details-rich-info-item > span {
+    color: rgba(255, 255, 255, 0.84);
+    font: 400 12px/16px var(--sleekfin-font-family);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+    .sleekfin-details-rich-info {
+        grid-template-columns: 1fr;
+    }
+}
+
+html.sleekfin-details-mounted #itemDetailPage[data-sleekfin-details] .emby-scrollbuttons,
+html.sleekfin-details-mounted #itemDetailPage[data-sleekfin-details] .emby-scrollbuttons-button {
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 5;
+}
