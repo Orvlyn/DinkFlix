@@ -113,4 +113,4 @@ DINKFLIX is an ongoing project. Jellyfin's web client and third-party plugins ca
 The design goal is simple: **make Jellyfin feel better without taking Jellyfin away.**
 
 
-<!-- Release marker: v11.5.0.0 -->
+<!-- Release marker refreshed: v11.5.0.0 -->
