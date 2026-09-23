@@ -1,4 +1,4 @@
-import { h, useEffect, useRef, useState } from '../../shared/runtime.js';
+import { Fragment, h, useEffect, useRef, useState } from '../../shared/runtime.js';
 import { HeroSlide } from './HeroSlide.jsx';
 
 export function Hero({ entries, root, settings }) {
@@ -65,5 +65,30 @@ export function Hero({ entries, root, settings }) {
     };
   }, [entries.length, root, settings.autoRotateSeconds, settings.swipeEnabled]);
 
-  return entries.map((entry, index) => <HeroSlide key={`${entry.display.Id || index}-${entry.play.Id || index}`} entry={entry} active={index === activeIndex} settings={settings} />);
+  return (
+    <Fragment>
+      {entries.map((entry, index) => (
+        <HeroSlide key={`${entry.display.Id || index}-${entry.play.Id || index}`} entry={entry} active={index === activeIndex} settings={settings} />
+      ))}
+      {entries.length > 1 && (
+        <div class="sleekfin-hero-pagination" role="tablist" aria-label="Hero slides">
+          {entries.map((entry, index) => (
+            <button
+              key={`hero-dot-${entry.display.Id || index}`}
+              type="button"
+              class="sleekfin-hero-pagination-pill"
+              data-active={index === activeIndex ? 'true' : 'false'}
+              role="tab"
+              aria-label={`Show ${entry.display.Name || `slide ${index + 1}`}`}
+              aria-selected={index === activeIndex}
+              onClick={() => {
+                setActiveIndex(index);
+                startRotation();
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </Fragment>
+  );
 }
