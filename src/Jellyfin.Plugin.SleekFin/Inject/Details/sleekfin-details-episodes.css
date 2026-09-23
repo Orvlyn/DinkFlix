@@ -49,6 +49,10 @@
     font: 600 24px/32px var(--sleekfin-font-family);
 }
 
+.sleekfin-details-season-native {
+    color-scheme: dark;
+}
+
 .sleekfin-details-season-title {
     margin: 0;
 }
@@ -61,6 +65,11 @@
     cursor: pointer;
     max-width: min(42vw, 300px);
     padding: 9px 36px 9px 9px;
+}
+
+.sleekfin-details-season-native option {
+    background: rgb(22 22 24);
+    color: var(--sleekfin-text);
 }
 
 .sleekfin-details-episode-controls {
@@ -91,9 +100,21 @@
     width: 32px;
 }
 
+.sleekfin-details-episode-nav .sleekfin-details-control > .sleekfin-icon {
+    height: 18px;
+    width: 18px;
+}
+
 .sleekfin-details-episode-nav .sleekfin-details-control:disabled {
     cursor: default;
     opacity: 0.3;
+}
+
+@media (hover: hover) {
+    .sleekfin-details-episode-nav .sleekfin-details-control:not(:disabled):hover {
+        background: rgba(0, 255, 198, 0.08) !important;
+        color: var(--sleekfin-accent) !important;
+    }
 }
 
 .sleekfin-details-view-controls {

@@ -4,6 +4,8 @@ import { h } from 'preact';
 const STROKE_WIDTHS = { download: 2, info: 2, star: 2 };
 
 const ICONS = {
+  chevron_left: '<path d="m15 18-6-6 6-6"></path>',
+  chevron_right: '<path d="m9 18 6-6-6-6"></path>',
   arrowDownAz: '<path d="m3 16 4 4 4-4"></path><path d="M7 20V4"></path><path d="M20 8h-5"></path><path d="M15 10V6.5a2.5 2.5 0 0 1 5 0V10"></path><path d="M15 14h5l-5 6h5"></path>',
   arrowLeft: '<path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path>',
   arrowUpAz: '<path d="m3 8 4-4 4 4"></path><path d="M7 4v16"></path><path d="M20 8h-5"></path><path d="M15 10V6.5a2.5 2.5 0 0 1 5 0V10"></path><path d="M15 14h5l-5 6h5"></path>',

@@ -158,7 +158,7 @@ function Episodes({ client, list, mediaItem, seasons }) {
   let title;
   if (mediaItem.Type === 'Series') {
     title = (
-      <span class="sleekfin-details-season-select">
+      <span class="sleekfin-details-season-select sleekfin-control-3d">
         <span class="sleekfin-details-season-label">Season</span>
         <select class="sleekfin-details-season-native" value={selectedSeasonId} onChange={(event) => setSelectedSeasonId(event.currentTarget.value)}>
           {seasons.map((season) => (
