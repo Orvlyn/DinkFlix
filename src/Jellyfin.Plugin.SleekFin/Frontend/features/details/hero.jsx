@@ -26,6 +26,34 @@ function childTitle(mediaItem) {
   );
 }
 
+function formatVideoType(value) {
+  if (!value) return '';
+  return { VideoFile: 'Video file', Dvd: 'DVD', BluRay: 'Blu-ray', Iso: 'ISO' }[String(value)] || String(value);
+}
+
+function peopleNames(mediaItem, type) {
+  const people = (mediaItem.People || []).filter((person) => String(person?.Type || '').toLowerCase() === type || String(person?.Role || '').toLowerCase() === type);
+  return people.map((person) => person.Name).filter(Boolean).slice(0, 2).join(', ');
+}
+
+function metadataValues(mediaItem) {
+  const values = [];
+  const type = item.typeLabel(mediaItem.Type);
+  const videoType = formatVideoType(mediaItem.VideoType);
+  const subtitles = mediaItem.HasSubtitles === true ? 'Yes' : mediaItem.HasSubtitles === false ? 'No' : '';
+  const director = peopleNames(mediaItem, 'director');
+  const writer = peopleNames(mediaItem, 'writer');
+  const studio = (mediaItem.Studios || []).map((studioItem) => studioItem?.Name).filter(Boolean).slice(0, 2).join(', ');
+
+  if (type) values.push({ text: `Type: ${type}` });
+  if (videoType) values.push({ text: `Video type: ${videoType}` });
+  if (subtitles) values.push({ text: `Subtitles: ${subtitles}` });
+  if (director) values.push({ text: `Director: ${director}` });
+  if (writer) values.push({ text: `Writer: ${writer}` });
+  if (studio) values.push({ text: `Studio: ${studio}` });
+  return values;
+}
+
 function factValues(mediaItem, seasons) {
   const values = [];
   const score = Number(mediaItem.CommunityRating || 0);
@@ -54,13 +82,14 @@ export function createHero(page) {
 
   let moved = [];
   const backdropOriginal = nativeBackdrop.style.backgroundImage;
-  const hero = dom.element('<div class="sleekfin-details-hero"><div></div><div class="sleekfin-details-stack"><div class="sleekfin-details-title"></div><div class="sleekfin-details-child-title" hidden></div><div class="sleekfin-details-facts"></div><div class="sleekfin-details-genres"></div></div></div>');
+  const hero = dom.element('<div class="sleekfin-details-hero"><div></div><div class="sleekfin-details-stack"><div class="sleekfin-details-title"></div><div class="sleekfin-details-child-title" hidden></div><div class="sleekfin-details-facts"></div><div class="sleekfin-details-genres"></div><div class="sleekfin-details-info"></div></div></div>');
   const backRoot = hero.firstElementChild;
   const stack = hero.querySelector('.sleekfin-details-stack');
   const title = stack.querySelector('.sleekfin-details-title');
   const childTitleRoot = stack.querySelector('.sleekfin-details-child-title');
   const factsRoot = stack.querySelector('.sleekfin-details-facts');
   const genresRoot = stack.querySelector('.sleekfin-details-genres');
+  const infoRoot = stack.querySelector('.sleekfin-details-info');
   const downloadWasHidden = actions.querySelector('.btnDownload')?.classList.contains('hide');
   const logo = page.querySelector('.detailLogo');
 
@@ -90,6 +119,7 @@ export function createHero(page) {
     render(childTitle(mediaItem), childTitleRoot);
     render(<Facts values={factValues(mediaItem, seasons)} />, factsRoot);
     render(<Facts values={(mediaItem.Genres || []).map((genre) => ({ text: genre }))} />, genresRoot);
+    render(<Facts values={metadataValues(mediaItem)} />, infoRoot);
 
     actions.querySelector('.btnDownload')?.classList.toggle('hide', !['Movie', 'Episode'].includes(mediaItem.Type) || !mediaItem.CanDownload);
     if (backdropUrl) {
@@ -123,6 +153,7 @@ export function createHero(page) {
       render(null, childTitleRoot);
       render(null, factsRoot);
       render(null, genresRoot);
+      render(null, infoRoot);
       restoreMoved();
       hero.remove();
       nativeBackdrop.style.backgroundImage = backdropOriginal;
