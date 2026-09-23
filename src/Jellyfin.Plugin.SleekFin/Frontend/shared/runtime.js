@@ -13,6 +13,7 @@ export const useRef = runtime.hooks.useRef;
 export const useState = runtime.hooks.useState;
 export const dom = runtime.dom;
 export const item = runtime.item;
+export const removeFromContinueWatching = runtime.item.removeFromContinueWatching;
 export const Button = runtime.components.Button;
 export const decorateNativeButton = runtime.components.decorateNativeButton;
 export const Facts = runtime.components.Facts;
