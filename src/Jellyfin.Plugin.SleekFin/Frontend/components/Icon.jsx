@@ -39,7 +39,7 @@ function createIconElement(name) {
 
 export function setIcon(parent, name) {
   const current = parent.querySelector(':scope > .dinkflix-icon');
-  if (current?.dataset.sleekfinIcon === name) return;
+  if (current?.dataset.dinkflixIcon === name) return;
 
   const icon = createIconElement(name);
   if (!icon) return;
