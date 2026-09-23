@@ -14,7 +14,7 @@ function OverflowItemVisual({ record }) {
     while (visual.firstChild) holder.appendChild(visual.firstChild);
   }, [record.template]);
 
-  return <span ref={element} data-sleekfin-header-overflow-visual />;
+  return <span ref={element} data-dinkflix-header-overflow-visual />;
 }
 
 export function HeaderOverflowDrawer({ anchor, onActivate, onClose, records }) {
@@ -27,7 +27,7 @@ export function HeaderOverflowDrawer({ anchor, onActivate, onClose, records }) {
     return () => window.removeEventListener('keydown', closeOnEscape);
   }, [onClose]);
 
-  const bar = anchor.closest('[data-sleekfin-header-proxy]') || anchor;
+  const bar = anchor.closest('[data-dinkflix-header-proxy]') || anchor;
   const barBounds = bar.getBoundingClientRect();
   const compact = layoutMode() === 'compact';
   const style = compact
@@ -35,19 +35,19 @@ export function HeaderOverflowDrawer({ anchor, onActivate, onClose, records }) {
     : { left: `${barBounds.left}px`, top: `${barBounds.bottom + 8}px`, width: `${barBounds.width}px` };
 
   return (
-    <div data-sleekfin-header-overflow-layer>
-      <div data-sleekfin-header-overflow-backdrop onClick={onClose} />
-      <div data-sleekfin-header-overflow-drawer onClick={(event) => event.stopPropagation()} style={style}>
+    <div data-dinkflix-header-overflow-layer>
+      <div data-dinkflix-header-overflow-backdrop onClick={onClose} />
+      <div data-dinkflix-header-overflow-drawer onClick={(event) => event.stopPropagation()} style={style}>
         {records.map((record, index) => {
-          if (record.key === 'separator') return <div data-sleekfin-header-overflow-separator key={`${record.key}-${index}`} />;
-          if (record.key === 'space') return <div data-sleekfin-header-overflow-space key={`${record.key}-${index}`} />;
-          const iconOnly = record.template.getAttribute('data-sleekfin-header-source-visual') === 'icon-only';
+          if (record.key === 'separator') return <div data-dinkflix-header-overflow-separator key={`${record.key}-${index}`} />;
+          if (record.key === 'space') return <div data-dinkflix-header-overflow-space key={`${record.key}-${index}`} />;
+          const iconOnly = record.template.getAttribute('data-dinkflix-header-source-visual') === 'icon-only';
           return (
             <button
               type="button"
-              data-sleekfin-current={record.current ? 'true' : 'false'}
-              data-sleekfin-header-overflow-full={iconOnly ? 'true' : 'false'}
-              data-sleekfin-header-overflow-item={record.key}
+              data-dinkflix-current={record.current ? 'true' : 'false'}
+              data-dinkflix-header-overflow-full={iconOnly ? 'true' : 'false'}
+              data-dinkflix-header-overflow-item={record.key}
               disabled={record.disabled}
               key={`${record.key}-${index}`}
               onClick={(event) => onActivate(record, event.currentTarget)}

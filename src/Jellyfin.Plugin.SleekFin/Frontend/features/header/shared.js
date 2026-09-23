@@ -68,27 +68,27 @@ export function setStyle(mount, element, name, value, priority) {
 export function applySettings(mount, settings) {
   const root = document.documentElement;
   const variables = {
-    '--sleekfin-header-active-background': settings.activeItemBackgroundColor,
-    '--sleekfin-header-active-opacity': String(settings.activeItemOpacity / 100),
-    '--sleekfin-header-active-text': settings.activeItemTextColor,
-    '--sleekfin-header-bar-padding': `${settings.barPadding}px`,
-    '--sleekfin-header-bar-top': `${(settings.height - settings.itemHeight - 2 * settings.barPadding) / 2}px`,
-    '--sleekfin-header-brand-gap': `${settings.brandSpacing}px`,
-    '--sleekfin-header-brand-top': `${(settings.height - settings.logoHeight) / 2}px`,
-    '--sleekfin-header-height': `${settings.height}px`,
-    '--sleekfin-header-hover-opacity': String(settings.hoverOpacity / 100),
-    '--sleekfin-header-item-background': settings.itemBackgroundColor,
-    '--sleekfin-header-item-height': `${settings.itemHeight}px`,
-    '--sleekfin-header-item-spacing': `${settings.itemSpacing}px`,
-    '--sleekfin-header-item-text': settings.itemTextColor,
-    '--sleekfin-header-logo-height': `${settings.logoHeight}px`,
-    '--sleekfin-header-name-color': settings.serverNameColor,
+    '--dinkflix-header-active-background': settings.activeItemBackgroundColor,
+    '--dinkflix-header-active-opacity': String(settings.activeItemOpacity / 100),
+    '--dinkflix-header-active-text': settings.activeItemTextColor,
+    '--dinkflix-header-bar-padding': `${settings.barPadding}px`,
+    '--dinkflix-header-bar-top': `${(settings.height - settings.itemHeight - 2 * settings.barPadding) / 2}px`,
+    '--dinkflix-header-brand-gap': `${settings.brandSpacing}px`,
+    '--dinkflix-header-brand-top': `${(settings.height - settings.logoHeight) / 2}px`,
+    '--dinkflix-header-height': `${settings.height}px`,
+    '--dinkflix-header-hover-opacity': String(settings.hoverOpacity / 100),
+    '--dinkflix-header-item-background': settings.itemBackgroundColor,
+    '--dinkflix-header-item-height': `${settings.itemHeight}px`,
+    '--dinkflix-header-item-spacing': `${settings.itemSpacing}px`,
+    '--dinkflix-header-item-text': settings.itemTextColor,
+    '--dinkflix-header-logo-height': `${settings.logoHeight}px`,
+    '--dinkflix-header-name-color': settings.serverNameColor,
   };
 
   Object.keys(variables).forEach((name) => setStyle(mount, root, name, variables[name]));
-  mark(mount, root, 'data-sleekfin-header-bar-position', settings.barPosition.toLowerCase());
-  mark(mount, root, 'data-sleekfin-header-brand-display', settings.brandDisplay.toLowerCase());
-  mark(mount, root, 'data-sleekfin-header-brand-position', settings.brandPosition.toLowerCase());
+  mark(mount, root, 'data-dinkflix-header-bar-position', settings.barPosition.toLowerCase());
+  mark(mount, root, 'data-dinkflix-header-brand-display', settings.brandDisplay.toLowerCase());
+  mark(mount, root, 'data-dinkflix-header-brand-position', settings.brandPosition.toLowerCase());
 }
 
 export function directChildren(element) {
@@ -111,7 +111,7 @@ export function move(mount, element, destination) {
 }
 
 export function updateScrolledState(mount) {
-  mark(mount, mount.header, 'data-sleekfin-scrolled', window.scrollY > 20 ? 'true' : 'false');
+  mark(mount, mount.header, 'data-dinkflix-scrolled', window.scrollY > 20 ? 'true' : 'false');
 }
 
 function restoreOwnedAttributes(mount) {

@@ -86,7 +86,7 @@ export function createBrandController(isActive) {
 
     removeFallback();
     const fallback = document.createElement('a');
-    fallback.className = 'sleekfin-header-fallback-brand';
+    fallback.className = 'dinkflix-header-fallback-brand';
     fallback.href = '#/';
     document.body.appendChild(fallback);
     state.fallback = fallback;
@@ -95,7 +95,7 @@ export function createBrandController(isActive) {
 
   function useNative(mount, nativeBrand) {
     readServerName(nativeBrand);
-    mark(mount, nativeBrand, 'data-sleekfin-header-brand');
+    mark(mount, nativeBrand, 'data-dinkflix-header-brand');
     removeFallback();
   }
 
@@ -103,17 +103,17 @@ export function createBrandController(isActive) {
     const element = mount.brand || state.fallback;
     if (!element) return;
 
-    mark(mount, element, 'data-sleekfin-header-overlap-hidden', 'false');
-    if (!mount.proxy || (window.innerWidth >= 1100 && mount.proxy.getAttribute('data-sleekfin-header-overflow-active') !== 'true')) return;
+    mark(mount, element, 'data-dinkflix-header-overlap-hidden', 'false');
+    if (!mount.proxy || (window.innerWidth >= 1100 && mount.proxy.getAttribute('data-dinkflix-header-overflow-active') !== 'true')) return;
 
     const brandBounds = element.getBoundingClientRect();
     const barBounds = mount.proxy.getBoundingClientRect();
     const overlaps = brandBounds.width > 0 && barBounds.width > 0 && brandBounds.left < barBounds.right && brandBounds.right > barBounds.left && brandBounds.top < barBounds.bottom && brandBounds.bottom > barBounds.top;
-    mark(mount, element, 'data-sleekfin-header-overlap-hidden', overlaps ? 'true' : 'false');
+    mark(mount, element, 'data-dinkflix-header-overlap-hidden', overlaps ? 'true' : 'false');
   }
 
   function updateOffset(mount) {
-    mark(mount, mount.brand || state.fallback, 'data-sleekfin-header-menu-offset', dom.isVisible(mount.menu) ? 'true' : 'false');
+    mark(mount, mount.brand || state.fallback, 'data-dinkflix-header-menu-offset', dom.isVisible(mount.menu) ? 'true' : 'false');
   }
 
   return { ensureFallback, removeFallback, resetServer, updateOffset, updateOverlap, useNative };

@@ -10,7 +10,7 @@ export function createLegacyAdapter(brand) {
     const right = header.querySelector('.headerRight');
     const tabs = header.querySelector('.headerTabs');
     const menu = left?.querySelector('.mainDrawerButton') || null;
-    const cluster = dom.element('<div data-sleekfin-legacy-cluster="true"></div>');
+    const cluster = dom.element('<div data-dinkflix-legacy-cluster="true"></div>');
     const headerMount = createMount({
       actions: right,
       cluster,
@@ -24,9 +24,9 @@ export function createLegacyAdapter(brand) {
 
     top.appendChild(cluster);
     applySettings(headerMount, settings);
-    mark(headerMount, header, 'data-sleekfin-header', 'legacy');
-    mark(headerMount, top, 'data-sleekfin-legacy-top');
-    mark(headerMount, left, 'data-sleekfin-legacy-left');
+    mark(headerMount, header, 'data-dinkflix-header', 'legacy');
+    mark(headerMount, top, 'data-dinkflix-legacy-top');
+    mark(headerMount, left, 'data-dinkflix-legacy-left');
     if (left) {
       directChildren(left)
         .filter((element) => element !== menu && element.matches('button, .headerButton, .paper-icon-button-light'))

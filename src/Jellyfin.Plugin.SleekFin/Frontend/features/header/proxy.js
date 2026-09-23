@@ -53,7 +53,7 @@ function resolveRecords(mount, settings) {
 
 function createStructuralItem(key) {
   const item = document.createElement('span');
-  item.setAttribute(key === 'space' ? 'data-sleekfin-header-space' : 'data-sleekfin-header-separator', 'true');
+  item.setAttribute(key === 'space' ? 'data-dinkflix-header-space' : 'data-dinkflix-header-separator', 'true');
   return item;
 }
 
@@ -69,9 +69,9 @@ function renderProxyVisual(record) {
   const template = cloneSourceTemplate(record.template);
   record.button.textContent = '';
   while (template.firstChild) record.button.appendChild(template.firstChild);
-  const shape = record.template.getAttribute('data-sleekfin-header-source-visual');
-  if (shape === 'icon-only') record.button.setAttribute('data-sleekfin-header-icon-only', 'true');
-  else record.button.removeAttribute('data-sleekfin-header-icon-only');
+  const shape = record.template.getAttribute('data-dinkflix-header-source-visual');
+  if (shape === 'icon-only') record.button.setAttribute('data-dinkflix-header-icon-only', 'true');
+  else record.button.removeAttribute('data-dinkflix-header-icon-only');
   record.button.disabled = sourceDisabled(record);
   record.button.style.display = record.nativeHidden ? 'none' : '';
   record.button.title = sourceTitle(record);
@@ -97,7 +97,7 @@ function activateSource(mount, record) {
 function createProxyButton(mount, record) {
   const button = document.createElement('button');
   button.type = 'button';
-  button.setAttribute('data-sleekfin-header-proxy-item', record.key);
+  button.setAttribute('data-dinkflix-header-proxy-item', record.key);
   record.button = button;
   renderProxyVisual(record);
   button.addEventListener('click', (event) => {
@@ -118,9 +118,9 @@ function createOverflowToggle() {
   const caret = document.createElement('span');
   button.type = 'button';
   button.title = 'More header items';
-  button.setAttribute('data-sleekfin-header-overflow-toggle', 'true');
-  button.setAttribute('data-sleekfin-header-overflow-hidden', 'true');
-  caret.setAttribute('data-sleekfin-header-overflow-caret', 'true');
+  button.setAttribute('data-dinkflix-header-overflow-toggle', 'true');
+  button.setAttribute('data-dinkflix-header-overflow-hidden', 'true');
+  caret.setAttribute('data-dinkflix-header-overflow-caret', 'true');
   button.appendChild(caret);
   return button;
 }
@@ -191,7 +191,7 @@ function proxyContentOverflows(mount) {
     parent = parent.parentElement;
   }
   const children = [...mount.proxyEntries.map((entry) => entry.element), mount.overflowToggle].filter(
-    (element) => element.getAttribute('data-sleekfin-header-overflowed') !== 'true' && element.getAttribute('data-sleekfin-header-overflow-hidden') !== 'true',
+    (element) => element.getAttribute('data-dinkflix-header-overflowed') !== 'true' && element.getAttribute('data-dinkflix-header-overflow-hidden') !== 'true',
   );
   return mount.proxy.scrollWidth > mount.proxy.clientWidth + 1 || children.some((element) => {
     const bounds = element.getBoundingClientRect();
@@ -202,23 +202,23 @@ function proxyContentOverflows(mount) {
 function updateOverflow(mount) {
   if (!mount.proxy) return;
 
-  mount.proxyEntries.forEach((entry) => entry.element.setAttribute('data-sleekfin-header-overflowed', 'false'));
-  mount.overflowToggle.setAttribute('data-sleekfin-header-overflow-hidden', 'true');
+  mount.proxyEntries.forEach((entry) => entry.element.setAttribute('data-dinkflix-header-overflowed', 'false'));
+  mount.overflowToggle.setAttribute('data-dinkflix-header-overflow-hidden', 'true');
   if (!proxyContentOverflows(mount)) {
-    mount.proxy.setAttribute('data-sleekfin-header-overflow-active', 'false');
+    mount.proxy.setAttribute('data-dinkflix-header-overflow-active', 'false');
     mount.overflow.sync([]);
     mount.updateBrandOverlap?.();
     return;
   }
 
-  mount.proxy.setAttribute('data-sleekfin-header-overflow-active', 'true');
-  mount.overflowToggle.setAttribute('data-sleekfin-header-overflow-hidden', 'false');
+  mount.proxy.setAttribute('data-dinkflix-header-overflow-active', 'true');
+  mount.overflowToggle.setAttribute('data-dinkflix-header-overflow-hidden', 'false');
   for (let index = mount.proxyEntries.length - 1; index >= 0 && proxyContentOverflows(mount); index -= 1) {
-    mount.proxyEntries[index].element.setAttribute('data-sleekfin-header-overflowed', 'true');
+    mount.proxyEntries[index].element.setAttribute('data-dinkflix-header-overflowed', 'true');
   }
-  const records = mount.proxyEntries.filter((entry) => entry.element.getAttribute('data-sleekfin-header-overflowed') === 'true').map((entry) => entry.record);
+  const records = mount.proxyEntries.filter((entry) => entry.element.getAttribute('data-dinkflix-header-overflowed') === 'true').map((entry) => entry.record);
   const hasItems = records.some((record) => record.source);
-  if (!hasItems) mount.overflowToggle.setAttribute('data-sleekfin-header-overflow-hidden', 'true');
+  if (!hasItems) mount.overflowToggle.setAttribute('data-dinkflix-header-overflow-hidden', 'true');
   mount.overflow.sync(hasItems ? records : []);
   mount.updateBrandOverlap?.();
 }
@@ -237,10 +237,10 @@ function markEmptySegments(mount) {
     if (!segment) return;
     const controls = Array.from(segment.querySelectorAll('button, a[href]')).filter(
       (source) =>
-        !source.closest('[data-sleekfin-header-proxy]') &&
-        !source.matches('[data-sleekfin-header-brand], .je-header-more-toggle, .mainDrawerButton'),
+        !source.closest('[data-dinkflix-header-proxy]') &&
+        !source.matches('[data-dinkflix-header-brand], .je-header-more-toggle, .mainDrawerButton'),
     );
-    mark(mount, segment, 'data-sleekfin-header-all-proxied', controls.every((source) => sources.has(source)) ? 'true' : 'false');
+    mark(mount, segment, 'data-dinkflix-header-all-proxied', controls.every((source) => sources.has(source)) ? 'true' : 'false');
   };
   markSegment(mount.nav);
   markSegment(mount.actions);
@@ -250,13 +250,13 @@ function markEmptySegments(mount) {
 function hideProviderWrappers(mount) {
   const randomContainer = mount.header.querySelector('#randomItemButtonContainer');
   if (randomContainer) {
-    mark(mount, randomContainer, 'data-sleekfin-header-source-hidden', mount.hiddenSources.has(randomContainer.querySelector('#randomItemButton')) ? 'true' : 'false');
+    mark(mount, randomContainer, 'data-dinkflix-header-source-hidden', mount.hiddenSources.has(randomContainer.querySelector('#randomItemButton')) ? 'true' : 'false');
   }
 
   const enhancedGroup = mount.header.querySelector('#je-native-tabs-group');
   if (enhancedGroup) {
     const hasUnmanagedButton = Array.from(enhancedGroup.querySelectorAll('button')).some((button) => !mount.hiddenSources.has(button));
-    mark(mount, enhancedGroup.querySelector('#je-native-tabs-separator'), 'data-sleekfin-header-source-hidden', hasUnmanagedButton ? 'false' : 'true');
+    mark(mount, enhancedGroup.querySelector('#je-native-tabs-separator'), 'data-dinkflix-header-source-hidden', hasUnmanagedButton ? 'false' : 'true');
   }
 
   const enhancedTray = mount.header.querySelector('#je-header-buttons-group');
@@ -264,9 +264,9 @@ function hideProviderWrappers(mount) {
     const hasUnmanagedButton = Array.from(enhancedTray.querySelectorAll('button, a')).some(
       (button) => !button.classList.contains('je-header-more-toggle') && !mount.hiddenSources.has(button),
     );
-    const hasPopupAnchor = Boolean(enhancedTray.querySelector('[data-sleekfin-header-source-anchor]'));
-    mark(mount, enhancedTray, 'data-sleekfin-header-source-hidden', !hasUnmanagedButton && !hasPopupAnchor ? 'true' : 'false');
-    mark(mount, enhancedTray, 'data-sleekfin-header-all-proxied', !hasUnmanagedButton ? 'true' : 'false');
+    const hasPopupAnchor = Boolean(enhancedTray.querySelector('[data-dinkflix-header-source-anchor]'));
+    mark(mount, enhancedTray, 'data-dinkflix-header-source-hidden', !hasUnmanagedButton && !hasPopupAnchor ? 'true' : 'false');
+    mark(mount, enhancedTray, 'data-dinkflix-header-all-proxied', !hasUnmanagedButton ? 'true' : 'false');
   }
 }
 
@@ -276,16 +276,16 @@ function hideSources(mount) {
     if (record.fallback) return;
     mount.hiddenSources.add(record.source);
     if (record.popup) {
-      mark(mount, record.source, 'data-sleekfin-header-source-anchor');
+      mark(mount, record.source, 'data-dinkflix-header-source-anchor');
       mark(mount, record.source, 'tabindex', '-1');
     } else {
-      mark(mount, record.source, 'data-sleekfin-header-source-hidden');
+      mark(mount, record.source, 'data-dinkflix-header-source-hidden');
     }
   });
   mount.hiddenRecords.forEach((record) => {
     if (!record.fallback) {
       mount.hiddenSources.add(record.source);
-      mark(mount, record.source, 'data-sleekfin-header-source-hidden');
+      mark(mount, record.source, 'data-dinkflix-header-source-hidden');
     }
   });
   hideProviderWrappers(mount);
@@ -295,7 +295,7 @@ function hideSources(mount) {
 function syncPopupAnchors(mount, activeRecord, activeAnchor) {
   (activeRecord ? [activeRecord] : mount.proxyRecords).forEach((record) => {
     const anchor = activeRecord ? activeAnchor : record.button;
-    if (!record.popup || record.fallback || !dom.isConnected(anchor) || (!activeRecord && record.button.getAttribute('data-sleekfin-header-overflowed') === 'true')) return;
+    if (!record.popup || record.fallback || !dom.isConnected(anchor) || (!activeRecord && record.button.getAttribute('data-dinkflix-header-overflowed') === 'true')) return;
 
     const rectangle = anchor.getBoundingClientRect();
     setStyle(mount, record.source, 'left', `${Math.round(rectangle.left)}px`, 'important');
@@ -310,7 +310,7 @@ export function createHeaderProxy(mount, parent, before, settings) {
   if (!resolved.customized) return null;
 
   const proxy = document.createElement('div');
-  proxy.setAttribute('data-sleekfin-header-proxy', mount.kind);
+  proxy.setAttribute('data-dinkflix-header-proxy', mount.kind);
   mount.proxyEntries = resolved.records.map((record) => {
     const element = record.source ? createProxyButton(mount, record) : createStructuralItem(record.key);
     proxy.appendChild(element);
@@ -322,7 +322,7 @@ export function createHeaderProxy(mount, parent, before, settings) {
   mount.proxyRecords = resolved.records.filter((record) => record.source);
   mount.hiddenRecords = resolved.hidden;
   mount.overflow = createOverflowController(mount, mount.overflowToggle);
-  mark(mount, mount.header, 'data-sleekfin-header-proxy-active');
+  mark(mount, mount.header, 'data-dinkflix-header-proxy-active');
   hideSources(mount);
   window.requestAnimationFrame(() => {
     if (mount.active) {
@@ -351,7 +351,7 @@ export function refreshHeaderProxy(mount) {
     if (refreshRecordVisual(record)) renderProxyVisual(record);
     record.button.disabled = sourceDisabled(record);
     record.button.style.display = record.nativeHidden ? 'none' : '';
-    record.button.setAttribute('data-sleekfin-current', currentSource(record) ? 'true' : 'false');
+    record.button.setAttribute('data-dinkflix-current', currentSource(record) ? 'true' : 'false');
   });
   syncPopupAnchors(mount);
   scheduleHeaderProxyLayout(mount);

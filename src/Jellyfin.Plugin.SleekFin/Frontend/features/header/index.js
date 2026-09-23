@@ -6,12 +6,12 @@ import { createModernAdapter } from './modern.js';
 import { DEFAULT_SETTINGS, normalizeSettings, settingsSignature } from './settings.js';
 import { findSurface, isTvLayout, layoutMode } from './shared.js';
 
-const MAIN_ROOT_CLASS = 'sleekfin-main-ui';
-const ROOT_BOOT_LOADING_CLASS = 'sleekfin-header-boot-loading';
-const ROOT_CLASS = 'sleekfin-header-mounted';
-const ROOT_LOADING_CLASS = 'sleekfin-header-loading';
-const SOURCE_CACHE_KEY = 'sleekfin:header-sources:v2';
-const SETTINGS_CHANGED_EVENT = 'sleekfin:header-settings-changed';
+const MAIN_ROOT_CLASS = 'dinkflix-main-ui';
+const ROOT_BOOT_LOADING_CLASS = 'dinkflix-header-boot-loading';
+const ROOT_CLASS = 'dinkflix-header-mounted';
+const ROOT_LOADING_CLASS = 'dinkflix-header-loading';
+const SOURCE_CACHE_KEY = 'dinkflix:header-sources:v2';
+const SETTINGS_CHANGED_EVENT = 'dinkflix:header-settings-changed';
 const WINDOW_EVENTS = ['hashchange', 'pageshow', 'popstate', 'resize', 'scroll'];
 const DISABLED_SETTINGS = Object.freeze({ ...DEFAULT_SETTINGS, enabled: false });
 
@@ -19,7 +19,7 @@ function sourceTemplate(html) {
   const holder = document.createElement('template');
   holder.innerHTML = typeof html === 'string' ? html : '';
   const template = holder.content.firstElementChild;
-  return template?.matches('[data-sleekfin-header-source-visual]') ? template : null;
+  return template?.matches('[data-dinkflix-header-source-visual]') ? template : null;
 }
 
 function currentScope() {
@@ -124,7 +124,7 @@ function createHeaderFeature() {
   }
 
   function notifyCatalogChanged() {
-    if (typeof window.CustomEvent === 'function') window.dispatchEvent(new CustomEvent('sleekfin:header-catalog-changed'));
+    if (typeof window.CustomEvent === 'function') window.dispatchEvent(new CustomEvent('dinkflix:header-catalog-changed'));
   }
 
   function clearStaleDashboardMenu() {
@@ -307,7 +307,7 @@ function createHeaderFeature() {
     const requestScope = scope.key;
     const request = ++state.settingsRequest;
     apiClient
-      .ajax({ dataType: 'json', type: 'GET', url: apiClient.getUrl('SleekFin/Header') })
+      .ajax({ dataType: 'json', type: 'GET', url: apiClient.getUrl('DinkFlix/Header') })
       .then((settings) => {
         if (!state.started || request !== state.settingsRequest || requestScope !== currentScope().key) return;
 
@@ -383,7 +383,7 @@ function createHeaderFeature() {
   return { cloneCatalogItem, cloneChromePart, getCatalog, start, stop };
 }
 
-const features = (window.SleekFinFeatures = window.SleekFinFeatures || {});
+const features = (window.DinkFlixFeatures = window.DinkFlixFeatures || {});
 features.header?.stop?.();
 features.header = createHeaderFeature();
 features.header.start();

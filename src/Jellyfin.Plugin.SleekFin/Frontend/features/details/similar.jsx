@@ -78,7 +78,7 @@ export function createSimilar(page) {
       }
       if (!record) {
         const meta = document.createElement('div');
-        meta.className = 'sleekfin-details-similar-meta sleekfin-meta';
+        meta.className = 'dinkflix-details-similar-meta dinkflix-meta';
         cardBox.appendChild(meta);
         record = { meta, rating: '', type: '', year: '' };
         records.set(card, record);

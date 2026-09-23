@@ -69,7 +69,7 @@ function stableClasses(source) {
 
 function stableData(source) {
   return Array.from(source.attributes)
-    .filter((attribute) => attribute.name.startsWith('data-') && !/^data-sleekfin-|^data-testid$/.test(attribute.name))
+    .filter((attribute) => attribute.name.startsWith('data-') && !/^data-dinkflix-|^data-testid$/.test(attribute.name))
     .map((attribute) => `${attribute.name}=${attribute.value}`)
     .sort()
     .join('&');
@@ -93,7 +93,7 @@ function stableElementOrdinal(source) {
   const role = source.getAttribute('role') || source.tagName.toLowerCase();
   const peers = Array.from(boundary.querySelectorAll(source.tagName)).filter((element) => {
     const peerRole = element.getAttribute('role') || element.tagName.toLowerCase();
-    return !element.closest('[data-sleekfin-header-proxy], .sleekfin-builder-preview') && peerRole === role && stableClasses(element) === classes;
+    return !element.closest('[data-dinkflix-header-proxy], .dinkflix-builder-preview') && peerRole === role && stableClasses(element) === classes;
   });
   return peers.indexOf(source);
 }
@@ -126,7 +126,7 @@ function seerrFinId(source, route) {
 }
 
 function keyForSource(source) {
-  if (!source || source.closest('[data-sleekfin-header-proxy], .sleekfin-builder-preview')) return null;
+  if (!source || source.closest('[data-dinkflix-header-proxy], .dinkflix-builder-preview')) return null;
   if (source.matches('.mainDrawerButton, .je-header-more-toggle')) return null;
 
   const route = source.matches('a[href]') ? routeFor(source) : '';
@@ -215,7 +215,7 @@ function legacyCandidates(surface) {
 
 function candidateScore(candidate) {
   const inline = candidate.zone === 'fallback' ? 0 : 10;
-  const owned = candidate.source.hasAttribute('data-sleekfin-header-source-hidden') || candidate.source.hasAttribute('data-sleekfin-header-source-anchor') ? 4 : 0;
+  const owned = candidate.source.hasAttribute('data-dinkflix-header-source-hidden') || candidate.source.hasAttribute('data-dinkflix-header-source-anchor') ? 4 : 0;
   return inline + owned + (dom.isVisible(candidate.source) ? 2 : 0);
 }
 
@@ -226,7 +226,7 @@ function namespaceSvgIds(clone) {
     const ids = new Map();
     [svg, ...svg.querySelectorAll('[id]')].filter((element) => Boolean(element.id)).forEach((element, idIndex) => {
       const original = element.id;
-      const namespaced = `sleekfin-source-svg-${cloneSequence}-${svgIndex}-${idIndex}`;
+      const namespaced = `dinkflix-source-svg-${cloneSequence}-${svgIndex}-${idIndex}`;
       ids.set(original, namespaced);
       element.id = namespaced;
     });
@@ -274,7 +274,7 @@ function cleanClone(node) {
     clone.src = node.currentSrc || node.src;
     clone.removeAttribute('srcset');
   }
-  clone.setAttribute('data-sleekfin-header-source-icon', 'true');
+  clone.setAttribute('data-dinkflix-header-source-icon', 'true');
   return clone;
 }
 
@@ -316,8 +316,8 @@ function visualNodes(source) {
   if (!background) return [];
 
   const clone = document.createElement('span');
-  clone.setAttribute('data-sleekfin-header-source-icon', 'true');
-  if (background.matches('.headerUserButtonRound, .MuiAvatar-root')) clone.setAttribute('data-sleekfin-header-source-avatar', 'true');
+  clone.setAttribute('data-dinkflix-header-source-icon', 'true');
+  if (background.matches('.headerUserButtonRound, .MuiAvatar-root')) clone.setAttribute('data-dinkflix-header-source-avatar', 'true');
   clone.style.backgroundImage = background.style.backgroundImage;
   clone.style.backgroundPosition = background.style.backgroundPosition || 'center';
   clone.style.backgroundRepeat = background.style.backgroundRepeat || 'no-repeat';
@@ -360,7 +360,7 @@ function sourceNativeHidden(source) {
 function sourceInline(candidate) {
   const source = candidate.source;
   if (candidate.zone === 'fallback' || sourceNativeHidden(source)) return false;
-  const owned = source.hasAttribute('data-sleekfin-header-source-hidden') || source.hasAttribute('data-sleekfin-header-source-anchor');
+  const owned = source.hasAttribute('data-dinkflix-header-source-hidden') || source.hasAttribute('data-dinkflix-header-source-anchor');
   return owned || dom.isVisible(source);
 }
 
@@ -379,11 +379,11 @@ function visualTemplate(source) {
   icons.forEach((icon) => template.appendChild(icon));
   if (label) {
     const text = document.createElement('span');
-    text.setAttribute('data-sleekfin-header-source-label', 'true');
+    text.setAttribute('data-dinkflix-header-source-label', 'true');
     text.textContent = label;
     template.appendChild(text);
   }
-  template.setAttribute('data-sleekfin-header-source-visual', icons.length ? (label ? 'icon-text' : 'icon-only') : 'text-only');
+  template.setAttribute('data-dinkflix-header-source-visual', icons.length ? (label ? 'icon-text' : 'icon-only') : 'text-only');
   return { label, template };
 }
 
@@ -402,17 +402,17 @@ function rootAnchor(container) {
 export function discoverHeaderChrome(surface) {
   if (!surface?.header || isDashboardRoute()) return {};
 
-  let brand = surface.header.querySelector('[data-sleekfin-header-brand]');
+  let brand = surface.header.querySelector('[data-dinkflix-header-brand]');
   let menu = null;
   if (surface.kind === 'modern') {
     const toolbar = surface.header.querySelector('.MuiToolbar-root');
     const children = toolbar ? Array.from(toolbar.children) : [];
     const navigation = children.find((element) => element.classList.contains('MuiStack-root')) || null;
-    brand ||= rootAnchor(navigation) || Array.from(document.querySelectorAll('.sleekfin-header-fallback-brand')).find((element) => dom.isVisible(element)) || null;
+    brand ||= rootAnchor(navigation) || Array.from(document.querySelectorAll('.dinkflix-header-fallback-brand')).find((element) => dom.isVisible(element)) || null;
     menu ||= children.find((element) => element.matches('button') && Boolean(element.querySelector('svg[data-testid="MenuIcon"]'))) || null;
   } else {
     menu ||= surface.header.querySelector('.mainDrawerButton');
-    brand ||= rootAnchor(surface.header) || Array.from(document.querySelectorAll('.sleekfin-header-fallback-brand')).find((element) => dom.isVisible(element)) || null;
+    brand ||= rootAnchor(surface.header) || Array.from(document.querySelectorAll('.dinkflix-header-fallback-brand')).find((element) => dom.isVisible(element)) || null;
   }
 
   return Object.fromEntries(
@@ -480,7 +480,7 @@ export function catalogDescriptors(records) {
     id: record.key,
     inline: record.inline,
     label: record.label,
-    shape: record.template.getAttribute('data-sleekfin-header-source-visual'),
+    shape: record.template.getAttribute('data-dinkflix-header-source-visual'),
   }));
 }
 
@@ -530,15 +530,15 @@ export function currentSource(record) {
     if (url && url.origin !== window.location.origin) return false;
     return Boolean(route && (window.location.href.toLowerCase().includes(route) || record.source.getAttribute('aria-current') === 'page'));
   }
-  return record.source.classList.contains('emby-tab-button-active') || record.source.getAttribute('data-sleekfin-current') === 'true';
+  return record.source.classList.contains('emby-tab-button-active') || record.source.getAttribute('data-dinkflix-current') === 'true';
 }
 
 export function refreshRecordVisual(record) {
   const visual = visualTemplate(record.source);
   const signature = visual.template.outerHTML;
   const preserveShape =
-    (record.source.hasAttribute('data-sleekfin-header-source-hidden') || record.source.hasAttribute('data-sleekfin-header-source-anchor')) &&
-    visual.template.getAttribute('data-sleekfin-header-source-visual') !== record.template.getAttribute('data-sleekfin-header-source-visual');
+    (record.source.hasAttribute('data-dinkflix-header-source-hidden') || record.source.hasAttribute('data-dinkflix-header-source-anchor')) &&
+    visual.template.getAttribute('data-dinkflix-header-source-visual') !== record.template.getAttribute('data-dinkflix-header-source-visual');
   const changed = !preserveShape && signature !== record.template.outerHTML;
   record.caption = captionFor(record.key, record.source, visual.label);
   record.inline = sourceInline(record);
