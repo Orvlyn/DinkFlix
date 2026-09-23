@@ -22,3 +22,5 @@ The project evolved from the **SleekFin** foundation by **varunaditya-plus** and
 https://github.com/varunaditya-plus/SleekFin
 
 The original upstream work remains credited under the applicable license. DINKFLIX's branding, modifications and ongoing development are separate from the upstream project.
+
+DINKFLIX v11.5.1.0 release build includes the current interaction and presentation fixes.
