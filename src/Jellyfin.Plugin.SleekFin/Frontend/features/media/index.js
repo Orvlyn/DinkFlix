@@ -45,11 +45,11 @@ function syncUser() {
 }
 
 function findHomeResumeContainers() {
-  return Array.from(document.querySelectorAll('#indexPage #homeTab.is-active .sections .itemsContainer[data-monitor]'));
+  return Array.from(document.querySelectorAll('#indexPage #homeTab.is-active .sections .itemsContainer'));
 }
 
 function hideEmptyResumeSection(container) {
-  if (container.querySelector('.card[data-id][data-positionticks]')) return;
+  if (container.querySelector('.card[data-id]:has(.cardOverlayFab-primary[data-action="resume"])')) return;
   const section = container.closest('.verticalSection, .sectionContainer');
   section?.classList.add('hide');
 }
@@ -82,7 +82,7 @@ function removeFromContinueWatching(card, button) {
 
 function decorateResumeCards() {
   findHomeResumeContainers().forEach((container) => {
-    container.querySelectorAll('.card[data-id][data-positionticks]').forEach((card) => {
+    container.querySelectorAll('.card[data-id]:has(.cardOverlayFab-primary[data-action="resume"])').forEach((card) => {
       if (card.querySelector('[data-sleekfin-resume-remove]')) return;
 
       const overlay = card.querySelector('.cardOverlayContainer');
