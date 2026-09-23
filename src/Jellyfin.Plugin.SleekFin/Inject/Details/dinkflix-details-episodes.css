@@ -345,3 +345,38 @@
     border-color: rgba(0, 255, 198, 0.44);
     box-shadow: 0 0 0 2px rgba(0, 255, 198, 0.14), 0 8px 24px rgba(0, 0, 0, 0.18);
 }
+
+
+.dinkflix-details-season-picker {
+    align-items: center;
+    display: flex;
+    gap: 7px;
+    max-width: min(78vw, 760px);
+    overflow-x: auto;
+    padding: 2px;
+    scrollbar-width: none;
+}
+.dinkflix-details-season-picker::-webkit-scrollbar { display: none; }
+
+.dinkflix-details-season-pill {
+    appearance: none;
+    background: rgba(255, 255, 255, 0.055);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    color: rgba(255,255,255,0.68);
+    cursor: pointer;
+    flex: 0 0 auto;
+    font: 600 12px/16px var(--dinkflix-font-family);
+    padding: 8px 13px;
+    transition: background 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+.dinkflix-details-season-pill[data-active="true"] {
+    background: rgba(0,255,198,0.12);
+    border-color: rgba(0,255,198,0.38);
+    color: var(--dinkflix-accent);
+}
+.dinkflix-details-season-pill:hover { transform: translateY(-1px); }
+.dinkflix-details-season-pill:focus-visible {
+    outline: 2px solid var(--dinkflix-accent);
+    outline-offset: 3px;
+}
