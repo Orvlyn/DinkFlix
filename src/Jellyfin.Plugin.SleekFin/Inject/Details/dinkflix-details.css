@@ -1,0 +1,132 @@
+/* Added by the synchronous boot asset while a detail route is entered and removed by the details bundle
+   once it has something to show. visibility rather than display hides the page without removing its
+   layout, so the bundle can still select, measure and move those nodes while it builds the hero, and
+   the background keeps Jellyfin's own page from showing through before the theme bundle defines the
+   token. */
+html.dinkflix-details-concealed,
+html.dinkflix-details-concealed body {
+    background: var(--dinkflix-background, #000);
+}
+
+/* A static rule rather than an animation: the boot script reveals the page by removing the class,
+   which is also what restarts this concealment on a later navigation. */
+html.dinkflix-details-concealed #itemDetailPage {
+    visibility: hidden;
+}
+
+/* Jellyfin's detail route raises its own loading ring on a fixed 10vh circle centred on the viewport
+   at z-index 9999999, which both outranks and encloses the loading mark below. Suppressing it while
+   the page is concealed leaves a single loader instead of two concentric ones. It stays hidden only
+   while the concealment gate is open: releasing the class without the bundle, which the boot script
+   failsafe does, brings Jellyfin's loader back with its page. */
+html.dinkflix-details-concealed .docspinner {
+    display: none !important;
+}
+
+html.dinkflix-details-concealed::before {
+    animation: dinkflix-details-skeleton-pulse 1.4s ease-in-out infinite alternate;
+    background:
+        linear-gradient(var(--dinkflix-skeleton-line-strong, rgba(226, 229, 234, 0.28)) 0 0) 0 0 / min(360px, 70vw) 92px no-repeat,
+        linear-gradient(var(--dinkflix-skeleton-line, rgba(211, 215, 221, 0.16)) 0 0) 0 116px / min(430px, 78vw) 14px no-repeat,
+        linear-gradient(var(--dinkflix-skeleton-line, rgba(211, 215, 221, 0.16)) 0 0) 0 144px / min(390px, 72vw) 14px no-repeat,
+        linear-gradient(var(--dinkflix-skeleton-line-strong, rgba(226, 229, 234, 0.28)) 0 0) 0 196px / 120px 40px no-repeat;
+    bottom: 14vh;
+    content: "";
+    height: 236px;
+    left: var(--dinkflix-page-gutter, 24px);
+    position: fixed;
+    width: min(520px, calc(100vw - var(--dinkflix-page-gutter, 24px) * 2));
+    z-index: 1;
+}
+
+@keyframes dinkflix-details-skeleton-pulse {
+    from {
+        opacity: 0.62;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes dinkflix-details-enter {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#itemDetailPage.dinkflix-details-entering {
+    animation: dinkflix-details-enter 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+html.dinkflix-details-mounted {
+    --dinkflix-details-hero-height: 85vh;
+    background: var(--dinkflix-background);
+}
+
+html.dinkflix-details-mounted :is([data-dinkflix-header], .dinkflix-header-fallback-brand, header.MuiAppBar-root, .skinHeader) {
+    display: none !important;
+}
+
+html.dinkflix-details-mounted body {
+    overflow: hidden !important;
+}
+
+html.dinkflix-details-mounted #itemDetailPage[data-dinkflix-details] {
+    background: var(--dinkflix-background) !important;
+    box-sizing: border-box;
+    color: var(--dinkflix-text);
+    font-family: var(--dinkflix-font-family);
+    height: 100% !important;
+    overflow-x: hidden;
+    padding-bottom: 0 !important;
+    padding-top: 0 !important;
+    scrollbar-color: rgba(255, 255, 255, 0.45) transparent;
+    top: 0 !important;
+}
+
+html.dinkflix-details-mounted #itemDetailPage[data-dinkflix-details]::-webkit-scrollbar {
+    background: transparent;
+    height: 5px;
+    width: 5px;
+}
+
+html.dinkflix-details-mounted #itemDetailPage[data-dinkflix-details]::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.45);
+    border-radius: 6px;
+}
+
+html.dinkflix-details-mounted #itemDetailPage[data-dinkflix-details] > .detailPageWrapperContainer {
+    background: transparent !important;
+    box-sizing: border-box;
+    margin: 0;
+    max-width: none;
+    padding-top: var(--dinkflix-details-hero-height);
+    position: relative;
+    width: calc(100vw - 5px);
+    z-index: 1;
+}
+
+html.dinkflix-details-mounted #itemDetailPage[data-dinkflix-details] .detailPagePrimaryContainer {
+    display: none !important;
+}
+
+html.dinkflix-details-mounted :is(#castCollapsible, #similarCollapsible) .cardScalable {
+    background: var(--dinkflix-surface);
+    border: 1px solid var(--dinkflix-border);
+    border-radius: 10px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+@media (max-width: 767px) {
+    html.dinkflix-details-mounted {
+        --dinkflix-details-hero-height: max(620px, 85vh);
+    }
+}
