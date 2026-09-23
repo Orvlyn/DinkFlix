@@ -19,7 +19,7 @@ html.sleekfin-header-mounted {
     --sleekfin-header-name-color: #fff;
 }
 
-html:is(.sleekfin-header-boot-loading, .sleekfin-header-loading) :is(header.MuiAppBar-root, .skinHeader) {
+html:is(.sleekfin-header-boot-loading, .sleekfin-header-loading) :is(header.MuiAppBar-root, .skinHeader):not(.osdHeader) {
     height: var(--sleekfin-header-height) !important;
     inset: 0 0 auto !important;
     opacity: 0;
