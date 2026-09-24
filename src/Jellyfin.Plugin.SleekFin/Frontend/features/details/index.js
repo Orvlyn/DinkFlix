@@ -2,6 +2,7 @@ import { dom } from '../../shared/runtime.js';
 import { createActions } from './actions.js';
 import { createEpisodes } from './episodes.jsx';
 import { createHero } from './hero.jsx';
+import { createMediaDetails } from './media.jsx';
 import { createSections } from './sections.jsx';
 import { createSimilar } from './similar.jsx';
 
@@ -140,6 +141,7 @@ function destroyMount() {
   if (!state.mount) return;
   state.mount.episodes?.destroy();
   state.mount.similar.destroy();
+  state.mount.media?.destroy();
   state.mount.sections.destroy();
   state.mount.actions.destroy();
   state.mount.hero.destroy();
@@ -161,12 +163,14 @@ function mount() {
   const actions = createActions(hero.actions, state.item.Type === 'Episode');
   const sections = createSections(state.page);
   const similar = createSimilar(state.page);
+  const media = createMediaDetails(state.page, state.item);
   const episodes = ['Series', 'Season', 'Episode'].includes(state.item.Type) && state.seasons.length ? createEpisodes(state.page, state.item, state.seasons) : null;
 
   state.mount = {
     actions,
     episodes,
     hero,
+    media,
     page: state.page,
     sections,
     similar,
@@ -397,6 +401,7 @@ function reconcile() {
   state.mount.hero.sync();
   state.mount.actions.reconcile();
   state.mount.sections.reconcile();
+  state.mount.media?.reconcile();
   state.mount.similar.render();
 }
 
