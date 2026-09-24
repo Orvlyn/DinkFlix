@@ -138,17 +138,22 @@ function loadSeasons(client, userId, mediaItem) {
 
 function destroyMount() {
   stopHiddenWatch();
-  if (!state.mount) return;
-  state.mount.episodes?.destroy();
-  state.mount.similar.destroy();
-  state.mount.media?.destroy();
-  state.mount.sections.destroy();
-  state.mount.actions.destroy();
-  state.mount.hero.destroy();
-  state.mount.page.classList.remove('sleekfin-details-entering');
-  state.mount.page.removeAttribute('data-sleekfin-details');
+  const mount = state.mount;
   state.mount = null;
   document.documentElement.classList.remove('sleekfin-details-mounted');
+  if (!mount) return;
+
+  try {
+    mount.episodes?.destroy();
+    mount.similar.destroy();
+    mount.media?.destroy();
+    mount.sections.destroy();
+    mount.actions.destroy();
+    mount.hero.destroy();
+  } finally {
+    mount.page.classList.remove('sleekfin-details-entering');
+    mount.page.removeAttribute('data-sleekfin-details');
+  }
 }
 
 function mount() {
