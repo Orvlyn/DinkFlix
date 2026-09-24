@@ -27,12 +27,8 @@ function streamLabel(stream) {
   return stream?.DisplayTitle || stream?.Title || stream?.Codec || 'Unknown';
 }
 
-function streamOptions(streams) {
-  return (streams || []).filter(Boolean);
-}
-
 function TrackRow({ icon, label, streams, emptyLabel = 'None' }) {
-  const options = streamOptions(streams);
+  const options = (streams || []).filter(Boolean);
   const value = options[0] ? streamLabel(options[0]) : emptyLabel;
 
   return (
@@ -52,8 +48,17 @@ function TrackRow({ icon, label, streams, emptyLabel = 'None' }) {
   );
 }
 
+function mediaStreams(item) {
+  const streams = item.MediaStreams || [];
+  return {
+    video: streams.filter((stream) => String(stream?.Type).toLowerCase() === 'video'),
+    audio: streams.filter((stream) => String(stream?.Type).toLowerCase() === 'audio'),
+    subtitles: streams.filter((stream) => String(stream?.Type).toLowerCase() === 'subtitle'),
+  };
+}
+
 export function createMediaDetails(page, mediaItem) {
-  if (!['Movie', 'Episode'].includes(mediaItem?.Type)) return null;
+  if (!['Movie', 'Series', 'Episode'].includes(mediaItem?.Type)) return null;
 
   const cast = page.querySelector('#castCollapsible');
   const similar = page.querySelector('#similarCollapsible');
@@ -72,37 +77,28 @@ export function createMediaDetails(page, mediaItem) {
   let destroyed = false;
   let requestGeneration = 0;
 
-  function renderLoading() {
-    render(
-      <div class="sleekfin-details-lower-grid">
-        <div class="sleekfin-details-meta-panel"></div>
-        <div class="sleekfin-details-media-panel"></div>
-      </div>,
-      section
-    );
-  }
-
   function renderContent(item) {
-    const streams = item.MediaStreams || [];
-    const video = streams.filter((stream) => String(stream?.Type).toLowerCase() === 'video');
-    const audio = streams.filter((stream) => String(stream?.Type).toLowerCase() === 'audio');
-    const subtitles = streams.filter((stream) => String(stream?.Type).toLowerCase() === 'subtitle');
+    const rows = metadataRows(item);
+    const streams = mediaStreams(item);
+    const showMedia = ['Movie', 'Episode'].includes(item.Type);
 
     render(
-      <div class="sleekfin-details-lower-grid">
+      <div className={showMedia ? 'sleekfin-details-lower-grid' : 'sleekfin-details-lower-grid sleekfin-details-lower-grid--metadata-only'}>
         <div class="sleekfin-details-meta-panel">
-          {metadataRows(item).map((row) => (
+          {rows.map((row) => (
             <div class="sleekfin-details-meta-row" key={row.label}>
               <span class="sleekfin-details-meta-label">{row.label}</span>
               <span class="sleekfin-details-meta-value">{row.value}</span>
             </div>
           ))}
         </div>
-        <div class="sleekfin-details-media-panel">
-          <TrackRow icon="movie" label="Video" streams={video} />
-          <TrackRow icon="graphic_eq" label="Audio" streams={audio} />
-          <TrackRow icon="subtitles" label="Subtitles" streams={subtitles} />
-        </div>
+        {showMedia ? (
+          <div class="sleekfin-details-media-panel">
+            <TrackRow icon="movie" label="Video" streams={streams.video} />
+            <TrackRow icon="graphic_eq" label="Audio" streams={streams.audio} />
+            <TrackRow icon="subtitles" label="Subtitles" streams={streams.subtitles} />
+          </div>
+        ) : null}
       </div>,
       section
     );
@@ -110,26 +106,21 @@ export function createMediaDetails(page, mediaItem) {
 
   function load() {
     const client = window.ApiClient;
-    if (!client || typeof client.getItems !== 'function') {
-      renderContent(mediaItem);
-      return;
-    }
+    if (!client || typeof client.getItems !== 'function' || !['Movie', 'Episode'].includes(mediaItem.Type)) return;
 
     const generation = ++requestGeneration;
     const userId = client.getCurrentUserId();
     client.getItems(userId, {
       EnableTotalRecordCount: false,
-      Fields: 'MediaStreams',
+      Fields: 'Genres,People,Studios,MediaStreams',
       Ids: mediaItem.Id,
     }).then((result) => {
       if (destroyed || generation !== requestGeneration) return;
-      renderContent(result.Items?.[0] || mediaItem);
-    }).catch(() => {
-      if (!destroyed && generation === requestGeneration) renderContent(mediaItem);
-    });
+      renderContent({ ...mediaItem, ...(result.Items?.[0] || {}) });
+    }).catch(() => {});
   }
 
-  renderLoading();
+  renderContent(mediaItem);
   load();
 
   return {
