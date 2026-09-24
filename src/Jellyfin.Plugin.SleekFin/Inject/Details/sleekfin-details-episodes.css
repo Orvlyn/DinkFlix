@@ -17,15 +17,34 @@
     margin: 0;
 }
 
-.sleekfin-details-season-cards {
+.sleekfin-details-season-carousel {
+    align-items: center;
     display: grid;
-    gap: 14px;
-    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 10px;
     margin-top: 18px;
+}
+
+.sleekfin-details-season-cards {
+    display: flex;
+    gap: 14px;
+    min-width: 0;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    padding: 2px 2px 8px;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+}
+
+.sleekfin-details-season-cards::-webkit-scrollbar {
+    display: none;
 }
 
 .sleekfin-details-season-card {
     aspect-ratio: 16 / 9;
+    flex: 0 0 clamp(220px, 24vw, 300px);
+    scroll-snap-align: start;
     background: var(--sleekfin-surface);
     border: 1px solid rgba(255, 255, 255, 0.07);
     border-radius: 15px;
@@ -39,6 +58,10 @@
     position: relative;
     text-align: start;
     transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.sleekfin-details-season-nav {
+    flex: 0 0 auto;
 }
 
 .sleekfin-details-season-card img,
@@ -370,8 +393,16 @@
         line-height: 28px;
     }
 
+    .sleekfin-details-season-carousel {
+        gap: 6px;
+    }
+
     .sleekfin-details-season-cards {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .sleekfin-details-season-card {
+        flex-basis: min(78vw, 280px);
     }
 
     .sleekfin-details-episodes-header {
