@@ -41,17 +41,25 @@ function metadataValues(mediaItem) {
   const type = item.typeLabel(mediaItem.Type);
   const videoType = formatVideoType(mediaItem.VideoType);
   const subtitles = mediaItem.HasSubtitles === true ? 'Yes' : mediaItem.HasSubtitles === false ? 'No' : '';
-  const director = peopleNames(mediaItem, 'director');
-  const writer = peopleNames(mediaItem, 'writer');
-  const studio = (mediaItem.Studios || []).map((studioItem) => studioItem?.Name).filter(Boolean).slice(0, 2).join(', ');
 
   if (type) values.push({ text: `Type: ${type}` });
   if (videoType) values.push({ text: `Video type: ${videoType}` });
   if (subtitles) values.push({ text: `Subtitles: ${subtitles}` });
-  if (director) values.push({ text: `Director: ${director}` });
-  if (writer) values.push({ text: `Writer: ${writer}` });
-  if (studio) values.push({ text: `Studio: ${studio}` });
   return values;
+}
+
+function metadataRows(mediaItem) {
+  const rows = [];
+  const genres = (mediaItem.Genres || []).filter(Boolean).join(', ');
+  const director = peopleNames(mediaItem, 'director');
+  const writer = peopleNames(mediaItem, 'writer');
+  const studios = (mediaItem.Studios || []).map((studioItem) => studioItem?.Name).filter(Boolean).join(', ');
+
+  if (genres) rows.push({ label: 'Genres', value: genres });
+  if (director) rows.push({ label: 'Director', value: director });
+  if (writer) rows.push({ label: 'Writer', value: writer });
+  if (studios) rows.push({ label: 'Studios', value: studios });
+  return rows;
 }
 
 function factValues(mediaItem, seasons) {
@@ -118,8 +126,19 @@ export function createHero(page) {
     hero.classList.toggle('sleekfin-details-has-child-title', isChild);
     render(childTitle(mediaItem), childTitleRoot);
     render(<Facts values={factValues(mediaItem, seasons)} />, factsRoot);
-    render(<Facts values={(mediaItem.Genres || []).map((genre) => ({ text: genre }))} />, genresRoot);
+    render(null, genresRoot);
     render(<Facts values={metadataValues(mediaItem)} />, infoRoot);
+    render(
+      <div class="sleekfin-details-meta">
+        {metadataRows(mediaItem).map((row) => (
+          <div class="sleekfin-details-meta-row" key={row.label}>
+            <span class="sleekfin-details-meta-label">{row.label}</span>
+            <span class="sleekfin-details-meta-value">{row.value}</span>
+          </div>
+        ))}
+      </div>,
+      genresRoot
+    );
 
     actions.querySelector('.btnDownload')?.classList.toggle('hide', !['Movie', 'Episode'].includes(mediaItem.Type) || !mediaItem.CanDownload);
     if (backdropUrl) {
