@@ -1,15 +1,31 @@
-/* DINKFLIX 11.5.0.20 */
+/* DINKFLIX 11.5.0.21 */
 /* DINKFLIX 11.5.0.18 */
 .sleekfin-details-episodes {
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
     padding: 36px var(--sleekfin-page-gutter) 0;
 }
 
 .sleekfin-details-episodes-header {
-    align-items: center;
-    display: flex;
-    justify-content: space-between;
-    min-height: 52px;
+    display: contents;
+}
+
+.sleekfin-details-episodes > .sleekfin-details-episodes-header > .sleekfin-section-heading {
+    order: 3;
+    margin-top: 34px;
+}
+
+.sleekfin-details-episodes > .sleekfin-details-episodes-header > .sleekfin-details-episode-controls {
+    order: 1;
+}
+
+.sleekfin-details-episodes > .sleekfin-details-episode-list {
+    order: 2;
+}
+
+.sleekfin-details-episodes > .sleekfin-details-episodes-header > .sleekfin-details-season-carousel {
+    order: 4;
 }
 
 .sleekfin-details-season-title {
@@ -23,7 +39,7 @@
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     gap: 10px;
-    margin-top: 18px;
+    margin-top: 14px;
 }
 
 .sleekfin-details-season-cards {
