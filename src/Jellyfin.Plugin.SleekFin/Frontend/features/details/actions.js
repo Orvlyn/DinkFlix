@@ -28,7 +28,7 @@ export function createActions(container, isEpisode) {
   observer.observe(container, {
     attributes: true,
     subtree: true,
-    attributeFilter: ['data-isfavorite', 'data-action', 'class'],
+    attributeFilter: ['data-isfavorite', 'data-action'],
   });
 
   return {
