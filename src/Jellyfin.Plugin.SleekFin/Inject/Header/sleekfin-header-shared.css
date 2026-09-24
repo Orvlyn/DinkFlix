@@ -32,6 +32,12 @@ html:is(.sleekfin-header-boot-loading, .sleekfin-header-loading) body:has(.video
     height: revert !important;
 }
 
+/* Keep Jellyfin's native player OSD visible while the DINKFLIX header is loading or rebuilding. */
+html:is(.sleekfin-header-boot-loading, .sleekfin-header-loading) body:has(.videoPlayerContainer) :is(header.MuiAppBar-root.osdHeader, .skinHeader.osdHeader) {
+    height: revert !important;
+    opacity: 1 !important;
+}
+
 @keyframes sleekfin-header-enter {
     from {
         opacity: 0;
