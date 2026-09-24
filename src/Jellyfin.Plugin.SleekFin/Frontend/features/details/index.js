@@ -435,10 +435,31 @@ function enter() {
   select(null, id, serverId);
 }
 
+function refreshRestoredNativeDetails(page, event) {
+  if (!page || !event?.detail?.isRestored || page.dataset.sleekfinNativeRefresh === 'true') return;
+
+  // Jellyfin deliberately skips its item request when a cached detail view is restored. That leaves
+  // the native controller's currentItem at the value it had when the view was cached, even though the
+  // server's UserData may have changed while the user was watching. Re-run Jellyfin's own detail-page
+  // lifecycle so its controller fetches the current item and playback position; DINKFLIX never stores
+  // or supplies its own resume position.
+  page.dataset.sleekfinNativeRefresh = 'true';
+  page.dispatchEvent(new CustomEvent('viewbeforehide', { bubbles: true, cancelable: true }));
+  page.dispatchEvent(new CustomEvent('viewshow', {
+    bubbles: true,
+    detail: {
+      isRestored: false,
+      params: route(),
+    },
+  }));
+  window.setTimeout(() => page.removeAttribute('data-sleekfin-native-refresh'), 0);
+}
+
 function onRouteChange(event) {
   const page = detailPageOf(event?.target);
   if (page) {
     state.activePage = page;
+    refreshRestoredNativeDetails(page, event);
   }
   enter();
   scheduleReconcile();
