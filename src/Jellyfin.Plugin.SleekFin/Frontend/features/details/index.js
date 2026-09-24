@@ -258,6 +258,7 @@ function select(page, id, serverId) {
 
 function clearState() {
   destroyMount();
+  document.documentElement.classList.remove('sleekfin-details-mounted');
   state.generation += 1;
   state.currentId = '';
   state.currentServerId = '';
