@@ -150,7 +150,44 @@ html.sleekfin-details-mounted #itemDetailPage[data-sleekfin-details] > #itemBack
 
 .sleekfin-details-genres {
     color: rgba(255, 255, 255, 0.78);
-    margin-top: 7px;
+    margin-top: 12px;
+    width: min(560px, 100%);
+}
+
+.sleekfin-details-meta {
+    display: grid;
+    gap: 6px;
+    margin-top: 12px;
+    max-width: 560px;
+    width: 100%;
+}
+
+.sleekfin-details-meta-row {
+    align-items: center;
+    background: rgba(10, 12, 15, 0.48);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    box-sizing: border-box;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: minmax(82px, 0.28fr) minmax(0, 1fr);
+    min-height: 38px;
+    padding: 7px 11px;
+}
+
+.sleekfin-details-meta-label {
+    color: rgba(255, 255, 255, 0.58);
+    font: 600 11px/16px var(--sleekfin-font-family);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.sleekfin-details-meta-value {
+    color: rgba(255, 255, 255, 0.9);
+    font: 400 13px/18px var(--sleekfin-font-family);
+    min-width: 0;
+    overflow-wrap: anywhere;
+    text-align: right;
 }
 
 .sleekfin-details-score {
@@ -205,6 +242,17 @@ html.sleekfin-details-mounted #itemDetailPage[data-sleekfin-details] > #itemBack
     .sleekfin-details-genres,
     .sleekfin-details-stack > .overview {
         font-size: 13px;
+    }
+
+    .sleekfin-details-meta-row {
+        gap: 10px;
+        grid-template-columns: minmax(72px, 0.34fr) minmax(0, 1fr);
+        padding: 7px 10px;
+    }
+
+    .sleekfin-details-meta-value {
+        font-size: 12px;
+        line-height: 17px;
     }
 
     .sleekfin-details-child-name {
