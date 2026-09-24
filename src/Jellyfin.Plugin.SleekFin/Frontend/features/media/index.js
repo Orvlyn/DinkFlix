@@ -93,25 +93,37 @@ function removeFromContinueWatching(card, button) {
   const client = window.ApiClient;
   const userId = currentUserId();
   const itemId = card.dataset.id;
-  if (!client || typeof client.markUnplayed !== 'function' || !itemId || !userId || button.disabled) {
+  if (!client || typeof client.ajax !== 'function' || typeof client.getUrl !== 'function' || !itemId || !userId || button.disabled) {
     return;
   }
 
   button.disabled = true;
   button.setAttribute('aria-busy', 'true');
 
-  client.markUnplayed(userId, itemId, new Date())
-    .then((userData) => {
-      if (Number(userData?.PlaybackPositionTicks || 0) !== 0) {
-        throw new Error('Jellyfin did not clear the playback position.');
-      }
-
-      const container = card.closest('.itemsContainer');
+  client.ajax({
+    type: 'POST',
+    dataType: 'json',
+    url: client.getUrl(`UserItems/${itemId}/UserData`, { userId }),
+    data: JSON.stringify({
+      ItemId: itemId,
+      PlaybackPositionTicks: 0,
+      PlayedPercentage: 0,
+      Played: false
+    }),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+    .then(() => {
+      // Remove the card immediately. The server-side UserData is now reset to a non-resumable
+      // state; do not rely on Jellyfin's existing home-card cache to visually remove it.
+      card.remove();
+      const container = document.querySelector(`#indexPage #homeTab.is-active .itemsContainer .card[data-id="${itemId}"]`)?.closest('.itemsContainer')
+        || document.querySelector('#indexPage #homeTab.is-active .itemsContainer');
       if (container) {
         makeContinueWatchingFresh(container);
-        return container.refreshItems();
+        window.setTimeout(() => container.refreshItems?.(), 0);
       }
-      return undefined;
     })
     .catch(() => {
       button.disabled = false;
