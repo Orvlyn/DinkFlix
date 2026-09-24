@@ -58,6 +58,8 @@ function Episodes({ client, list, mediaItem, seasons }) {
   const [scrollState, setScrollState] = useState({ left: false, right: false });
   const requestGeneration = useRef(0);
   const searchInput = useRef(null);
+  const seasonScroller = useRef(null);
+  const [seasonScrollState, setSeasonScrollState] = useState({ left: false, right: false });
 
   useEffect(() => {
     if (searchOpen) {
@@ -154,13 +156,44 @@ function Episodes({ client, list, mediaItem, seasons }) {
     list.scrollBy({ left: direction * (cardWidth + 12), behavior: 'smooth' });
   }
 
+  useEffect(() => {
+    const scroller = seasonScroller.current;
+    if (!scroller || mediaItem.Type !== 'Series') return undefined;
+
+    const updateSeasonScrollState = () => {
+      const maxScroll = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+      setSeasonScrollState({
+        left: scroller.scrollLeft > 2,
+        right: scroller.scrollLeft < maxScroll - 2,
+      });
+    };
+
+    updateSeasonScrollState();
+    scroller.addEventListener('scroll', updateSeasonScrollState, { passive: true });
+    window.addEventListener('resize', updateSeasonScrollState);
+    return () => {
+      scroller.removeEventListener('scroll', updateSeasonScrollState);
+      window.removeEventListener('resize', updateSeasonScrollState);
+    };
+  }, [seasons, mediaItem]);
+
+  function scrollSeasons(direction) {
+    const scroller = seasonScroller.current;
+    if (!scroller) return;
+    const firstCard = scroller.querySelector('.sleekfin-details-season-card');
+    const cardWidth = firstCard?.getBoundingClientRect().width || 250;
+    scroller.scrollBy({ left: direction * (cardWidth + 14), behavior: 'smooth' });
+  }
+
   const subtitle = status === 'loading' ? 'Loading episodes' : status === 'error' ? 'Episodes unavailable' : `${visibleEpisodes.length}${visibleEpisodes.length === 1 ? ' episode' : ' episodes'}`;
   let title;
   let seasonCards = null;
   if (mediaItem.Type === 'Series') {
     title = <h2 class="sleekfin-details-season-title">Seasons</h2>;
     seasonCards = (
-      <div class="sleekfin-details-season-cards" role="list" aria-label="Seasons">
+      <div class="sleekfin-details-season-carousel">
+        <IconButton class="sleekfin-details-season-nav sleekfin-details-season-nav-left" icon="chevron_left" label="Previous seasons" raised disabled={!seasonScrollState.left} onClick={() => scrollSeasons(-1)} />
+        <div ref={seasonScroller} class="sleekfin-details-season-cards" role="list" aria-label="Seasons">
         {seasons.map((season) => {
           const seasonNumber = Number(season.IndexNumber);
           const seasonName = season.Name || `Season ${seasonNumber || ''}`;
@@ -186,6 +219,8 @@ function Episodes({ client, list, mediaItem, seasons }) {
             </button>
           );
         })}
+        </div>
+        <IconButton class="sleekfin-details-season-nav sleekfin-details-season-nav-right" icon="chevron_right" label="Next seasons" raised disabled={!seasonScrollState.right} onClick={() => scrollSeasons(1)} />
       </div>
     );
   } else {
