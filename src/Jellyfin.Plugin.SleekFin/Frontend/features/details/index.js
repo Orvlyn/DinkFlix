@@ -435,38 +435,10 @@ function enter() {
   select(null, id, serverId);
 }
 
-function refreshNativeDetails(page, event) {
-  if (!page || page.dataset.sleekfinNativeRefresh === 'true') return;
-
-  // DINKFLIX owns the visual detail-page shell, but Jellyfin must remain the source of truth for
-  // playback state. Jellyfin's legacy detail controller intentionally skips its item request when a
-  // cached detail view is restored. That is correct for Jellyfin itself, but it means a cached page
-  // can retain an older currentItem.UserData after playback happened elsewhere.
-  //
-  // Do not read PlaybackPositionTicks here and do not manufacture data-action/data-positionticks.
-  // Instead, re-enter Jellyfin's own non-restored detail lifecycle. Its controller then performs its
-  // normal getItem() request, receives the current UserData.PlaybackPositionTicks, calls
-  // reloadPlayButtons(), and its existing click handler later passes that value to playbackManager.
-  //
-  // The viewbeforehide/viewshow pair is the same lifecycle Jellyfin uses; this only asks Jellyfin to
-  // run it again. DINKFLIX never becomes the playback authority.
-  page.dataset.sleekfinNativeRefresh = 'true';
-  page.dispatchEvent(new CustomEvent('viewbeforehide', { bubbles: true, cancelable: true }));
-  page.dispatchEvent(new CustomEvent('viewshow', {
-    bubbles: true,
-    detail: {
-      isRestored: false,
-      params: route(),
-    },
-  }));
-  window.setTimeout(() => page.removeAttribute('data-sleekfin-native-refresh'), 0);
-}
-
 function onRouteChange(event) {
   const page = detailPageOf(event?.target);
   if (page) {
     state.activePage = page;
-    refreshNativeDetails(page, event);
   }
   enter();
   scheduleReconcile();
