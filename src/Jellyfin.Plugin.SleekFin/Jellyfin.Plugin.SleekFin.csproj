@@ -6,7 +6,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-        <Version>11.5.0.28</Version>
+        <Version>11.5.0.29</Version>
         <RootNamespace>Jellyfin.Plugin.SleekFin</RootNamespace>
         <FrontendRoot>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/../..'))</FrontendRoot>
     </PropertyGroup>
