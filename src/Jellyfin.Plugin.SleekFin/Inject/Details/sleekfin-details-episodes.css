@@ -10,66 +10,93 @@
     min-height: 52px;
 }
 
-.sleekfin-details-season-select {
-    align-items: center;
-    background: rgba(255, 255, 255, 0.035);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    box-sizing: border-box;
-    display: inline-flex;
-    max-width: min(54vw, 360px);
-    padding-left: 12px;
-    position: relative;
-}
-
-.sleekfin-details-season-label {
-    color: var(--sleekfin-muted);
-    flex: 0 0 auto;
-    font: 600 11px/16px var(--sleekfin-font-family);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-}
-
-.sleekfin-details-season-select::after {
-    border-bottom: 2px solid var(--sleekfin-muted);
-    border-right: 2px solid var(--sleekfin-muted);
-    content: "";
-    height: 7px;
-    pointer-events: none;
-    position: absolute;
-    right: 14px;
-    top: 50%;
-    transform: translateY(-65%) rotate(45deg);
-    width: 7px;
-}
-
-.sleekfin-details-season-native,
 .sleekfin-details-season-title {
     color: var(--sleekfin-text);
     font: 600 24px/32px var(--sleekfin-font-family);
-}
-
-.sleekfin-details-season-native {
-    color-scheme: dark;
-}
-
-.sleekfin-details-season-title {
     margin: 0;
 }
 
-.sleekfin-details-season-native {
-    -webkit-appearance: none;
-    appearance: none;
-    background: transparent;
-    border: 0;
-    cursor: pointer;
-    max-width: min(42vw, 300px);
-    padding: 9px 36px 9px 9px;
+.sleekfin-details-season-cards {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    margin-top: 18px;
 }
 
-.sleekfin-details-season-native option {
-    background: rgb(22 22 24);
+.sleekfin-details-season-card {
+    aspect-ratio: 16 / 9;
+    background: var(--sleekfin-surface);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 15px;
+    box-sizing: border-box;
     color: var(--sleekfin-text);
+    cursor: pointer;
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    padding: 0;
+    position: relative;
+    text-align: start;
+    transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.sleekfin-details-season-card img,
+.sleekfin-details-season-card-fallback {
+    height: 100%;
+    inset: 0;
+    object-fit: cover;
+    position: absolute;
+    width: 100%;
+}
+
+.sleekfin-details-season-card-fallback {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+}
+
+.sleekfin-details-season-card-shade {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.03) 20%, rgba(0, 0, 0, 0.86) 100%);
+    inset: 0;
+    position: absolute;
+}
+
+.sleekfin-details-season-card-copy {
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    left: 0;
+    padding: 14px;
+    position: absolute;
+    right: 0;
+}
+
+.sleekfin-details-season-card-kicker {
+    color: rgba(241, 242, 244, 0.68);
+    font: 600 10px/14px var(--sleekfin-font-family);
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+}
+
+.sleekfin-details-season-card-name {
+    font: 600 16px/21px var(--sleekfin-font-family);
+    margin-top: 2px;
+}
+
+.sleekfin-details-season-card-count {
+    color: rgba(241, 242, 244, 0.68);
+    font: 400 12px/16px var(--sleekfin-font-family);
+    margin-top: 3px;
+}
+
+.sleekfin-details-season-card-selected {
+    border-color: var(--sleekfin-accent);
+    box-shadow: 0 0 0 1px var(--sleekfin-accent), 0 10px 30px rgba(0, 0, 0, 0.22);
+}
+
+@media (hover: hover) {
+    .sleekfin-details-season-card:not(.sleekfin-details-season-card-selected):hover {
+        border-color: rgba(255, 255, 255, 0.22);
+        transform: translateY(-2px);
+    }
 }
 
 .sleekfin-details-episode-controls {
@@ -337,18 +364,13 @@
 }
 
 @media (max-width: 767px) {
-    .sleekfin-details-season-native,
     .sleekfin-details-season-title {
         font-size: 20px;
         line-height: 28px;
     }
 
-    .sleekfin-details-season-select {
-        max-width: 78vw;
-    }
-
-    .sleekfin-details-season-native {
-        max-width: 55vw;
+    .sleekfin-details-season-cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .sleekfin-details-episodes-header {
