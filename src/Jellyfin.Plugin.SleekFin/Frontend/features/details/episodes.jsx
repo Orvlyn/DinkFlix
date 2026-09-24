@@ -1,5 +1,7 @@
 import { Fragment, h, Icon, IconButton, item, dom, render, SectionHeading, useEffect, useMemo, useRef, useState } from '../../shared/runtime.js';
 
+const seasonSelections = new Map();
+
 function downloadEpisode(client, episode) {
   const link = document.createElement('a');
   link.href = client.getItemDownloadUrl(episode.Id);
@@ -46,12 +48,16 @@ function EpisodeCard({ client, episode }) {
   );
 }
 
-function Episodes({ client, list, mediaItem, seasons }) {
+function Episodes({ client, list, seasonMount, mediaItem, seasons }) {
+  const seriesId = mediaItem.Type === 'Series' ? mediaItem.Id : mediaItem.SeriesId;
   const firstSeason = useMemo(() => seasons.find((season) => Number(season.IndexNumber) > 0) || seasons[0] || null, [seasons]);
   const [episodes, setEpisodes] = useState([]);
   const [query, setQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
-  const [selectedSeasonId, setSelectedSeasonId] = useState(firstSeason?.Id || '');
+  const [selectedSeasonId, setSelectedSeasonId] = useState(() => {
+    const remembered = seriesId ? seasonSelections.get(String(seriesId)) : '';
+    return remembered && seasons.some((season) => String(season.Id) === String(remembered)) ? remembered : firstSeason?.Id || '';
+  });
   const [sortDescending, setSortDescending] = useState(false);
   const [status, setStatus] = useState(firstSeason ? 'loading' : 'error');
   const [view, setView] = useState('grid');
@@ -60,6 +66,12 @@ function Episodes({ client, list, mediaItem, seasons }) {
   const searchInput = useRef(null);
   const seasonScroller = useRef(null);
   const [seasonScrollState, setSeasonScrollState] = useState({ left: false, right: false });
+
+  useEffect(() => {
+    if (mediaItem.Type === 'Series' && seriesId && selectedSeasonId) {
+      seasonSelections.set(String(seriesId), selectedSeasonId);
+    }
+  }, [mediaItem.Type, selectedSeasonId, seriesId]);
 
   useEffect(() => {
     if (searchOpen) {
@@ -76,7 +88,7 @@ function Episodes({ client, list, mediaItem, seasons }) {
       return undefined;
     }
 
-    setEpisodes([]);
+    list.scrollTo({ left: 0, behavior: 'auto' });
     setStatus('loading');
     client
       .getEpisodes(seriesId, {
@@ -102,7 +114,7 @@ function Episodes({ client, list, mediaItem, seasons }) {
         requestGeneration.current += 1;
       }
     };
-  }, [client, mediaItem, selectedSeasonId]);
+  }, [client, list, mediaItem, selectedSeasonId, seriesId]);
 
   const visibleEpisodes = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase();
@@ -191,8 +203,10 @@ function Episodes({ client, list, mediaItem, seasons }) {
   if (mediaItem.Type === 'Series') {
     title = <h2 class="sleekfin-details-season-title">Seasons</h2>;
     seasonCards = (
-      <div class="sleekfin-details-season-carousel">
-        <IconButton class="sleekfin-details-season-nav sleekfin-details-season-nav-left" icon="chevron_left" label="Previous seasons" raised disabled={!seasonScrollState.left} onClick={() => scrollSeasons(-1)} />
+      <Fragment>
+        <SectionHeading title={title} />
+        <div class="sleekfin-details-season-carousel">
+        <IconButton class="sleekfin-details-control sleekfin-details-season-nav" icon="chevron_left" label="Previous seasons" raised disabled={!seasonScrollState.left} onClick={() => scrollSeasons(-1)} />
         <div ref={seasonScroller} class="sleekfin-details-season-cards" role="list" aria-label="Seasons">
         {seasons.map((season) => {
           const seasonNumber = Number(season.IndexNumber);
@@ -220,8 +234,9 @@ function Episodes({ client, list, mediaItem, seasons }) {
           );
         })}
         </div>
-        <IconButton class="sleekfin-details-season-nav sleekfin-details-season-nav-right" icon="chevron_right" label="Next seasons" raised disabled={!seasonScrollState.right} onClick={() => scrollSeasons(1)} />
-      </div>
+        <IconButton class="sleekfin-details-control sleekfin-details-season-nav" icon="chevron_right" label="Next seasons" raised disabled={!seasonScrollState.right} onClick={() => scrollSeasons(1)} />
+        </div>
+      </Fragment>
     );
   } else {
     const currentSeason = seasons[0];
@@ -237,10 +252,15 @@ function Episodes({ client, list, mediaItem, seasons }) {
     });
   }
 
+  useEffect(() => {
+    if (mediaItem.Type !== 'Series' || !seasonMount) return undefined;
+    render(seasonCards, seasonMount);
+    return () => render(null, seasonMount);
+  }, [mediaItem.Type, seasons, selectedSeasonId, seasonScrollState, seasonMount]);
+
   return (
     <Fragment>
       <SectionHeading title={title} subtitle={subtitle} />
-      {seasonCards}
       <div class="sleekfin-details-episode-controls">
         {view === 'grid' && (
           <span class="sleekfin-details-episode-nav sleekfin-control-3d">
@@ -268,11 +288,12 @@ export function createEpisodes(page, mediaItem, seasons) {
   const secondary = page.querySelector('.detailPageSecondaryContainer');
   if (!client || !wrapper || !secondary) return null;
 
-  const section = dom.element('<section class="sleekfin-details-episodes"><div class="sleekfin-details-episodes-header"></div><div is="emby-itemscontainer" class="sleekfin-details-episode-list" data-contextmenu="false" data-multiselect="false" data-view="grid"></div></section>');
+  const section = dom.element('<section class="sleekfin-details-episodes"><div class="sleekfin-details-episodes-header"></div><div is="emby-itemscontainer" class="sleekfin-details-episode-list" data-contextmenu="false" data-multiselect="false" data-view="grid"></div><div class="sleekfin-details-seasons"></div></section>');
   const header = section.firstElementChild;
-  const list = section.lastElementChild;
+  const list = section.querySelector('.sleekfin-details-episode-list');
+  const seasonMount = section.querySelector('.sleekfin-details-seasons');
   let destroyed = false;
-  render(<Episodes client={client} list={list} mediaItem={mediaItem} seasons={seasons} />, header);
+  render(<Episodes client={client} list={list} seasonMount={seasonMount} mediaItem={mediaItem} seasons={seasons} />, header);
   wrapper.insertBefore(section, secondary);
 
   return {
@@ -281,6 +302,7 @@ export function createEpisodes(page, mediaItem, seasons) {
       destroyed = true;
       render(null, list);
       render(null, header);
+      render(null, seasonMount);
       section.remove();
     },
   };
