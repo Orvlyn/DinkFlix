@@ -156,18 +156,37 @@ function Episodes({ client, list, mediaItem, seasons }) {
 
   const subtitle = status === 'loading' ? 'Loading episodes' : status === 'error' ? 'Episodes unavailable' : `${visibleEpisodes.length}${visibleEpisodes.length === 1 ? ' episode' : ' episodes'}`;
   let title;
+  let seasonCards = null;
   if (mediaItem.Type === 'Series') {
-    title = (
-      <span class="sleekfin-details-season-select sleekfin-control-3d">
-        <span class="sleekfin-details-season-label">Season</span>
-        <select class="sleekfin-details-season-native" value={selectedSeasonId} onChange={(event) => setSelectedSeasonId(event.currentTarget.value)}>
-          {seasons.map((season) => (
-            <option value={season.Id} key={season.Id}>
-              {season.Name || `Season ${season.IndexNumber || ''}`}
-            </option>
-          ))}
-        </select>
-      </span>
+    title = <h2 class="sleekfin-details-season-title">Seasons</h2>;
+    seasonCards = (
+      <div class="sleekfin-details-season-cards" role="list" aria-label="Seasons">
+        {seasons.map((season) => {
+          const seasonNumber = Number(season.IndexNumber);
+          const seasonName = season.Name || `Season ${seasonNumber || ''}`;
+          const imageUrl = item.imageUrl(season, 'Primary', { maxWidth: 520, quality: 90 });
+          const episodeCount = Number(season.ChildCount || season.RecursiveItemCount || 0);
+          const selected = String(season.Id) === String(selectedSeasonId);
+
+          return (
+            <button
+              type="button"
+              class={`sleekfin-details-season-card${selected ? ' sleekfin-details-season-card-selected' : ''}`}
+              role="listitem"
+              aria-pressed={selected ? 'true' : 'false'}
+              onClick={() => setSelectedSeasonId(season.Id)}
+            >
+              {imageUrl ? <img src={imageUrl} alt="" /> : <span class="sleekfin-details-season-card-fallback" />}
+              <span class="sleekfin-details-season-card-shade" />
+              <span class="sleekfin-details-season-card-copy">
+                <span class="sleekfin-details-season-card-kicker">{seasonNumber > 0 ? `Season ${seasonNumber}` : 'Specials'}</span>
+                <span class="sleekfin-details-season-card-name">{seasonName}</span>
+                {episodeCount > 0 && <span class="sleekfin-details-season-card-count">{episodeCount} {episodeCount === 1 ? 'Episode' : 'Episodes'}</span>}
+              </span>
+            </button>
+          );
+        })}
+      </div>
     );
   } else {
     const currentSeason = seasons[0];
@@ -186,6 +205,7 @@ function Episodes({ client, list, mediaItem, seasons }) {
   return (
     <Fragment>
       <SectionHeading title={title} subtitle={subtitle} />
+      {seasonCards}
       <div class="sleekfin-details-episode-controls">
         {view === 'grid' && (
           <span class="sleekfin-details-episode-nav sleekfin-control-3d">
