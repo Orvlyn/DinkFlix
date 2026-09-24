@@ -1,6 +1,7 @@
 import { decorateNativeButton, restoreNativeButton } from '../../shared/runtime.js';
 
 export function createActions(container, isEpisode) {
+  // Mirror Jellyfin's native action state; playback remains entirely owned by Jellyfin.
   const decorated = new Set();
 
   function reconcile() {
