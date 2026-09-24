@@ -161,6 +161,10 @@ html.sleekfin-details-mounted #itemDetailPage[data-sleekfin-details] > #itemBack
     grid-template-columns: minmax(0, 1.12fr) minmax(320px, 0.88fr);
 }
 
+.sleekfin-details-lower-grid--metadata-only {
+    grid-template-columns: minmax(0, 1fr);
+}
+
 .sleekfin-details-meta-panel,
 .sleekfin-details-media-panel {
     background: rgba(10, 12, 15, 0.5);
