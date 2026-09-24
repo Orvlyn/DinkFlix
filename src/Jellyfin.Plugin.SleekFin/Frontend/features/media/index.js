@@ -1,6 +1,7 @@
 import { dom } from '../../shared/runtime.js';
 import { cleanupInactiveMetadata, cleanupMetadata, renderMetadata } from './metadata.jsx';
 
+// DINKFLIX 11.5.0.31: Continue Watching removal uses Jellyfin UserData without altering playback handlers.
 const MAIN_ROOT_CLASS = 'sleekfin-main-ui';
 const ROOT_CLASS = 'sleekfin-media-mounted';
 const PAGE_SELECTOR = '#indexPage, #moviesPage, #tvshowsPage, #tvRecommendedPage';
