@@ -2,30 +2,18 @@
 /* DINKFLIX 11.5.0.18 */
 .sleekfin-details-episodes {
     box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
     padding: 36px var(--sleekfin-page-gutter) 0;
 }
 
 .sleekfin-details-episodes-header {
-    display: contents;
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    min-height: 52px;
 }
 
-.sleekfin-details-episodes > .sleekfin-details-episodes-header > .sleekfin-section-heading {
-    order: 3;
+.sleekfin-details-seasons {
     margin-top: 34px;
-}
-
-.sleekfin-details-episodes > .sleekfin-details-episodes-header > .sleekfin-details-episode-controls {
-    order: 1;
-}
-
-.sleekfin-details-episodes > .sleekfin-details-episode-list {
-    order: 2;
-}
-
-.sleekfin-details-episodes > .sleekfin-details-episodes-header > .sleekfin-details-season-carousel {
-    order: 4;
 }
 
 .sleekfin-details-season-title {
@@ -38,8 +26,8 @@
     align-items: center;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
-    gap: 10px;
-    margin-top: 14px;
+    gap: 6px;
+    margin-top: 12px;
 }
 
 .sleekfin-details-season-cards {
@@ -59,8 +47,8 @@
 }
 
 .sleekfin-details-season-card {
-    aspect-ratio: 16 / 9;
-    flex: 0 0 clamp(220px, 24vw, 300px);
+    aspect-ratio: 2 / 3;
+    flex: 0 0 clamp(150px, 11vw, 190px);
     scroll-snap-align: start;
     background: var(--sleekfin-surface);
     border: 1px solid rgba(255, 255, 255, 0.07);
@@ -78,7 +66,25 @@
 }
 
 .sleekfin-details-season-nav {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none;
+    color: var(--sleekfin-text) !important;
     flex: 0 0 auto;
+    height: 32px;
+    width: 32px;
+}
+
+.sleekfin-details-season-nav:disabled {
+    cursor: default;
+    opacity: 0.3;
+}
+
+@media (hover: hover) {
+    .sleekfin-details-season-nav:not(:disabled):hover {
+        background: rgba(0, 255, 198, 0.08) !important;
+        color: var(--sleekfin-accent) !important;
+    }
 }
 
 .sleekfin-details-season-card img,
@@ -411,7 +417,7 @@
     }
 
     .sleekfin-details-season-carousel {
-        gap: 6px;
+        gap: 4px;
     }
 
     .sleekfin-details-season-cards {
@@ -419,7 +425,7 @@
     }
 
     .sleekfin-details-season-card {
-        flex-basis: min(78vw, 280px);
+        flex-basis: min(42vw, 190px);
     }
 
     .sleekfin-details-episodes-header {
