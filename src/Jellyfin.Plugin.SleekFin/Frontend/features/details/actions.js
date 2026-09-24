@@ -11,7 +11,7 @@ export function createActions(container, isEpisode) {
       const isFavorite = element.classList.contains('btnUserRating');
       const isDownload = element.classList.contains('btnDownload');
       const icon = isFavorite ? (element.dataset.isfavorite === 'true' ? 'bookmarkCheck' : 'bookmark') : isDownload ? 'download' : 'play';
-      const label = isFavorite ? (element.dataset.isfavorite === 'true' ? 'In watchlist' : 'Add to watchlist') : isDownload ? 'Download' : element.dataset.action === 'resume' ? 'Resume' : 'Play';
+      const label = isFavorite ? (element.dataset.isfavorite === 'true' ? 'In watchlist' : 'Add to watchlist') : isDownload ? 'Download' : (element.getAttribute('title') || (element.dataset.action === 'resume' ? 'Resume' : 'Play'));
 
       element.classList.toggle('sleekfin-details-suppressed-action', hasEpisodeResume && element.dataset.action === 'play');
       decorateNativeButton(element, {
@@ -28,7 +28,7 @@ export function createActions(container, isEpisode) {
   observer.observe(container, {
     attributes: true,
     subtree: true,
-    attributeFilter: ['data-isfavorite', 'data-action'],
+    attributeFilter: ['data-isfavorite', 'data-action', 'title'],
   });
 
   return {
