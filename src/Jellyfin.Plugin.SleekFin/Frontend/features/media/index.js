@@ -103,7 +103,6 @@ function removeFromContinueWatching(card, button) {
 
   client.ajax({
     type: 'POST',
-    dataType: 'json',
     url: client.getUrl(`UserItems/${itemId}/UserData`, { userId }),
     data: JSON.stringify({
       ItemId: itemId,
