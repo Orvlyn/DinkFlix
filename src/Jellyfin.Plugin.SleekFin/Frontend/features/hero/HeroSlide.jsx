@@ -35,7 +35,6 @@ export function HeroSlide({ entry, active, settings }) {
           </div>
           {displayItem.Overview && <p class="sleekfin-hero-description">{displayItem.Overview}</p>}
           <div class="sleekfin-hero-actions">
-            <Button {...item.actionAttributes(entry.play, 'play')} variant="primary" icon="play" label="Play" />
             <Button {...item.actionAttributes(displayItem, 'link')} variant="control" icon="info" label="More info" />
           </div>
         </div>
