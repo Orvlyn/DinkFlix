@@ -1,4 +1,4 @@
-import { Facts, Fragment, h, IconButton, item, dom, render } from '../../shared/runtime.js';
+import { Button, Facts, Fragment, h, IconButton, item, dom, render } from '../../shared/runtime.js';
 
 function goBack() {
   if (window.history.length > 1) {
@@ -60,6 +60,7 @@ export function createHero(page) {
   const title = stack.querySelector('.sleekfin-details-title');
   const childTitleRoot = stack.querySelector('.sleekfin-details-child-title');
   const factsRoot = stack.querySelector('.sleekfin-details-facts');
+  const trailerSlot = dom.element('<div class="sleekfin-details-trailer-slot"></div>');
   const downloadWasHidden = actions.querySelector('.btnDownload')?.classList.contains('hide');
   const logo = page.querySelector('.detailLogo');
 
@@ -89,6 +90,22 @@ export function createHero(page) {
     render(childTitle(mediaItem), childTitleRoot);
     render(<Facts values={factValues(mediaItem, seasons)} />, factsRoot);
     actions.querySelector('.btnDownload')?.classList.toggle('hide', !['Movie', 'Episode'].includes(mediaItem.Type) || !mediaItem.CanDownload);
+    const trailerUrl = (mediaItem.RemoteTrailers || [])
+      .map((trailer) => trailer?.Url)
+      .find((url) => typeof url === 'string' && /^https?:\/\//i.test(url));
+    render(
+      trailerUrl
+        ? <Button
+            variant="control"
+            icon="play"
+            label="Trailer"
+            class="sleekfin-details-trailer"
+            aria-label="Watch trailer"
+            onClick={() => window.open(trailerUrl, '_blank', 'noopener,noreferrer')}
+          />
+        : null,
+      trailerSlot
+    );
     if (backdropUrl) {
       nativeBackdrop.style.backgroundImage = `url("${backdropUrl.replace(/["\\]/g, '\\$&')}")`;
     }
@@ -104,6 +121,7 @@ export function createHero(page) {
   }
 
   render(<IconButton class="sleekfin-details-back" icon="arrowLeft" label="Back" raised onClick={goBack} />, backRoot);
+  actions.appendChild(trailerSlot);
   move(logo, title);
   move(page.querySelector('.nameContainer'), title);
   move(page.querySelector('.overview'), stack);
@@ -119,6 +137,8 @@ export function createHero(page) {
       render(null, backRoot);
       render(null, childTitleRoot);
       render(null, factsRoot);
+      render(null, trailerSlot);
+      trailerSlot.remove();
       render(null, genresRoot);
       render(null, infoRoot);
       restoreMoved();
