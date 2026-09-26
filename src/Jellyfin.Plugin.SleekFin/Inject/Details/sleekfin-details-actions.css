@@ -38,3 +38,13 @@
 .sleekfin-details-stack > .mainDetailButtons .material-icons {
     display: none !important;
 }
+
+.sleekfin-details-stack > .mainDetailButtons > .sleekfin-details-trailer-slot {
+    display: inline-flex !important;
+    margin: 0 !important;
+    order: 4;
+}
+
+.sleekfin-details-stack > .mainDetailButtons > .sleekfin-details-trailer-slot:empty {
+    display: none !important;
+}
