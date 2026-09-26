@@ -209,7 +209,7 @@ function load(id, serverId) {
   const isCurrent = () => generation === state.generation && id === state.currentId;
   state.loadingId = id;
 
-  client.getItem(userId, id)
+  client.getItem(userId, id, { Fields: 'RemoteTrailers' })
     .then((mediaItem) => {
       if (!isCurrent()) return;
       state.item = mediaItem;
