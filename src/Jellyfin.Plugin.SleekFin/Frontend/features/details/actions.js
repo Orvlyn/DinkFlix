@@ -5,14 +5,13 @@ export function createActions(container, isEpisode) {
   const decorated = new Set();
 
   function reconcile() {
-    const buttons = container.querySelectorAll('.btnPlay, .btnReplay, .btnDownload, .btnUserRating');
+    const buttons = container.querySelectorAll('.btnPlay, .btnReplay, .btnUserRating');
     const hasEpisodeResume = isEpisode && Array.from(buttons).some((element) => element.dataset.action === 'resume' && !element.classList.contains('hide'));
 
     buttons.forEach((element) => {
       const isFavorite = element.classList.contains('btnUserRating');
-      const isDownload = element.classList.contains('btnDownload');
-      const icon = isFavorite ? (element.dataset.isfavorite === 'true' ? 'bookmarkCheck' : 'bookmark') : isDownload ? 'download' : 'play';
-      const label = isFavorite ? (element.dataset.isfavorite === 'true' ? 'In watchlist' : 'Add to watchlist') : isDownload ? 'Download' : (element.getAttribute('title') || (element.dataset.action === 'resume' ? 'Resume' : 'Play'));
+      const icon = isFavorite ? (element.dataset.isfavorite === 'true' ? 'bookmarkCheck' : 'bookmark') : 'play';
+      const label = isFavorite ? (element.dataset.isfavorite === 'true' ? 'In watchlist' : 'Add to watchlist') : (element.getAttribute('title') || (element.dataset.action === 'resume' ? 'Resume' : 'Play'));
 
       element.classList.toggle('sleekfin-details-suppressed-action', hasEpisodeResume && element.dataset.action === 'play');
       decorateNativeButton(element, {
