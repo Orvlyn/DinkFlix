@@ -30,6 +30,10 @@
     order: 3;
 }
 
+.sleekfin-details-stack > .mainDetailButtons > .btnDownload {
+    display: none !important;
+}
+
 .sleekfin-details-stack > .mainDetailButtons .detailButton-content {
     flex-direction: row !important;
     height: auto;
