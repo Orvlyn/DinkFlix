@@ -95,7 +95,7 @@ export function createHero(page) {
       trailerUrl
         ? <Button
             variant="control"
-            icon="play"
+            icon="trailer"
             label="Trailer"
             class="sleekfin-details-trailer"
             aria-label="Watch trailer"
