@@ -61,7 +61,6 @@ export function createHero(page) {
   const childTitleRoot = stack.querySelector('.sleekfin-details-child-title');
   const factsRoot = stack.querySelector('.sleekfin-details-facts');
   const trailerSlot = dom.element('<div class="sleekfin-details-trailer-slot"></div>');
-  const downloadWasHidden = actions.querySelector('.btnDownload')?.classList.contains('hide');
   const logo = page.querySelector('.detailLogo');
 
   function move(element, destination) {
@@ -89,7 +88,6 @@ export function createHero(page) {
     hero.classList.toggle('sleekfin-details-has-child-title', isChild);
     render(childTitle(mediaItem), childTitleRoot);
     render(<Facts values={factValues(mediaItem, seasons)} />, factsRoot);
-    actions.querySelector('.btnDownload')?.classList.toggle('hide', !['Movie', 'Episode'].includes(mediaItem.Type) || !mediaItem.CanDownload);
     const trailerUrl = (mediaItem.RemoteTrailers || [])
       .map((trailer) => trailer?.Url)
       .find((url) => typeof url === 'string' && /^https?:\/\//i.test(url));
@@ -133,7 +131,6 @@ export function createHero(page) {
   return {
     actions,
     destroy() {
-      actions.querySelector('.btnDownload')?.classList.toggle('hide', downloadWasHidden);
       render(null, backRoot);
       render(null, childTitleRoot);
       render(null, factsRoot);
