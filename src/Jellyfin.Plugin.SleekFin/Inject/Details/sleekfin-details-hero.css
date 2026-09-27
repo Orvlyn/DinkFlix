@@ -354,3 +354,16 @@ html.sleekfin-details-mounted #itemDetailPage[data-sleekfin-details] > #itemBack
         line-height: 27px;
     }
 }
+
+.sleekfin-details-trailer-slot .sleekfin-button {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+@media (hover: hover) {
+    .sleekfin-details-trailer-slot .sleekfin-button:hover {
+        border-color: var(--sleekfin-border-hover);
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.24);
+        transform: translateY(-1px);
+    }
+}
+
