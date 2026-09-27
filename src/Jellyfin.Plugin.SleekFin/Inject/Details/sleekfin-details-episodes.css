@@ -160,8 +160,7 @@
     padding: 2px;
 }
 
-.sleekfin-details-control,
-.sleekfin-details-episode-download {
+.sleekfin-details-control {
     transition: color 180ms ease;
 }
 
@@ -369,13 +368,9 @@
     width: 11px;
 }
 
-.sleekfin-details-episode-download {
-    height: 32px;
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    width: 32px;
-    z-index: 2;
+.sleekfin-details-episode:focus-within {
+    border-color: var(--sleekfin-border-hover);
+    box-shadow: 0 0 0 1px var(--sleekfin-accent);
 }
 
 .sleekfin-details-episode:hover .sleekfin-details-episode-action > img {
