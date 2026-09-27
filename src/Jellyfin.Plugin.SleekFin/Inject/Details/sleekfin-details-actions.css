@@ -52,3 +52,20 @@
 .sleekfin-details-stack > .mainDetailButtons > .sleekfin-details-trailer-slot:empty {
     display: none !important;
 }
+
+@media (max-width: 767px) {
+    .sleekfin-details-stack > .mainDetailButtons {
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 14px !important;
+    }
+
+    .sleekfin-details-stack > .mainDetailButtons > :is(.btnPlay, .btnReplay, .btnUserRating) {
+        flex: 0 0 auto;
+    }
+
+    .sleekfin-details-stack > .mainDetailButtons > .sleekfin-details-trailer-slot {
+        flex: 0 0 auto;
+    }
+}
+
