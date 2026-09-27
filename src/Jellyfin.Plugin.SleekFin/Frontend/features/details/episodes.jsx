@@ -2,16 +2,7 @@ import { Fragment, h, Icon, IconButton, item, dom, render, SectionHeading, useEf
 
 const seasonSelections = new Map();
 
-function downloadEpisode(client, episode) {
-  const link = document.createElement('a');
-  link.href = client.getItemDownloadUrl(episode.Id);
-  link.download = '';
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-}
-
-function EpisodeCard({ client, episode }) {
+function EpisodeCard({ episode }) {
   const score = Number(episode.CommunityRating || 0);
   const imageUrl = item.imageUrl(episode, 'Primary', { maxWidth: 840, quality: 90 });
   const action = item.actionAttributes(episode);
@@ -41,9 +32,6 @@ function EpisodeCard({ client, episode }) {
           </span>
         </span>
       </button>
-      {episode.CanDownload && typeof client.getItemDownloadUrl === 'function' && (
-        <IconButton class="sleekfin-details-episode-download" icon="download" label="Download" raised strokeWidth={1.75} onClick={() => downloadEpisode(client, episode)} />
-      )}
     </article>
   );
 }
@@ -94,7 +82,7 @@ function Episodes({ client, list, seasonMount, mediaItem, seasons }) {
       .getEpisodes(seriesId, {
         seasonId: selectedSeasonId,
         userId: client.getCurrentUserId(),
-        Fields: 'Overview,CanDownload',
+        Fields: 'Overview',
         EnableImages: true,
         EnableUserData: true,
       })
@@ -130,7 +118,7 @@ function Episodes({ client, list, seasonMount, mediaItem, seasons }) {
     render(
       <Fragment>
         {visibleEpisodes.map((episode) => (
-          <EpisodeCard client={client} episode={episode} key={episode.Id} />
+          <EpisodeCard episode={episode} key={episode.Id} />
         ))}
       </Fragment>,
       list,
